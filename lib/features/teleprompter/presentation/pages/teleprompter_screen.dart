@@ -1,20 +1,27 @@
-import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
-import 'dart:ui'; // Required for ImageFilter
-
 import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:camerawesome/pigeon.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 
-// --- YOUR PROJECT IMPORTS ---
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/toast_service.dart';
+import '../../../../core/services/voice_sync_service.dart';
+import '../../../../core/utils/responsive_config.dart';
 import '../../../scripts/data/models/script_model.dart';
-import '../../../gallery/presentation/pages/video_editor_screen.dart';
+import '../../../gallery/presentation/providers/gallery_provider.dart';
+import '../../../gallery/presentation/pages/video_player_screen.dart';
+import '../../../settings/presentation/providers/ui_provider.dart';
+import '../../../../core/services/analytics_service.dart';
+
+import '../widgets/camera_side_controls.dart';
+import '../widgets/prompter_overlay.dart';
+import '../widgets/camera_bottom_controls.dart';
+import '../widgets/video_settings_sheet.dart';
+import '../widgets/teleprompter_top_bar.dart';
 
 class TeleprompterScreen extends StatefulWidget {
   final Script script;
@@ -26,66 +33,328 @@ class TeleprompterScreen extends StatefulWidget {
 
 class _TeleprompterScreenState extends State<TeleprompterScreen>
     with WidgetsBindingObserver, TickerProviderStateMixin {
-  // --- STATE VARIABLES ---
-  bool _permissionsGranted = false;
-  double _currentZoom = 0.0;
-  double _currentBrightness = 0.0;
-  bool _showProControls = true;
-  bool _isRecording = false; // For UI Animation
+  bool _isRecording = false;
+  bool _isPaused = false;
+  bool _showProControls = false;
 
-  // --- TELEPROMPTER STATE ---
+  VideoRecordingQuality _videoQuality = VideoRecordingQuality.fhd;
+  int _targetFps = 30;
+  double _currentBrightness = 0.0;
+  double _currentZoom = 0.0;
+
+  late final ValueNotifier<Duration> _recordingDuration;
+  late final ValueNotifier<Size> _prompterSize;
+  late final ValueNotifier<double> _prompterOpacity;
+  late final ValueNotifier<double> _fontSize;
+  late final ValueNotifier<double> _scrollSpeed;
+  late final ValueNotifier<int> _textOrientation;
+
+  Ticker? _ticker;
+  Duration _lastElapsed = Duration.zero;
+  late final VoiceSyncService _voiceSync;
+  late final UIProvider _uiProvider;
   final ScrollController _scriptScrollController = ScrollController();
+
+  int _lastFoundIndex = 0;
   bool _isPlayingScript = false;
   bool _showScriptControls = true;
   bool _showSettingsPanel = false;
-  int _textOrientation = 0;
+  double _dragX = 0.0;
+  double _dragY = 0.0;
+  bool _isPositionInitialized = false;
+  String? _lastVideoPath;
 
-  // --- DRAGGABLE WINDOW DEFAULTS ---
-  double _dragX = 30.0;
-  double _dragY = 120.0;
-  double _prompterWidth = 300.0;
-  double _prompterHeight = 350.0;
-  double _prompterOpacity = 0.4;
-  double _fontSize = 24.0;
-  double _scrollSpeed = 50.0;
-
-  Timer? _scrollTimer;
+  TextPainter? _cachedTextPainter;
+  double? _cachedPainterWidth;
+  double? _cachedPainterFontSize;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-    _initializePermissions();
+
+    _prompterOpacity = ValueNotifier(0.2);
+    _fontSize = ValueNotifier(24.0.sp);
+    _scrollSpeed = ValueNotifier(50.0);
+    _textOrientation = ValueNotifier(0);
+    _prompterSize = ValueNotifier(Size(double.infinity, 500.h));
+    _recordingDuration = ValueNotifier(Duration.zero);
+
+    _ticker = createTicker(_onTick);
+    _voiceSync = context.read<VoiceSyncService>();
+    _uiProvider = context.read<UIProvider>();
+    _voiceSync.initialize();
+    _uiProvider.addListener(_handleUIChanges);
+    _voiceSync.addListener(_handleVoiceChanges);
   }
 
-  Future<void> _initializePermissions() async {
-    Map<Permission, PermissionStatus> statuses = await [
-      Permission.camera,
-      Permission.microphone,
-    ].request();
+  void _handleVoiceChanges() {
+    if (!mounted || !_isPlayingScript || !_uiProvider.voiceSyncEnabled) return;
 
-    if (statuses[Permission.camera] == PermissionStatus.granted &&
-        statuses[Permission.microphone] == PermissionStatus.granted) {
-      if (mounted) setState(() => _permissionsGranted = true);
+    if (!_voiceSync.isListening &&
+        !_isPaused &&
+        _scriptScrollController.hasClients) {
+      _voiceSync.startListening(_onVoiceResult);
+    }
+  }
+
+  void _handleUIChanges() {
+    if (!mounted || !_isPlayingScript) return;
+
+    if (_uiProvider.voiceSyncEnabled) {
+      if (!_voiceSync.isListening) {
+        _voiceSync.startListening(_onVoiceResult);
+      }
     } else {
-      if (mounted) {
-        ToastService.show("Permissions required", isError: true);
-        Navigator.pop(context);
+      if (_voiceSync.isListening) {
+        _voiceSync.stopListening();
       }
     }
   }
 
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.manual,
-      overlays: SystemUiOverlay.values,
+  double _getYOffsetForIndex(int index) {
+    if (!_scriptScrollController.hasClients) return 0.0;
+
+    final horizontalPadding = 32.0.w;
+    final maxWidth = math.max(
+      100.0.w,
+      _prompterSize.value.width - horizontalPadding,
     );
-    _scrollTimer?.cancel();
-    _scriptScrollController.dispose();
-    super.dispose();
+    final fs = _fontSize.value;
+
+    if (_cachedTextPainter == null ||
+        _cachedPainterWidth != maxWidth ||
+        _cachedPainterFontSize != fs) {
+      final textStyle = TextStyle(
+        fontSize: fs,
+        fontWeight: FontWeight.w700,
+        fontFamily: 'Manrope',
+        height: 1.4,
+      );
+
+      _cachedTextPainter = TextPainter(
+        text: TextSpan(text: widget.script.content, style: textStyle),
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr,
+      );
+      _cachedTextPainter!.layout(maxWidth: maxWidth);
+      _cachedPainterWidth = maxWidth;
+      _cachedPainterFontSize = fs;
+    }
+
+    final offset = _cachedTextPainter!.getOffsetForCaret(
+      TextPosition(offset: index),
+      Rect.fromLTWH(0, 0, 0, fs),
+    );
+
+    return offset.dy;
+  }
+
+  void _onVoiceResult(String words) {
+    if (!mounted || !_isPlayingScript) return;
+
+    final scriptContent = widget.script.content.toLowerCase();
+    final cleanedScript = scriptContent.replaceAll(RegExp(r'[^\w\s]'), ' ');
+    final spokenWords = words.toLowerCase().trim().split(RegExp(r'\s+'));
+
+    if (spokenWords.isEmpty) return;
+
+    // Use a smaller transcript tail for more immediate matching
+    final transcriptTail = spokenWords.length > 8
+        ? spokenWords.sublist(spokenWords.length - 8)
+        : spokenWords;
+
+    // SEARCH STRATEGY:
+    // We look forward from our current position to ensure steady progress.
+    // indexOf is used instead of lastIndexOf to find the NEAREST match,
+    // which prevents the prompter from jumping deep into the script.
+    const int lookAhead = 1500;
+    const int lookBehind = 50; // Tiny look-behind to catch late recognition
+    final int start = math.max(0, _lastFoundIndex - lookBehind);
+    final int end = math.min(cleanedScript.length, _lastFoundIndex + lookAhead);
+    final String window = cleanedScript.substring(start, end);
+
+    int foundPos = -1;
+    int phraseSize = 0;
+
+    // 1. Precise Phrase Matching (3-4 words) - Strongest anchors
+    for (int len = 4; len >= 3; len--) {
+      if (transcriptTail.length < len) continue;
+
+      // We check the most recent combinations of words
+      for (int offset = 0; offset < 2; offset++) {
+        int tEnd = transcriptTail.length - offset;
+        int tStart = tEnd - len;
+        if (tStart < 0) continue;
+
+        final String phrase = transcriptTail.sublist(tStart, tEnd).join(' ');
+        if (phrase.length < 6) continue;
+
+        // Find the FIRST match in our look-ahead window
+        final int pos = window.indexOf(phrase);
+        if (pos != -1) {
+          foundPos = pos + phrase.length;
+          phraseSize = len;
+          break;
+        }
+      }
+      if (foundPos != -1) break;
+    }
+
+    // 2. Reliable word matching (2 words or long single word) - Fallback
+    if (foundPos == -1) {
+      // Bi-grams
+      if (transcriptTail.length >= 2) {
+        final phrase = transcriptTail
+            .sublist(transcriptTail.length - 2)
+            .join(' ');
+        if (phrase.length > 8) {
+          final int pos = window.indexOf(phrase);
+          if (pos != -1) {
+            foundPos = pos + phrase.length;
+            phraseSize = 2;
+          }
+        }
+      }
+
+      // Long single word fallback
+      if (foundPos == -1) {
+        final lastWord = transcriptTail.last;
+        if (lastWord.length > 6) {
+          final int pos = window.indexOf(lastWord);
+          if (pos != -1) {
+            foundPos = pos + lastWord.length;
+            phraseSize = 1;
+          }
+        }
+      }
+    }
+
+    if (foundPos != -1) {
+      final int absoluteIdx = start + foundPos;
+
+      // Progress Guard: Don't jump ahead more than 800 chars in one go
+      // unless it's a very confident multi-word match
+      if (phraseSize < 3 && absoluteIdx > _lastFoundIndex + 800) return;
+
+      _lastFoundIndex = absoluteIdx;
+
+      final double containerH = _prompterSize.value.height;
+      // Focus point at 25% height (upper region of the prompter)
+      final double focusLineY = containerH * 0.25;
+      final double charY = _getYOffsetForIndex(absoluteIdx);
+
+      // Calculate scroll offset to bring charY to focusLineY
+      // Initial state has containerH/2 padding
+      final double targetOffset = (containerH / 2 + charY) - focusLineY;
+
+      if (_scriptScrollController.hasClients) {
+        final double current = _scriptScrollController.offset;
+        final double diff = (targetOffset - current).abs();
+
+        if (diff > 5) {
+          // LONG DURATION + SMOOTH CURVE = Gliding feel, no jumping
+          // Faster move for small adjustments, slower move for catching up
+          final int duration = (diff * 1.2 + 900).toInt().clamp(900, 2500);
+
+          _scriptScrollController.animateTo(
+            targetOffset.clamp(
+              0.0,
+              _scriptScrollController.position.maxScrollExtent,
+            ),
+            duration: Duration(milliseconds: duration),
+            curve: Curves.easeInOutCubic,
+          );
+        }
+      }
+    }
+  }
+
+  void _onTick(Duration elapsed) {
+    final isManualScrolling =
+        _isPlayingScript && !context.read<UIProvider>().voiceSyncEnabled;
+    if (!isManualScrolling && !_isRecording) {
+      _lastElapsed = Duration.zero;
+      return;
+    }
+    if (_lastElapsed == Duration.zero) {
+      _lastElapsed = elapsed;
+      return;
+    }
+    final delta = (elapsed - _lastElapsed).inMicroseconds / 1000000.0;
+    _lastElapsed = elapsed;
+    if (_isRecording && !_isPaused) {
+      _recordingDuration.value += Duration(
+        microseconds: (delta * 1000000).toInt(),
+      );
+    }
+    if (_scriptScrollController.hasClients && _isPlayingScript) {
+      if (_scriptScrollController.offset >=
+          _scriptScrollController.position.maxScrollExtent) {
+        setState(() => _isPlayingScript = false);
+        _stopScrolling();
+      } else if (!context.read<UIProvider>().voiceSyncEnabled) {
+        _scriptScrollController.jumpTo(
+          _scriptScrollController.offset + (_scrollSpeed.value * delta),
+        );
+      }
+    }
+  }
+
+  void _startScrolling() {
+    final uiProvider = context.read<UIProvider>();
+    if (uiProvider.voiceSyncEnabled) {
+      _voiceSync.startListening(_onVoiceResult);
+    } else {
+      if (!(_ticker?.isActive ?? false)) _ticker?.start();
+    }
+
+    if (_isRecording && !(_ticker?.isActive ?? false)) {
+      _ticker?.start();
+    }
+  }
+
+  void _stopScrolling() {
+    _voiceSync.stopListening();
+
+    if (!_isRecording) {
+      _ticker?.stop();
+    }
+    setState(() => _isPlayingScript = false);
+  }
+
+  void _toggleScriptPlay() {
+    setState(() {
+      _isPlayingScript = !_isPlayingScript;
+      if (!_isPlayingScript) _lastFoundIndex = 0;
+    });
+    if (_isPlayingScript) {
+      _startScrolling();
+    } else {
+      _stopScrolling();
+    }
+  }
+
+  void _togglePause(VideoRecordingCameraState recordingState) async {
+    if (recordingState.captureState == null) return;
+    if (_isPaused) {
+      await recordingState.resumeRecording(recordingState.captureState!);
+      setState(() {
+        _isPaused = false;
+        if (!_isPlayingScript) {
+          _isPlayingScript = true;
+          _startScrolling();
+        }
+      });
+    } else {
+      await recordingState.pauseRecording(recordingState.captureState!);
+      setState(() {
+        _isPaused = true;
+        _stopScrolling();
+      });
+    }
   }
 
   Future<CaptureRequest> _pathBuilder(List<Sensor> sensors) async {
@@ -94,619 +363,268 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
     return SingleCaptureRequest('${appDir.path}/$fileName', sensors.first);
   }
 
-  // --- SCROLL LOGIC ---
-  void _startScrolling() {
-    _scrollTimer?.cancel();
-    const fps = 60;
-    _scrollTimer = Timer.periodic(const Duration(milliseconds: 1000 ~/ fps), (
-      timer,
-    ) {
-      if (!_scriptScrollController.hasClients) return;
-      if (_scriptScrollController.offset >=
-          _scriptScrollController.position.maxScrollExtent) {
-        setState(() => _isPlayingScript = false);
-        _scrollTimer?.cancel();
-      } else {
-        _scriptScrollController.jumpTo(
-          _scriptScrollController.offset + (_scrollSpeed / fps),
-        );
-      }
-    });
-  }
-
-  void _stopScrolling() {
-    _scrollTimer?.cancel();
-    setState(() => _isPlayingScript = false);
-  }
-
-  void _toggleScriptPlay() {
-    setState(() => _isPlayingScript = !_isPlayingScript);
-    if (_isPlayingScript) {
-      _startScrolling();
-    } else {
-      _scrollTimer?.cancel();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isPositionInitialized) {
+      final size = MediaQuery.of(context).size;
+      final prompterWidth = size.width;
+      final prompterHeight = size.height * 0.5;
+      _prompterSize.value = Size(prompterWidth, prompterHeight);
+      _dragX = 0;
+      _dragY = (size.height - prompterHeight) / 3;
+      _isPositionInitialized = true;
     }
   }
 
   @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
+
+    _uiProvider.removeListener(_handleUIChanges);
+    _voiceSync.removeListener(_handleVoiceChanges);
+    _ticker?.dispose();
+    _scriptScrollController.dispose();
+    _prompterOpacity.dispose();
+    _fontSize.dispose();
+    _scrollSpeed.dispose();
+    _textOrientation.dispose();
+    _prompterSize.dispose();
+    _recordingDuration.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (!_permissionsGranted) {
-      return const Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(child: CircularProgressIndicator(color: AppColors.accent)),
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: CameraAwesomeBuilder.awesome(
-        saveConfig: SaveConfig.video(
-          pathBuilder: _pathBuilder,
-          mirrorFrontCamera: true,
-          videoOptions: VideoOptions(
-            enableAudio: true,
-            quality: VideoRecordingQuality.fhd,
-          ),
-        ),
-        sensorConfig: SensorConfig.single(
-          sensor: Sensor.position(SensorPosition.front),
-          aspectRatio: CameraAspectRatios.ratio_16_9,
-          flashMode: FlashMode.none,
-        ),
-        // Disable default UI elements to use our Custom Builders
-        theme: AwesomeTheme(
-          bottomActionsBackgroundColor: Colors.transparent,
-          buttonTheme: AwesomeButtonTheme(
-            backgroundColor: Colors.transparent,
-            iconSize: 32,
-            foregroundColor: Colors.white,
-          ),
-        ),
-
-        // 1. TOP BAR (Back + Flash)
-        topActionsBuilder: (state) {
-          return SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildGlassButton(
-                    icon: Icons.arrow_back,
-                    onTap: () => Navigator.pop(context),
-                  ),
-
-                  StreamBuilder<FlashMode>(
-                    stream: state.sensorConfig.flashMode$,
-                    builder: (context, snapshot) {
-                      final currentMode = snapshot.data ?? FlashMode.none;
-                      IconData flashIcon;
-                      switch (currentMode) {
-                        case FlashMode.none:
-                          flashIcon = Icons.flash_off;
-                          break;
-                        case FlashMode.on:
-                          flashIcon = Icons.flash_on;
-                          break;
-                        case FlashMode.auto:
-                          flashIcon = Icons.flash_auto;
-                          break;
-                        case FlashMode.always:
-                          flashIcon = Icons.flashlight_on;
-                          break;
-                      }
-
-                      return _buildGlassButton(
-                        icon: flashIcon,
-                        isActive: currentMode != FlashMode.none,
-                        onTap: () {
-                          FlashMode nextMode;
-                          if (currentMode == FlashMode.none) {
-                            nextMode = FlashMode.on;
-                          } else if (currentMode == FlashMode.on) {
-                            nextMode = FlashMode.auto;
-                          } else {
-                            nextMode = FlashMode.none;
-                          }
-                          state.sensorConfig.setFlashMode(nextMode);
-                        },
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-
-        // 2. BOTTOM BAR (Switch + Shutter + Settings)
-        bottomActionsBuilder: (state) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 30, left: 30, right: 30),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildGlassButton(
-                  icon: Icons.cameraswitch_rounded,
-                  onTap: () {
-                    state.switchCameraSensor(
-                      aspectRatio: CameraAspectRatios.ratio_16_9,
-                    );
-                  },
-                ),
-
-                _buildShutterButton(state),
-
-                _buildGlassButton(
-                  icon: _showProControls ? Icons.close : Icons.tune_rounded,
-                  isActive: _showProControls,
-                  onTap: () =>
-                      setState(() => _showProControls = !_showProControls),
-                ),
-              ],
-            ),
-          );
-        },
-
-        onMediaCaptureEvent: (MediaCapture? event) {
-          if (event == null) return;
-          switch (event.status) {
-            case MediaCaptureStatus.capturing:
-              setState(() => _isRecording = true);
-              if (!_isPlayingScript) {
-                setState(() => _isPlayingScript = true);
-                _startScrolling();
-              }
-              break;
-            case MediaCaptureStatus.success:
-              setState(() => _isRecording = false);
-              _stopScrolling();
-              final path = event.captureRequest.path;
-              if (path != null) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ProfessionalVideoEditor(file: File(path)),
-                    ),
-                  );
-                });
-              }
-              break;
-            case MediaCaptureStatus.failure:
-              setState(() => _isRecording = false);
-              _stopScrolling();
-              ToastService.show("Recording Failed", isError: true);
-              break;
-            default:
-              break;
+    return Focus(
+      autofocus: true,
+      onKeyEvent: (node, event) {
+        if (event is KeyDownEvent) {
+          if (event.logicalKey == LogicalKeyboardKey.space) {
+            _toggleScriptPlay();
+            return KeyEventResult.handled;
+          } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+            _scrollSpeed.value = math.min(150.0, _scrollSpeed.value + 5.0);
+            return KeyEventResult.handled;
+          } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+            _scrollSpeed.value = math.max(10.0, _scrollSpeed.value - 5.0);
+            return KeyEventResult.handled;
+          } else if (event.logicalKey == LogicalKeyboardKey.keyR) {
+            _scriptScrollController.jumpTo(0);
+            return KeyEventResult.handled;
           }
-        },
-        middleContentBuilder: (CameraState state) {
-          return Stack(
+        }
+        return KeyEventResult.ignored;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: CameraAwesomeBuilder.awesome(
+          progressIndicator: const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          ),
+          saveConfig: SaveConfig.video(
+            pathBuilder: _pathBuilder,
+            mirrorFrontCamera: true,
+            videoOptions: VideoOptions(
+              enableAudio: true,
+              quality: _videoQuality,
+            ),
+          ),
+          sensorConfig: SensorConfig.single(
+            sensor: Sensor.position(SensorPosition.front),
+            aspectRatio: CameraAspectRatios.ratio_16_9,
+          ),
+          theme: AwesomeTheme(
+            bottomActionsBackgroundColor: Colors.transparent,
+            buttonTheme: AwesomeButtonTheme(
+              backgroundColor: Colors.transparent,
+              iconSize: 32,
+              foregroundColor: Colors.white,
+            ),
+          ),
+          topActionsBuilder: (state) => const SizedBox.shrink(),
+          bottomActionsBuilder: (state) => const SizedBox.shrink(),
+          middleContentBuilder: (state) => Stack(
             fit: StackFit.expand,
             children: [
-              _buildTeleprompterOverlay(),
-
-              if (_showProControls) _buildSideControls(state),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  // --- CUSTOM SHUTTER BUTTON ---
-  Widget _buildShutterButton(CameraState state) {
-    return GestureDetector(
-      onTap: () {
-        state.when(
-          // 1. If IDLE: We receive VideoCameraState -> Start Recording
-          onVideoMode: (videoState) {
-            videoState.startRecording();
-          },
-          // 2. If RECORDING: We receive VideoRecordingCameraState -> Stop Recording
-          onVideoRecordingMode: (recordingState) {
-            recordingState.stopRecording();
-          },
-          // 3. Handle other states safely
-          onPreparingCamera: (_) {},
-        );
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        width: 80,
-        height: 80,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 4),
-          color: Colors.transparent,
-        ),
-        padding: const EdgeInsets.all(4),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          decoration: BoxDecoration(
-            color: _isRecording ? Colors.red : Colors.white,
-            shape: _isRecording ? BoxShape.rectangle : BoxShape.circle,
-            borderRadius: _isRecording ? BorderRadius.circular(16) : null,
-          ),
-        ),
-      ),
-    );
-  }
-
-  // --- SIDEBAR CONTROLS ---
-  Widget _buildSideControls(CameraState state) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Padding(
-        padding: const EdgeInsets.only(right: 16),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(30),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: Container(
-              width: 56,
-              height: 280,
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.25),
-                borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              PrompterOverlay(
+                script: widget.script,
+                isPlayingScript: _isPlayingScript,
+                showScriptControls: _showScriptControls,
+                showSettingsPanel: _showSettingsPanel,
+                dragX: _dragX,
+                dragY: _dragY,
+                prompterSize: _prompterSize,
+                prompterOpacity: _prompterOpacity,
+                fontSize: _fontSize,
+                textOrientation: _textOrientation,
+                scrollSpeed: _scrollSpeed,
+                scrollController: _scriptScrollController,
+                onTogglePlay: _toggleScriptPlay,
+                onToggleSettings: () =>
+                    setState(() => _showSettingsPanel = !_showSettingsPanel),
+                onToggleControls: () =>
+                    setState(() => _showScriptControls = !_showScriptControls),
+                onDrag: (d) => setState(() {
+                  _dragX += d.dx;
+                  _dragY += d.dy;
+                }),
+                onResize: (s) => _prompterSize.value = s,
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  const Icon(
-                    Icons.wb_sunny_rounded,
-                    color: Colors.amber,
-                    size: 20,
-                  ),
-
-                  // Brightness Slider
-                  Expanded(
-                    child: RotatedBox(
-                      quarterTurns: 3,
-                      child: SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          trackHeight: 4,
-                          thumbShape: const RoundSliderThumbShape(
-                            enabledThumbRadius: 8,
-                          ),
-                          overlayShape: SliderComponentShape.noOverlay,
-                          activeTrackColor: Colors.amber,
-                          inactiveTrackColor: Colors.white24,
-                          thumbColor: Colors.white,
-                        ),
-                        child: Slider(
-                          value: _currentBrightness,
-                          min: 0.0,
-                          max: 1.0,
-                          onChanged: (val) {
-                            setState(() => _currentBrightness = val);
-                            state.sensorConfig.setBrightness(val);
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  Container(width: 24, height: 1, color: Colors.white12),
-                  const SizedBox(height: 12),
-
-                  // Zoom Toggles
-                  _buildZoomToggle("2x", _currentZoom > 0.1, () {
-                    setState(() => _currentZoom = 0.5);
-                    state.sensorConfig.setZoom(0.5);
-                  }),
-                  const SizedBox(height: 10),
-                  _buildZoomToggle("1x", _currentZoom <= 0.1, () {
-                    setState(() => _currentZoom = 0.0);
-                    state.sensorConfig.setZoom(0.0);
-                  }),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildZoomToggle(String label, bool isActive, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: 36,
-        height: 36,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: isActive ? Colors.white : Colors.black.withValues(alpha: 0.3),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white30),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isActive ? Colors.black : Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
-          ),
-        ),
-      ),
-    );
-  }
-
-  // --- TELEPROMPTER OVERLAY ---
-  Widget _buildTeleprompterOverlay() {
-    return Positioned(
-      left: _dragX,
-      top: _dragY,
-      child: GestureDetector(
-        onPanUpdate: (d) => setState(() {
-          _dragX += d.delta.dx;
-          _dragY += d.delta.dy;
-        }),
-        onTap: () => setState(() => _showScriptControls = !_showScriptControls),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              width: _prompterWidth,
-              height: _prompterHeight,
-              decoration: BoxDecoration(
-                color: const Color(
-                  0xFF1C1C1E,
-                ).withValues(alpha: _prompterOpacity),
-                border: Border.all(
-                  color: _showScriptControls
-                      ? Colors.white24
-                      : Colors.transparent,
-                  width: 1,
+              if (_showProControls && !_isRecording)
+                CameraSideControls(
+                  state: state,
+                  currentBrightness: _currentBrightness,
+                  currentZoom: _currentZoom,
+                  onBrightnessChanged: (v) =>
+                      setState(() => _currentBrightness = v),
+                  onZoomChanged: (v) => setState(() => _currentZoom = v),
                 ),
-                borderRadius: BorderRadius.circular(24),
+
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: SafeArea(
+                  child: ValueListenableBuilder<Duration>(
+                    valueListenable: _recordingDuration,
+                    builder: (context, duration, _) => TeleprompterTopBar(
+                      state: state,
+                      isRecording: _isRecording,
+                      recordingDuration: duration,
+                      onBack: () => Navigator.pop(context),
+                      onShowSettings: () => _showVideoSettings(state),
+                      formatDuration: (d) =>
+                          "${d.inMinutes.remainder(60).toString().padLeft(2, "0")}:${d.inSeconds.remainder(60).toString().padLeft(2, "0")}",
+                    ),
+                  ),
+                ),
               ),
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    bottom: _showScriptControls ? 64 : 0,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
-                      child: RotatedBox(
-                        quarterTurns: _textOrientation,
-                        child: ShaderMask(
-                          shaderCallback: (r) => const LinearGradient(
-                            colors: [
-                              Colors.transparent,
-                              Colors.white,
-                              Colors.white,
-                              Colors.transparent,
-                            ],
-                            stops: [0.0, 0.1, 0.9, 1.0],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                          ).createShader(r),
-                          blendMode: BlendMode.dstIn,
-                          child: SingleChildScrollView(
-                            controller: _scriptScrollController,
-                            padding: EdgeInsets.symmetric(
-                              vertical: _prompterHeight / 2,
-                            ),
-                            child: Text(
-                              widget.script.content,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: _fontSize,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                height: 1.4,
-                                shadows: const [
-                                  Shadow(
-                                    color: Colors.black45,
-                                    offset: Offset(0, 1),
-                                    blurRadius: 2,
-                                  ),
-                                ],
-                              ),
-                            ),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: SafeArea(
+                  child: CameraBottomControls(
+                    state: state,
+                    isRecording: _isRecording,
+                    isPaused: _isPaused,
+                    showProControls: _showProControls,
+                    onTogglePro: () =>
+                        setState(() => _showProControls = !_showProControls),
+                    onTogglePause: (s) => _togglePause(s),
+                  ),
+                ),
+              ),
+              if (_lastVideoPath != null && !_isRecording)
+                Positioned(
+                  bottom: 120.h,
+                  left: 24.w,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              FullScreenVideoPlayer(path: _lastVideoPath!),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: 60.w,
+                      height: 80.h,
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(color: Colors.white24),
+                        image: const DecorationImage(
+                          image: AssetImage(
+                            'assets/images/video_placeholder.png',
                           ),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.play_circle_fill,
+                          color: Colors.white,
+                          size: 30,
                         ),
                       ),
                     ),
                   ),
-
-                  if (_showSettingsPanel && _showScriptControls)
-                    Positioned.fill(
-                      bottom: 64,
-                      child: Container(
-                        color: Colors.black.withValues(alpha: 0.85),
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildSettingRow(
-                              Icons.text_fields,
-                              "Size",
-                              _fontSize,
-                              16,
-                              50,
-                              (v) => setState(() => _fontSize = v),
-                            ),
-                            const SizedBox(height: 16),
-                            _buildSettingRow(
-                              Icons.opacity,
-                              "Opacity",
-                              _prompterOpacity,
-                              0.2,
-                              0.9,
-                              (v) => setState(() => _prompterOpacity = v),
-                            ),
-                            const SizedBox(height: 16),
-                            _buildSettingRow(
-                              Icons.speed,
-                              "Speed",
-                              _scrollSpeed,
-                              10,
-                              150,
-                              (v) => setState(() => _scrollSpeed = v),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                  if (_showScriptControls)
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                        height: 64,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.4),
-                          border: const Border(
-                            top: BorderSide(color: Colors.white10),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            IconButton(
-                              icon: Icon(
-                                _showSettingsPanel ? Icons.close : Icons.tune,
-                                color: Colors.white70,
-                              ),
-                              iconSize: 24,
-                              onPressed: () => setState(
-                                () => _showSettingsPanel = !_showSettingsPanel,
-                              ),
-                            ),
-
-                            GestureDetector(
-                              onTap: _toggleScriptPlay,
-                              child: Container(
-                                width: 48,
-                                height: 48,
-                                decoration: const BoxDecoration(
-                                  color: AppColors.accent,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  _isPlayingScript
-                                      ? Icons.pause_rounded
-                                      : Icons.play_arrow_rounded,
-                                  color: Colors.white,
-                                  size: 30,
-                                ),
-                              ),
-                            ),
-
-                            IconButton(
-                              icon: const Icon(
-                                Icons.rotate_right,
-                                color: Colors.white70,
-                              ),
-                              iconSize: 24,
-                              onPressed: () => setState(
-                                () => _textOrientation =
-                                    (_textOrientation + 1) % 4,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                  if (_showScriptControls)
-                    Positioned(
-                      right: 4,
-                      bottom: 4,
-                      child: GestureDetector(
-                        onPanUpdate: (d) => setState(() {
-                          _prompterWidth = math.max(
-                            200,
-                            _prompterWidth + d.delta.dx,
-                          );
-                          _prompterHeight = math.max(
-                            200,
-                            _prompterHeight + d.delta.dy,
-                          );
-                        }),
-                        child: const Icon(
-                          Icons.crop_free_rounded,
-                          color: Colors.white38,
-                          size: 16,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
+                ),
+            ],
           ),
+          onMediaCaptureEvent: (event) {
+            switch (event.status) {
+              case MediaCaptureStatus.capturing:
+                if (!_isRecording) {
+                  setState(() {
+                    _isRecording = true;
+                    _isPaused = false;
+                    _lastFoundIndex = 0;
+                    _recordingDuration.value = Duration.zero;
+                  });
+                  if (!(_ticker?.isActive ?? false)) _ticker?.start();
+                  if (!_isPlayingScript) _toggleScriptPlay();
+                  AnalyticsService().logRecordingStarted(
+                    scriptId: widget.script.key?.toString() ?? 'unknown',
+                    scriptTitle: widget.script.title,
+                    isVoiceSyncEnabled: context
+                        .read<UIProvider>()
+                        .voiceSyncEnabled,
+                  );
+                }
+                break;
+              case MediaCaptureStatus.success:
+                final path = event.captureRequest.path;
+                setState(() {
+                  _isRecording = false;
+                  _isPaused = false;
+                  _lastVideoPath = path;
+                });
+                _stopScrolling();
+                AnalyticsService().logRecordingStopped(
+                  scriptId: widget.script.key?.toString() ?? 'unknown',
+                  durationSeconds: _recordingDuration.value.inSeconds,
+                );
+                if (path != null) {
+                  context.read<GalleryProvider>().addVideo(path);
+                  ToastService.show("Video Saved Successfully");
+                }
+                break;
+              case MediaCaptureStatus.failure:
+                setState(() {
+                  _isRecording = false;
+                  _isPaused = false;
+                });
+                _stopScrolling();
+                ToastService.show("Recording Failed", isError: true);
+                break;
+            }
+          },
         ),
       ),
     );
   }
 
-  // --- STANDARD GLASS BUTTON ---
-  Widget _buildGlassButton({
-    required IconData icon,
-    VoidCallback? onTap,
-    bool isActive = false,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipOval(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-          child: Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: isActive
-                  ? AppColors.accent
-                  : Colors.black.withValues(alpha: 0.3),
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white24),
-            ),
-            child: Icon(icon, color: Colors.white, size: 24),
-          ),
-        ),
+  void _showVideoSettings(CameraState state) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => VideoSettingsSheet(
+        state: state,
+        videoQuality: _videoQuality,
+        targetFps: _targetFps,
+        onQualityChanged: (q) => setState(() => _videoQuality = q),
+        onFpsChanged: (f) => setState(() => _targetFps = f),
       ),
-    );
-  }
-
-  Widget _buildSettingRow(
-    IconData icon,
-    String label,
-    double val,
-    double min,
-    double max,
-    Function(double) onChanged,
-  ) {
-    return Row(
-      children: [
-        Icon(icon, color: Colors.white54, size: 20),
-        const SizedBox(width: 12),
-        Expanded(
-          child: SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              trackHeight: 4,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-              activeTrackColor: AppColors.accent,
-              inactiveTrackColor: Colors.white24,
-              thumbColor: Colors.white,
-              overlayShape: SliderComponentShape.noOverlay,
-            ),
-            child: Slider(value: val, min: min, max: max, onChanged: onChanged),
-          ),
-        ),
-      ],
     );
   }
 }

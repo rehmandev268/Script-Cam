@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:permission_handler/permission_handler.dart';
+import '../../../../core/services/analytics_service.dart';
 
 class UIProvider extends ChangeNotifier {
   final Box _settingsBox;
@@ -7,10 +9,28 @@ class UIProvider extends ChangeNotifier {
   bool get showOnboarding => _showOnboarding;
   bool _showcaseSeen = false;
   bool get showcaseSeen => _showcaseSeen;
+  bool _permissionsGranted = false;
+  bool get permissionsGranted => _permissionsGranted;
+
+  bool _voiceSyncEnabled = false;
+  bool get voiceSyncEnabled => _voiceSyncEnabled;
+
+  bool _mirrorTextEnabled = false;
+  bool get mirrorTextEnabled => _mirrorTextEnabled;
 
   UIProvider(this._settingsBox) {
     _checkOnboarding();
     _checkShowcase();
+    _loadVoiceSyncSetting();
+    _loadMirrorTextSetting();
+    checkPermissions();
+  }
+
+  Future<void> checkPermissions() async {
+    final camera = await Permission.camera.isGranted;
+    final mic = await Permission.microphone.isGranted;
+    _permissionsGranted = camera && mic;
+    notifyListeners();
   }
 
   void _checkOnboarding() {
@@ -24,9 +44,40 @@ class UIProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _loadVoiceSyncSetting() {
+    _voiceSyncEnabled = _settingsBox.get(
+      'voice_sync_enabled',
+      defaultValue: false,
+    );
+    notifyListeners();
+  }
+
+  void _loadMirrorTextSetting() {
+    _mirrorTextEnabled = _settingsBox.get(
+      'mirror_text_enabled',
+      defaultValue: false,
+    );
+    notifyListeners();
+  }
+
+  void toggleVoiceSync(bool value) {
+    _voiceSyncEnabled = value;
+    _settingsBox.put('voice_sync_enabled', value);
+    AnalyticsService().logVoiceSyncToggled(enabled: value);
+    notifyListeners();
+  }
+
+  void toggleMirrorText(bool value) {
+    _mirrorTextEnabled = value;
+    _settingsBox.put('mirror_text_enabled', value);
+    AnalyticsService().logMirrorTextToggled(enabled: value);
+    notifyListeners();
+  }
+
   void completeOnboarding() {
     _settingsBox.put('onboarding_seen', true);
     _showOnboarding = false;
+    AnalyticsService().logOnboardingCompleted();
     notifyListeners();
   }
 

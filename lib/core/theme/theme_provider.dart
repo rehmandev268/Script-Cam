@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import '../services/analytics_service.dart';
 
 class ThemeProvider extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;
@@ -15,11 +16,9 @@ class ThemeProvider extends ChangeNotifier {
     final savedMode = _settingsBox.get('theme_mode', defaultValue: 0);
     if (savedMode == 1) {
       _themeMode = ThemeMode.light;
-    } else if (savedMode == 2)
-    {
+    } else if (savedMode == 2) {
       _themeMode = ThemeMode.dark;
-    }
-    else{
+    } else {
       _themeMode = ThemeMode.system;
     }
     notifyListeners();
@@ -31,6 +30,7 @@ class ThemeProvider extends ChangeNotifier {
     if (mode == ThemeMode.light) saveVal = 1;
     if (mode == ThemeMode.dark) saveVal = 2;
     _settingsBox.put('theme_mode', saveVal);
+    AnalyticsService().logThemeChanged(theme: mode.toString());
     notifyListeners();
   }
 }

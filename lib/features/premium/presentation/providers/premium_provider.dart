@@ -3,19 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/utils/toast_service.dart';
+import '../../../../core/services/analytics_service.dart';
 
-const String _kPremiumProductId = 'com.yourname.yourapp.premium'; // Replace with real ID
+const String _kPremiumProductId = 'sc_premium_lifetime';
 const String _kPrefKey = 'is_premium_user';
 
 class PremiumProvider extends ChangeNotifier {
   final InAppPurchase _iap = InAppPurchase.instance;
   late StreamSubscription<List<PurchaseDetails>> _subscription;
-  
-  bool _isPremium = false;
-  
-  // Only track PURCHASING status here (Restoring is handled locally in UI)
-  bool _isPurchasing = false; 
-  
+
+  bool _isPremium = true;
+  bool _isPurchasing = false;
   List<ProductDetails> _products = [];
 
   bool get isPremium => _isPremium;
@@ -30,11 +28,13 @@ class PremiumProvider extends ChangeNotifier {
     _isPremium = prefs.getBool(_kPrefKey) ?? false;
     notifyListeners();
 
-    _subscription = _iap.purchaseStream.listen(
+    final Stream<List<PurchaseDetails>> purchaseUpdated = _iap.purchaseStream;
+    _subscription = purchaseUpdated.listen(
       _listenToPurchaseUpdated,
       onDone: () => _subscription.cancel(),
       onError: (error) {
         _setPurchasing(false);
+        ToastService.show("Connection Error");
       },
     );
 
@@ -45,54 +45,79 @@ class PremiumProvider extends ChangeNotifier {
     final bool available = await _iap.isAvailable();
     if (!available) return;
 
-    const Set<String> _kIds = {_kPremiumProductId};
-    final ProductDetailsResponse response = await _iap.queryProductDetails(_kIds);
+    const Set<String> kIds = {_kPremiumProductId};
+    final ProductDetailsResponse response = await _iap.queryProductDetails(
+      kIds,
+    );
+
+    if (response.notFoundIDs.isNotEmpty) {}
+
     _products = response.productDetails;
     notifyListeners();
   }
 
-  // --- BUYING (Updates _isPurchasing) ---
   Future<void> buyPremium() async {
     if (_products.isEmpty) {
       ToastService.show("Store unavailable");
       return;
     }
-    _setPurchasing(true); // Start loading on Purchase button
-    
-    final PurchaseParam purchaseParam = PurchaseParam(productDetails: _products.first);
-    await _iap.buyNonConsumable(purchaseParam: purchaseParam);
+
+    _setPurchasing(true);
+
+    final PurchaseParam purchaseParam = PurchaseParam(
+      productDetails: _products.first,
+    );
+
+    try {
+      AnalyticsService().logPurchaseInitiated(
+        productId: _products.first.id,
+        productType: 'non_consumable',
+      );
+      await _iap.buyNonConsumable(purchaseParam: purchaseParam);
+    } catch (e) {
+      _setPurchasing(false);
+      AnalyticsService().logPurchaseFailed(
+        productId: _products.first.id,
+        reason: e.toString(),
+      );
+      ToastService.show("Purchase failed to initiate");
+    }
   }
 
-  // --- RESTORING (Returns Future, UI handles loading) ---
   Future<void> restorePurchases() async {
-    // We do NOT set _isPurchasing here. 
-    // The UI will show its own spinner while awaiting this.
     try {
       await _iap.restorePurchases();
-      // Logic continues in _listenToPurchaseUpdated when items arrive
     } catch (e) {
       ToastService.show("Restore failed: $e");
     }
   }
 
   void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
+    if (purchaseDetailsList.isEmpty) {
+      _setPurchasing(false);
+      return;
+    }
+
     for (final PurchaseDetails purchaseDetails in purchaseDetailsList) {
-      
-      if (purchaseDetails.status == PurchaseStatus.pending) {
-        _setPurchasing(true); // Keep spinner going
-      } 
-      else if (purchaseDetails.status == PurchaseStatus.error) {
-        _setPurchasing(false); // Stop spinner
-        if (purchaseDetails.error?.code != 'user_cancelled') {
-           ToastService.show("Error: ${purchaseDetails.error?.message}");
-        }
-      } 
-      else if (purchaseDetails.status == PurchaseStatus.purchased ||
-               purchaseDetails.status == PurchaseStatus.restored) {
-        
-        _deliverProduct(purchaseDetails);
+      switch (purchaseDetails.status) {
+        case PurchaseStatus.pending:
+          _setPurchasing(true);
+          break;
+        case PurchaseStatus.canceled:
+          _setPurchasing(false);
+          break;
+        case PurchaseStatus.error:
+          _setPurchasing(false);
+          if (purchaseDetails.error?.code != 'user_cancelled') {
+            ToastService.show("Error: ${purchaseDetails.error?.message}");
+          }
+          break;
+        case PurchaseStatus.purchased:
+        case PurchaseStatus.restored:
+          _deliverProduct(purchaseDetails);
+          break;
       }
-      
+
       if (purchaseDetails.pendingCompletePurchase) {
         _iap.completePurchase(purchaseDetails);
       }
@@ -102,18 +127,23 @@ class PremiumProvider extends ChangeNotifier {
   Future<void> _deliverProduct(PurchaseDetails purchaseDetails) async {
     if (purchaseDetails.productID == _kPremiumProductId) {
       _isPremium = true;
-      notifyListeners();
-
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_kPrefKey, true);
-      
-      // Stop spinner
+
       _setPurchasing(false);
+      notifyListeners();
 
       if (purchaseDetails.status == PurchaseStatus.purchased) {
+        AnalyticsService().logPurchaseCompleted(
+          productId: purchaseDetails.productID,
+          productType: 'non_consumable',
+          price: 0, // Price info not directly available in PurchaseDetails
+          currency: 'USD',
+        );
         ToastService.show("Premium Unlocked!");
       } else if (purchaseDetails.status == PurchaseStatus.restored) {
-         ToastService.show("Restored Successfully");
+        AnalyticsService().logPurchaseRestored(restoredCount: 1);
+        ToastService.show("Restored Successfully");
       }
     } else {
       _setPurchasing(false);
@@ -121,8 +151,10 @@ class PremiumProvider extends ChangeNotifier {
   }
 
   void _setPurchasing(bool value) {
-    _isPurchasing = value;
-    notifyListeners();
+    if (_isPurchasing != value) {
+      _isPurchasing = value;
+      notifyListeners();
+    }
   }
 
   @override

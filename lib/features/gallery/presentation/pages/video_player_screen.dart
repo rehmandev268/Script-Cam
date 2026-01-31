@@ -76,24 +76,30 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      extendBodyBehindAppBar: true, 
+      extendBodyBehindAppBar: true,
 
-      appBar: _showControls 
-        ? AdaptiveAppBar(
-            title: "", 
-            showBackButton: true,
-            backgroundColor: Colors.black38,
-            actions: [
-               IconButton(
-                 icon: const Icon(Icons.edit, color: Colors.white),
-                 onPressed: () {
-                   _pause();
-                   Navigator.push(context, MaterialPageRoute(builder: (_) => ProfessionalVideoEditor(file: File(widget.path))));
-                 },
-               )
-            ],
-          )
-        : null,
+      appBar: _showControls
+          ? AdaptiveAppBar(
+              title: "",
+              showBackButton: true,
+              backgroundColor: Colors.black38,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.white),
+                  onPressed: () {
+                    _pause();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            ProfessionalVideoEditor(file: File(widget.path)),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            )
+          : null,
 
       body: GestureDetector(
         onTap: _toggleControls,
@@ -113,52 +119,73 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
               duration: const Duration(milliseconds: 300),
               child: Container(
                 color: Colors.black38,
-                child: SafeArea(
-                  child: Column(
-                    children: [
-                      const Spacer(),
-                      IconButton(
-                        iconSize: 80.sp,
-                        icon: Icon(
-                          _isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
-                          color: Colors.white.withOpacity(0.9),
-                        ),
-                        onPressed: _isPlaying ? _pause : _play,
+                child: Column(
+                  children: [
+                    const Spacer(),
+                    IconButton(
+                      iconSize: 80.sp,
+                      icon: Icon(
+                        _isPlaying
+                            ? Icons.pause_circle_filled
+                            : Icons.play_circle_fill,
+                        color: Colors.white.withValues(alpha: 0.9),
                       ),
-                      const Spacer(),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 30.h),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(_formatDuration(_controller.value.position), style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
-                                Text(_formatDuration(_controller.value.duration), style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
-                              ],
-                            ),
-                            SizedBox(height: 10.h),
-                            SliderTheme(
-                              data: SliderThemeData(
-                                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                                thumbColor: AppColors.primary,
-                                activeTrackColor: AppColors.primary,
-                                inactiveTrackColor: Colors.white24,
-                              ),
-                              child: Slider(
-                                value: _controller.value.position.inSeconds.toDouble(),
-                                min: 0.0,
-                                max: _controller.value.duration.inSeconds.toDouble(),
-                                onChanged: (value) {
-                                  _controller.seekTo(Duration(seconds: value.toInt()));
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
+                      onPressed: _isPlaying ? _pause : _play,
+                    ),
+                    const Spacer(),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20.w,
+                        vertical: 30.h,
                       ),
-                    ],
-                  ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                _formatDuration(_controller.value.position),
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12.sp,
+                                ),
+                              ),
+                              Text(
+                                _formatDuration(_controller.value.duration),
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10.h),
+                          SliderTheme(
+                            data: SliderThemeData(
+                              thumbShape: const RoundSliderThumbShape(
+                                enabledThumbRadius: 8,
+                              ),
+                              thumbColor: AppColors.primary,
+                              activeTrackColor: AppColors.primary,
+                              inactiveTrackColor: Colors.white24,
+                            ),
+                            child: Slider(
+                              value: _controller.value.position.inSeconds
+                                  .toDouble(),
+                              min: 0.0,
+                              max: _controller.value.duration.inSeconds
+                                  .toDouble(),
+                              onChanged: (value) {
+                                _controller.seekTo(
+                                  Duration(seconds: value.toInt()),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

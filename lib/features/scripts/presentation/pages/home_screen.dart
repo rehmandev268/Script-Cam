@@ -1,24 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/main.dart';
+import 'dart:math';
 import 'package:provider/provider.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/utils/responsive_config.dart';
 import '../../../../core/utils/toast_service.dart';
-import '../../../../core/services/ad_manager.dart';
-import '../../../../widgets/common/adaptive_app_bar.dart';
+import '../../../../core/services/ads_service/interstitial_ad_helper.dart';
 import '../../../premium/presentation/providers/premium_provider.dart';
-import '../../../premium/presentation/screen/premium_screen.dart';
 import '../../../teleprompter/presentation/pages/teleprompter_screen.dart';
 import '../../data/models/script_model.dart';
 import '../providers/scripts_provider.dart';
 import 'editor_screen.dart';
 import '../../../../core/constants/app_constants.dart';
+import 'package:permission_handler/permission_handler.dart';
+import '../../../../core/utils/platform_utils.dart';
+import '../../../../core/utils/app_dialogs.dart';
+import '../../../onboarding/presentation/pages/onboarding_screen.dart';
+import '../widgets/premium_badge.dart';
+import '../widgets/category_tabs.dart';
+import '../widgets/script_card.dart';
+import '../widgets/empty_scripts_state.dart';
+import '../widgets/script_search_bar.dart';
+import '../../../../widgets/ads/custom_native_ad_widget.dart';
+import '../../../../core/services/analytics_service.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback? onGoToCreate;
+  final double bottomPadding;
 
-  const HomeScreen({super.key, this.onGoToCreate});
+  const HomeScreen({super.key, this.onGoToCreate, this.bottomPadding = 20});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -28,58 +40,90 @@ class _HomeScreenState extends State<HomeScreen> {
   String _selectedCategory = "All";
   final List<String> _categories = [
     "All",
-    "General",
-    "YouTube",
-    "Instagram",
-    "TikTok",
-    "LinkedIn",
+    ...PlatformConfig.platforms.map((p) => p['name'] as String),
   ];
+  final ScrollController _scrollController = ScrollController();
+  double _scrollProgress = 0.0;
 
-  void _confirmDelete(BuildContext context, Script script) async {
-    bool confirm =
-        await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: Text("Delete Script?", style: TextStyle(fontSize: 18.sp)),
-            content: Text(
-              "This action cannot be undone.",
-              style: TextStyle(fontSize: 14.sp),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: Text("Cancel", style: TextStyle(fontSize: 14.sp)),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: Text(
-                  "Delete",
-                  style: TextStyle(color: Colors.red, fontSize: 14.sp),
-                ),
-              ),
-            ],
-          ),
-        ) ??
-        false;
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
 
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+
+    // Calculate smooth progress from 0.0 to 1.0 based on scroll offset
+    // Transition happens between 0 and 100 pixels for smoother effect
+    const double maxScrollForTransition = 100.0;
+    final double offset = _scrollController.offset.clamp(
+      0.0,
+      maxScrollForTransition,
+    );
+    final double linearProgress = offset / maxScrollForTransition;
+
+    // Apply easing curve for smoother animation (ease-in-out cubic)
+    final double easedProgress = linearProgress < 0.5
+        ? 4 * linearProgress * linearProgress * linearProgress
+        : 1 - pow(-2 * linearProgress + 2, 3) / 2;
+
+    if ((_scrollProgress - easedProgress).abs() > 0.005) {
+      setState(() => _scrollProgress = easedProgress);
+    }
+  }
+
+  void _confirmDelete(BuildContext context, Script script, bool isDark) async {
+    bool confirm = await AppDialogs.showConfirmDelete(
+      context: context,
+      title: "Delete Script?",
+      content: "This action cannot be undone.",
+      isDark: isDark,
+    );
     if (confirm && context.mounted) {
       Provider.of<ScriptsProvider>(context, listen: false).deleteScript(script);
       ToastService.show("Script deleted");
     }
   }
 
-  void _handleVideoClick(BuildContext context, Script script) {
+  void _handleVideoClick(BuildContext context, Script script) async {
     FocusManager.instance.primaryFocus?.unfocus();
+
+    // Check permissions before proceeding
+    final cameraStatus = await Permission.camera.status;
+    final micStatus = await Permission.microphone.status;
+
+    if (!cameraStatus.isGranted || !micStatus.isGranted) {
+      if (context.mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+        );
+      }
+      return;
+    }
+
     final premium = Provider.of<PremiumProvider>(
       context,
       listen: false,
     ).isPremium;
-    AdHelper.showInterstitialAd(() {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => TeleprompterScreen(script: script)),
-      );
-    }, premium);
+    InterstitialAdHelper.show(
+      isPremium: premium,
+      onComplete: () {
+        print("Pushing to TeleprompterScreen: $script");
+        Navigator.push(
+          navigatorKey.currentContext!,
+          MaterialPageRoute(builder: (_) => TeleprompterScreen(script: script)),
+        );
+      },
+    );
   }
 
   void _handleEditClick(BuildContext context, Script script) {
@@ -89,349 +133,145 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildPremiumBadge(BuildContext context) {
-    final isPremium = Provider.of<PremiumProvider>(context).isPremium;
-    if (isPremium) return const SizedBox.shrink();
-
-    return Center(
-      child: GestureDetector(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const PremiumScreen()),
-        ),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.premium, Colors.orange],
-            ),
-            borderRadius: BorderRadius.circular(20.r),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.star_rounded, size: 14.sp, color: Colors.white),
-              SizedBox(width: 4.w),
-              Text(
-                "PRO",
-                style: TextStyle(
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
-                  letterSpacing: 0.5.w,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour >= 5 && hour < 12) return "Good Morning";
+    if (hour >= 12 && hour < 17) return "Good Afternoon";
+    return "Good Evening";
   }
 
-  Widget _buildHeroSection(BuildContext context) {
-    return FadeInDown(
-      duration: const Duration(milliseconds: 600),
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-        height: 100.h,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: widget.onGoToCreate,
-            borderRadius: BorderRadius.circular(24.r),
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.primary, AppColors.primaryVariant],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(24.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.4),
-                    blurRadius: 20.r,
-                    offset: Offset(0, 10.h),
-                  ),
-                ],
-              ),
-              child: Stack(
-                children: [
-                  Positioned(
-                    right: -10.w,
-                    bottom: -10.h,
-                    child: Icon(
-                      Icons.movie_creation_outlined,
-                      size: 90.sp,
-                      color: Colors.white.withOpacity(0.1),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.w),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(12.r),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.add,
-                            color: Colors.white,
-                            size: 26.sp,
-                          ),
-                        ),
-                        SizedBox(width: 16.w),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Create New Script",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 2.h),
-                            Text(
-                              "Select platform & start writing",
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12.sp,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+  String _getEmoji() {
+    final hour = DateTime.now().hour;
+    if (hour >= 5 && hour < 12) return "☀️";
+    if (hour >= 12 && hour < 17) return "🌤️";
+    return "🌙";
   }
 
-  Widget _buildCategoryTabs(BuildContext context) {
+  void _showQuickRecordBottomSheet(BuildContext context) {
+    final TextEditingController titleController = TextEditingController();
+    final TextEditingController contentController = TextEditingController();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      height: 36.h,
-      margin: EdgeInsets.only(bottom: 10.h),
-      child: ListView.builder(
-        padding: EdgeInsets.symmetric(horizontal: 20.w),
-        scrollDirection: Axis.horizontal,
-        itemCount: _categories.length,
-        itemBuilder: (context, index) {
-          final catName = _categories[index];
-          final isSelected = _selectedCategory == catName;
+    AnalyticsService().logQuickRecordStarted();
 
-          final bg = isSelected
-              ? AppColors.primary
-              : (isDark ? AppColors.darkSurface : AppColors.lightSurface);
-
-          final textC = isSelected
-              ? Colors.white
-              : (isDark ? AppColors.textGrey : AppColors.textGrey);
-
-          return GestureDetector(
-            onTap: () => setState(() => _selectedCategory = catName),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: EdgeInsets.only(right: 10.w),
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-              decoration: BoxDecoration(
-                color: bg,
-                borderRadius: BorderRadius.circular(18.r),
-                border: Border.all(
-                  color: isSelected
-                      ? Colors.transparent
-                      : (isDark ? AppColors.borderDark : AppColors.borderLight),
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  catName,
-                  style: TextStyle(
-                    color: textC,
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildScriptCard(BuildContext context, Script script) {
-    final wordCount = script.content.split(' ').length;
-    final readTime = (wordCount / 130).ceil();
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    // --- LOGIC FIXED HERE ---
-    String platformText = "GENERAL";
-    Color platformColor = Colors.grey;
-
-    // Check both title AND content for platform keywords
-    final combinedText = "${script.title} ${script.content}".toLowerCase();
-
-    if (combinedText.contains("youtube")) {
-      platformText = "YOUTUBE";
-      platformColor = const Color(0xFFFF0000); // YouTube Red
-    } else if (combinedText.contains("instagram") ||
-        combinedText.contains("insta")) {
-      platformText = "INSTAGRAM";
-      platformColor = const Color(0xFFE1306C); // Instagram Pink
-    } else if (combinedText.contains("tiktok")) {
-      platformText = "TIKTOK";
-      platformColor = Colors.black;
-      if (isDark) platformColor = const Color(0xFF00F2EA); // Cyan for dark mode
-    } else if (combinedText.contains("linkedin")) {
-      platformText = "LINKEDIN";
-      platformColor = const Color(0xFF0077B5); // LinkedIn Blue
-    }
-
-    return Container(
-      margin: EdgeInsets.only(bottom: 16.h),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.3 : 0.03),
-            blurRadius: 15.r,
-            offset: Offset(0, 5.h),
-          ),
-        ],
-      ),
-      child: InkWell(
-        onTap: () => _handleEditClick(context, script),
-        borderRadius: BorderRadius.circular(20.r),
-        child: Padding(
-          padding: EdgeInsets.all(16.r),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 24.h),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Center(
+                child: Container(
+                  width: 40.w,
+                  height: 4.h,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
+                ),
+              ),
+              SizedBox(height: 24.h),
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 40.w,
-                    height: 40.h,
+                    padding: EdgeInsets.all(8.r),
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white.withOpacity(0.05)
-                          : Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(12.r),
+                      color: Colors.amber.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      Icons.article_rounded,
-                      color: isDark ? Colors.white70 : Colors.black87,
-                      size: 20.sp,
+                      Icons.bolt_rounded,
+                      color: Colors.amber,
+                      size: 24.sp,
                     ),
                   ),
                   SizedBox(width: 12.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          script.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.manrope(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w700,
-                            color: isDark
-                                ? AppColors.textWhite
-                                : AppColors.textBlack,
-                          ),
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          "$readTime min read • $wordCount words",
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: AppColors.textGrey,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
+                  Text(
+                    "Quick Record",
+                    style: GoogleFonts.manrope(
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
-                  _buildMenuButton(context, script),
                 ],
               ),
               SizedBox(height: 16.h),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Platform Badge
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 8.w,
-                      vertical: 4.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: platformColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6.r),
-                    ),
-                    child: Text(
-                      platformText,
-                      style: TextStyle(
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.bold,
-                        color: platformColor,
-                      ),
-                    ),
-                  ),
-
-                  Material(
-                    color: AppColors.accent.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(30.r),
-                    child: InkWell(
-                      onTap: () => _handleVideoClick(context, script),
-                      borderRadius: BorderRadius.circular(30.r),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 14.w,
-                          vertical: 8.h,
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.videocam_rounded,
-                              size: 16.sp,
-                              color: AppColors.accent,
-                            ),
-                            SizedBox(width: 6.w),
-                            Text(
-                              "Record",
-                              style: TextStyle(
-                                color: AppColors.accent,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12.sp,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              Text(
+                "Enter script details below, or skip to open the camera without any text.",
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: AppColors.textGrey,
+                  height: 1.5,
+                ),
               ),
+              SizedBox(height: 24.h),
+              _buildFieldLabel("Script Title"),
+              SizedBox(height: 8.h),
+              TextField(
+                controller: titleController,
+                textCapitalization: TextCapitalization.sentences,
+                style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
+                decoration: _buildInputDecoration("e.g. YouTube Intro", isDark),
+              ),
+              SizedBox(height: 20.h),
+              _buildFieldLabel("Script Content"),
+              SizedBox(height: 8.h),
+              TextField(
+                controller: contentController,
+                maxLines: 5,
+                textCapitalization: TextCapitalization.sentences,
+                style: TextStyle(fontSize: 15.sp),
+                decoration: _buildInputDecoration(
+                  "Paste your script content here...",
+                  isDark,
+                ),
+              ),
+              SizedBox(height: 32.h),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    final titleInput = titleController.text.trim();
+                    final contentInput = contentController.text.trim();
+                    final tempScript = Script(
+                      createdAt: DateTime.now(),
+                      title: titleInput.isEmpty ? "Quick Record" : titleInput,
+                      content: contentInput.isEmpty ? " " : contentInput,
+                      category: 'General',
+                    );
+                    _handleVideoClick(ctx, tempScript);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    minimumSize: Size(double.infinity, 56.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16.r),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    "Start Recording",
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 12.h),
             ],
           ),
         ),
@@ -439,121 +279,487 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildMenuButton(BuildContext context, Script script) {
-    return SizedBox(
-      width: 24.w,
-      height: 24.h,
-      child: PopupMenuButton<String>(
-        padding: EdgeInsets.zero,
-        icon: Icon(Icons.more_vert, color: AppColors.textGrey, size: 20.sp),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.r),
-        ),
-        onSelected: (value) {
-          if (value == 'delete') _confirmDelete(context, script);
-          if (value == 'edit') _handleEditClick(context, script);
-        },
-        itemBuilder: (context) => [
-          PopupMenuItem(
-            value: 'edit',
-            child: Text("Edit", style: TextStyle(fontSize: 14.sp)),
-          ),
-          PopupMenuItem(
-            value: 'delete',
-            child: Text(
-              "Delete",
-              style: TextStyle(color: Colors.red, fontSize: 14.sp),
-            ),
-          ),
-        ],
+  Widget _buildFieldLabel(String label) {
+    return Text(
+      label,
+      style: TextStyle(
+        fontSize: 13.sp,
+        fontWeight: FontWeight.w700,
+        color: AppColors.textGrey,
+        letterSpacing: 0.5,
       ),
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(height: 50.h),
-          Icon(Icons.filter_list_off, size: 50.sp, color: Colors.grey.shade400),
-          SizedBox(height: 10.h),
-          Text(
-            "No scripts in '$_selectedCategory'",
-            style: TextStyle(
-              color: isDark ? Colors.white70 : Colors.grey.shade600,
-              fontSize: 14.sp,
-            ),
-          ),
-        ],
+  InputDecoration _buildInputDecoration(String hint, bool isDark) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: TextStyle(
+        fontSize: 14.sp,
+        color: Colors.grey,
+        fontWeight: FontWeight.normal,
       ),
+      filled: true,
+      fillColor: isDark ? AppColors.darkBg : Colors.grey.shade50,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14.r),
+        borderSide: BorderSide(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+          width: 1,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14.r),
+        borderSide: BorderSide(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+          width: 1,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14.r),
+        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+      ),
+      contentPadding: EdgeInsets.all(16.r),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final topPadding = MediaQuery.of(context).padding.top;
+    final premiumProvider = Provider.of<PremiumProvider>(context);
 
-    return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBg : AppColors.lightBg,
-
-      appBar: AdaptiveAppBar(
-        title: "ScriptFlow",
-        showBackButton: false,
-        actions: [_buildPremiumBadge(context)],
-      ),
-
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Padding(
-          padding: EdgeInsets.only(bottom: 120.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeroSection(context),
-
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
-                child: Text(
-                  "Recent Projects",
-                  style: GoogleFonts.manrope(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? AppColors.textWhite : AppColors.textBlack,
+    return RefreshIndicator(
+      onRefresh: () async {
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted) setState(() {});
+      },
+      color: AppColors.primary,
+      child: CustomScrollView(
+        controller: _scrollController,
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
+        ),
+        slivers: [
+          SliverAppBar(
+            pinned: true,
+            floating: false,
+            automaticallyImplyLeading: false,
+            backgroundColor: isDark ? AppColors.darkBg : AppColors.lightBg,
+            elevation: 0,
+            scrolledUnderElevation: 2,
+            toolbarHeight: 80.h + topPadding,
+            titleSpacing: 0,
+            title: Stack(
+              children: [
+                // Expanded header - fades out as we scroll
+                IgnorePointer(
+                  ignoring: _scrollProgress > 0.3,
+                  child: Opacity(
+                    opacity: (1.0 - _scrollProgress * 1.5).clamp(0.0, 1.0),
+                    child: Transform.translate(
+                      offset: Offset(0, -10 * _scrollProgress),
+                      child: Transform.scale(
+                        scale: (1.0 - _scrollProgress * 0.05).clamp(0.95, 1.0),
+                        alignment: Alignment.centerLeft,
+                        child: _buildExpandedHeader(isDark, topPadding),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-
-              _buildCategoryTabs(context),
-
-              Consumer<ScriptsProvider>(
-                builder: (context, provider, _) {
-                  final displayedScripts = provider.getScriptsByCategory(
-                    _selectedCategory,
-                  );
-
-                  if (displayedScripts.isEmpty) {
-                    return _buildEmptyState(context);
-                  }
-
-                  return Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20.w),
-                    child: Column(
-                      children: List.generate(displayedScripts.length, (index) {
-                        return FadeInUp(
-                          duration: const Duration(milliseconds: 300),
-                          child: _buildScriptCard(
-                            context,
-                            displayedScripts[index],
-                          ),
-                        );
-                      }),
+                // Collapsed header - fades in as we scroll
+                IgnorePointer(
+                  ignoring: _scrollProgress < 0.3,
+                  child: Opacity(
+                    opacity: (_scrollProgress * 1.5 - 0.5).clamp(0.0, 1.0),
+                    child: Transform.translate(
+                      offset: Offset(0, 10 * (1.0 - _scrollProgress)),
+                      child: Transform.scale(
+                        scale: (0.95 + _scrollProgress * 0.05).clamp(0.95, 1.0),
+                        alignment: Alignment.centerLeft,
+                        child: _buildCollapsedHeader(isDark, topPadding),
+                      ),
                     ),
-                  );
-                },
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // 2. Action Cards, Ads, Search, Tabs
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                // Action Cards
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 20.w,
+                    vertical: 10.h,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _buildActionCard(
+                          title: "New Script",
+                          subtitle: "Write from scratch",
+                          icon: Icons.text_snippet,
+                          gradient: [AppColors.primary, AppColors.primaryDark],
+                          onTap: widget.onGoToCreate,
+                        ),
+                      ),
+                      SizedBox(width: 16.w),
+                      Expanded(
+                        child: _buildActionCard(
+                          title: "Quick Record",
+                          subtitle: "Record on the fly",
+                          icon: Icons.videocam_rounded,
+                          gradient: [
+                            const Color(0xFF63F297),
+                            const Color.fromARGB(255, 54, 178, 100),
+                          ],
+                          onTap: () => _showQuickRecordBottomSheet(context),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Native Ad
+                if (!premiumProvider.isPremium)
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 4.h,
+                      horizontal: 20.w,
+                    ),
+                    child: CustomNativeAdWidget(
+                      key: ValueKey("HomeAd_$isDark"),
+                      factoryId: 'adFactoryHome',
+                      height: 84.h,
+                      isGlass: false,
+                    ),
+                  ),
+
+                // Search Bar
+                const ScriptSearchBar(),
+
+                // Projects Header
+                Padding(
+                  padding: EdgeInsets.fromLTRB(24.w, 8.h, 24.w, 10.h),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "My Scripts",
+                        style: GoogleFonts.manrope(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      Text(
+                        "Recent First",
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: AppColors.textGrey,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Category Tabs
+                CategoryTabs(
+                  categories: _categories,
+                  selectedCategory: _selectedCategory,
+                  onCategorySelected: (cat) {
+                    setState(() => _selectedCategory = cat);
+                    AnalyticsService().logCategorySelected(cat);
+                  },
+                ),
+                SizedBox(height: 12.h),
+              ],
+            ),
+          ),
+
+          // 3. Scripts List
+          Consumer<ScriptsProvider>(
+            builder: (context, provider, _) {
+              final displayedScripts = provider.getScriptsByCategory(
+                _selectedCategory,
+              );
+
+              if (displayedScripts.isEmpty) {
+                return SliverToBoxAdapter(
+                  child: EmptyScriptsState(selectedCategory: _selectedCategory),
+                );
+              }
+
+              return SliverPadding(
+                padding: EdgeInsets.fromLTRB(
+                  20.w,
+                  4.h,
+                  20.w,
+                  widget.bottomPadding + 20.h,
+                ),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    return FadeInUp(
+                      duration: Duration(
+                        milliseconds: 300 + (index * 50).clamp(0, 300),
+                      ),
+                      child: ScriptCard(
+                        script: displayedScripts[index],
+                        platformStyle: PlatformConfig.getPlatformStyle(
+                          displayedScripts[index].title,
+                          displayedScripts[index].content,
+                          isDark,
+                        ),
+                        onTap: () =>
+                            _handleEditClick(context, displayedScripts[index]),
+                        onRecord: () =>
+                            _handleVideoClick(context, displayedScripts[index]),
+                        onEdit: () =>
+                            _handleEditClick(context, displayedScripts[index]),
+                        onDelete: () => _confirmDelete(
+                          context,
+                          displayedScripts[index],
+                          isDark,
+                        ),
+                      ),
+                    );
+                  }, childCount: displayedScripts.length),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExpandedHeader(bool isDark, double topPadding) {
+    return Container(
+      key: const ValueKey('expanded'),
+      padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 10.h),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      _getGreeting(),
+                      style: GoogleFonts.manrope(
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.w800,
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Text(_getEmoji(), style: TextStyle(fontSize: 18.sp)),
+                  ],
+                ),
+                Text(
+                  "Ready to create something\namazing?",
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: isDark ? Colors.white70 : AppColors.textGrey,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const PremiumBadge(),
+          SizedBox(width: 8.w),
+          IconButton(
+            onPressed: () =>
+                AppDialogs.showAppInfo(context: context, isDark: isDark),
+            icon: Icon(
+              Icons.info_outline_rounded,
+              size: 22.sp,
+              color: isDark ? Colors.white : Colors.black,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCollapsedHeader(bool isDark, double topPadding) {
+    return Container(
+      key: const ValueKey('collapsed'),
+      padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 15.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Category Dropdown (compact)
+          Expanded(
+            flex: 2,
+            child: Container(
+              height: 44.h,
+              padding: EdgeInsets.symmetric(horizontal: 12.w),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? AppColors.primary.withValues(alpha: 0.15)
+                    : AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.3),
+                  width: 1,
+                ),
               ),
-            ],
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _selectedCategory,
+                  isExpanded: true,
+                  iconSize: 20.sp,
+                  icon: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: AppColors.primary,
+                  ),
+                  style: GoogleFonts.manrope(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
+                  dropdownColor: isDark ? AppColors.darkSurface : Colors.white,
+                  items: _categories.map((cat) {
+                    return DropdownMenuItem(value: cat, child: Text(cat));
+                  }).toList(),
+                  onChanged: (val) {
+                    if (val != null) {
+                      setState(() => _selectedCategory = val);
+                    }
+                  },
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 8.w),
+          // Quick Action: New Script
+          _buildQuickActionButton(
+            icon: Icons.add_rounded,
+            color: AppColors.primary,
+            onTap: widget.onGoToCreate,
+          ),
+          SizedBox(width: 8.w),
+          // Quick Action: Quick Record
+          _buildQuickActionButton(
+            icon: Icons.videocam_rounded,
+            color: const Color(0xFF63F297),
+            onTap: () => _showQuickRecordBottomSheet(context),
+          ),
+          SizedBox(width: 8.w),
+          // Premium Badge
+          const PremiumBadge(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActionButton({
+    required IconData icon,
+    required Color color,
+    VoidCallback? onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12.r),
+        child: Container(
+          width: 44.w,
+          height: 44.h,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+          ),
+          child: Icon(icon, color: color, size: 22.sp),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required List<Color> gradient,
+    VoidCallback? onTap,
+  }) {
+    return FadeInDown(
+      duration: const Duration(milliseconds: 600),
+      child: Container(
+        height: 120.h,
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(24.r)),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24.r),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: gradient,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      right: -10.w,
+                      bottom: -10.h,
+                      child: Icon(
+                        icon,
+                        size: 80.sp,
+                        color: Colors.white.withValues(alpha: 0.12),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(16.r),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(8.r),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.25),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(icon, color: Colors.white, size: 22.sp),
+                          ),
+                          const Spacer(),
+                          Text(
+                            title,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          Text(
+                            subtitle,
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.8),
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),

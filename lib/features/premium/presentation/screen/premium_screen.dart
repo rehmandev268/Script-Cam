@@ -8,6 +8,8 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/responsive_config.dart';
 import '../../../../widgets/common/glass_container.dart';
 import '../providers/premium_provider.dart';
+import '../widgets/feature_item.dart';
+import '../../../../core/services/analytics_service.dart';
 
 class PremiumScreen extends StatefulWidget {
   const PremiumScreen({super.key});
@@ -22,8 +24,15 @@ class _PremiumScreenState extends State<PremiumScreen> {
   Future<void> _handleRestore(PremiumProvider provider) async {
     setState(() => _isRestoring = true);
     await provider.restorePurchases();
-    await Future.delayed(const Duration(seconds: 1));
+
+    await Future.delayed(const Duration(seconds: 2));
     if (mounted) setState(() => _isRestoring = false);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService().logPremiumScreenViewed();
   }
 
   @override
@@ -36,45 +45,46 @@ class _PremiumScreenState extends State<PremiumScreen> {
       builder: (context, provider, child) {
         if (provider.isPremium) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) Navigator.pop(context);
+            if (mounted && Navigator.canPop(context)) {
+              Navigator.pop(context);
+            }
           });
         }
 
         return Scaffold(
           backgroundColor: bgColor,
-          body: Stack(
-            children: [
-              Positioned(
-                top: -100.h,
-                right: -50.w,
-                child: Container(
-                  width: 300.w,
-                  height: 300.h,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.primary.withOpacity(0.4),
+          body: SafeArea(
+            child: Stack(
+              children: [
+                Positioned(
+                  top: -100.h,
+                  right: -50.w,
+                  child: Container(
+                    width: 300.w,
+                    height: 300.h,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.primary.withValues(alpha: 0.4),
+                    ),
                   ),
                 ),
-              ),
-              Positioned(
-                bottom: -50.h,
-                left: -50.w,
-                child: Container(
-                  width: 250.w,
-                  height: 250.h,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: accentOrange.withOpacity(0.3),
+                Positioned(
+                  bottom: -50.h,
+                  left: -50.w,
+                  child: Container(
+                    width: 250.w,
+                    height: 250.h,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: accentOrange.withValues(alpha: 0.3),
+                    ),
                   ),
                 ),
-              ),
-              BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 80.0, sigmaY: 80.0),
-                child: Container(color: Colors.transparent),
-              ),
-
-              SafeArea(
-                child: Column(
+                BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 80.0, sigmaY: 80.0),
+                  child: Container(color: Colors.transparent),
+                ),
+                Column(
                   children: [
                     Align(
                       alignment: Alignment.topRight,
@@ -86,7 +96,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                             padding: EdgeInsets.all(8.r),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.1),
+                              color: Colors.white.withValues(alpha: 0.1),
                             ),
                             child: Icon(
                               Icons.close,
@@ -97,7 +107,6 @@ class _PremiumScreenState extends State<PremiumScreen> {
                         ),
                       ),
                     ),
-
                     Expanded(
                       child: Padding(
                         padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -112,14 +121,14 @@ class _PremiumScreenState extends State<PremiumScreen> {
                                   shape: BoxShape.circle,
                                   gradient: LinearGradient(
                                     colors: [
-                                      accentGold.withOpacity(0.2),
+                                      accentGold.withValues(alpha: 0.2),
                                       Colors.transparent,
                                     ],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   ),
                                   border: Border.all(
-                                    color: accentGold.withOpacity(0.3),
+                                    color: accentGold.withValues(alpha: 0.3),
                                     width: 1.w,
                                   ),
                                 ),
@@ -131,7 +140,6 @@ class _PremiumScreenState extends State<PremiumScreen> {
                               ),
                             ),
                             SizedBox(height: 30.h),
-
                             FadeInUp(
                               delay: const Duration(milliseconds: 200),
                               child: Text(
@@ -149,44 +157,36 @@ class _PremiumScreenState extends State<PremiumScreen> {
                             FadeInUp(
                               delay: const Duration(milliseconds: 300),
                               child: Text(
-                                "Join thousands of creators making professional videos with ScriptFlow.",
+                                "Join thousands of creators making professional videos with ScriptCam.",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 14.sp,
-                                  color: Colors.white.withOpacity(0.7),
+                                  color: Colors.white.withValues(alpha: 0.7),
                                   height: 1.5,
                                 ),
                               ),
                             ),
-
                             SizedBox(height: 40.h),
-
                             FadeInUp(
                               delay: const Duration(milliseconds: 400),
                               child: GlassContainer(
-                                color: Colors.white.withOpacity(0.08),
+                                color: Colors.white.withValues(alpha: 0.08),
                                 border: Border.all(
-                                  color: Colors.white.withOpacity(0.1),
+                                  color: Colors.white.withValues(alpha: 0.1),
                                 ),
                                 padding: EdgeInsets.all(24.r),
                                 child: Column(
                                   children: [
-                                    _buildFeatureItem(
-                                      "Remove All Ads",
-                                      Icons.block_flipped,
-                                      accentGold,
+                                    FeatureItem(
+                                      text: "Remove All Ads",
+                                      icon: Icons.block_flipped,
+                                      color: accentGold,
                                     ),
                                     SizedBox(height: 20.h),
-                                    _buildFeatureItem(
-                                      "Unlimited Scripts",
-                                      Icons.description_outlined,
-                                      accentGold,
-                                    ),
-                                    SizedBox(height: 20.h),
-                                    _buildFeatureItem(
-                                      "Access Premium Filters",
-                                      Icons.auto_fix_high,
-                                      accentGold,
+                                    FeatureItem(
+                                      text: "Unlimited Scripts",
+                                      icon: Icons.description_outlined,
+                                      color: accentGold,
                                     ),
                                   ],
                                 ),
@@ -196,13 +196,12 @@ class _PremiumScreenState extends State<PremiumScreen> {
                         ),
                       ),
                     ),
-
                     FadeInUp(
                       delay: const Duration(milliseconds: 600),
                       child: Container(
                         padding: EdgeInsets.all(24.r),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.5),
+                          color: Colors.black.withValues(alpha: 0.5),
                           borderRadius: BorderRadius.vertical(
                             top: Radius.circular(30.r),
                           ),
@@ -221,13 +220,6 @@ class _PremiumScreenState extends State<PremiumScreen> {
                                     colors: [accentGold, accentOrange],
                                   ),
                                   borderRadius: BorderRadius.circular(20.r),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: accentOrange.withOpacity(0.4),
-                                      blurRadius: 25.r,
-                                      offset: Offset(0, 8.h),
-                                    ),
-                                  ],
                                 ),
                                 child: provider.isPurchasing
                                     ? Center(
@@ -265,9 +257,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                                       ),
                               ),
                             ),
-
                             SizedBox(height: 20.h),
-
                             GestureDetector(
                               onTap: (provider.isPurchasing || _isRestoring)
                                   ? null
@@ -284,7 +274,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
                                   : Text(
                                       "Already purchased? Restore",
                                       style: TextStyle(
-                                        color: Colors.white.withOpacity(0.6),
+                                        color: Colors.white.withValues(
+                                          alpha: 0.6,
+                                        ),
                                         fontSize: 12.sp,
                                         fontWeight: FontWeight.w600,
                                         decoration: TextDecoration.underline,
@@ -298,37 +290,11 @@ class _PremiumScreenState extends State<PremiumScreen> {
                     ),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
-    );
-  }
-
-  Widget _buildFeatureItem(String text, IconData icon, Color color) {
-    return Row(
-      children: [
-        Container(
-          padding: EdgeInsets.all(8.r),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.2),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: color, size: 20.sp),
-        ),
-        SizedBox(width: 16.w),
-        Text(
-          text,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const Spacer(),
-        Icon(Icons.check_circle_rounded, color: color, size: 20.sp),
-      ],
     );
   }
 }

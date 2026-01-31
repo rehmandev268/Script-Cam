@@ -1,0 +1,116 @@
+import 'package:flutter/material.dart';
+import 'package:camerawesome/camerawesome_plugin.dart';
+import 'package:flutter_application_6/core/utils/responsive_config.dart';
+import 'glass_button.dart';
+import '../../../../core/services/analytics_service.dart';
+
+class TeleprompterTopBar extends StatelessWidget {
+  final CameraState state;
+  final bool isRecording;
+  final Duration recordingDuration;
+  final VoidCallback onBack;
+  final VoidCallback onShowSettings;
+  final String Function(Duration) formatDuration;
+
+  const TeleprompterTopBar({
+    super.key,
+    required this.state,
+    required this.isRecording,
+    required this.recordingDuration,
+    required this.onBack,
+    required this.onShowSettings,
+    required this.formatDuration,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          TeleprompterGlassButton(icon: Icons.arrow_back, onTap: onBack),
+          if (isRecording)
+            _DurationDisplay(
+              duration: recordingDuration,
+              formatDuration: formatDuration,
+            ),
+          Row(
+            children: [
+              if (!isRecording)
+                TeleprompterGlassButton(
+                  icon: Icons.settings,
+                  onTap: onShowSettings,
+                ),
+              SizedBox(width: 12.w),
+              _FlashToggle(state: state),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DurationDisplay extends StatelessWidget {
+  final Duration duration;
+  final String Function(Duration) formatDuration;
+
+  const _DurationDisplay({
+    required this.duration,
+    required this.formatDuration,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      decoration: BoxDecoration(
+        color: Colors.red.withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(20.r),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.fiber_manual_record, color: Colors.white, size: 12.sp),
+          SizedBox(width: 8.w),
+          Text(
+            formatDuration(duration),
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16.sp,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FlashToggle extends StatelessWidget {
+  final CameraState state;
+
+  const _FlashToggle({required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<FlashMode>(
+      stream: state.sensorConfig.flashMode$,
+      builder: (context, snapshot) {
+        final flashMode = snapshot.data ?? FlashMode.none;
+        final hasFlash = flashMode != FlashMode.none;
+        return TeleprompterGlassButton(
+          icon: hasFlash ? Icons.flash_on : Icons.flash_off,
+          isActive: hasFlash,
+          onTap: () {
+            final nextFlash = hasFlash ? FlashMode.none : FlashMode.always;
+            AnalyticsService().logFlashToggled(
+              enabled: nextFlash == FlashMode.always,
+            );
+            state.sensorConfig.setFlashMode(nextFlash);
+          },
+        );
+      },
+    );
+  }
+}

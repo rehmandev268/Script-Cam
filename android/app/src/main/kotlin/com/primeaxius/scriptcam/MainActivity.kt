@@ -1,4 +1,4 @@
-package com.example.flutter_application_6
+package com.primeaxius.scriptcam
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -15,11 +15,15 @@ class MainActivity: FlutterActivity() {
         // 2. Register Settings Factory
         GoogleMobileAdsPlugin.registerNativeAdFactory(
                 flutterEngine, "adFactorySettings", SettingsNativeAdFactory(context))
+
+        GoogleMobileAdsPlugin.registerNativeAdFactory(
+                flutterEngine, "adFactoryHome", HomeNativeAdFactory(context))
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
         super.cleanUpFlutterEngine(flutterEngine)
         GoogleMobileAdsPlugin.unregisterNativeAdFactory(flutterEngine, "adFactoryGallery")
         GoogleMobileAdsPlugin.unregisterNativeAdFactory(flutterEngine, "adFactorySettings")
+        GoogleMobileAdsPlugin.unregisterNativeAdFactory(flutterEngine, "adFactoryHome")
     }
 }

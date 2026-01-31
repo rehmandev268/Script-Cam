@@ -5,12 +5,16 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/utils/responsive_config.dart';
 import '../../../../core/utils/toast_service.dart';
-import '../../../../core/services/ad_manager.dart';
+import '../../../../core/services/ads_service/interstitial_ad_helper.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../widgets/common/adaptive_app_bar.dart';
 import '../../../premium/presentation/providers/premium_provider.dart';
 import '../../data/models/script_model.dart';
 import '../providers/scripts_provider.dart';
+import '../widgets/editor/platform_selector.dart';
+import '../widgets/editor/editor_stats_bar.dart';
+import '../../../../core/utils/platform_utils.dart';
+import '../../../../core/services/analytics_service.dart';
 
 class EditorScreen extends StatefulWidget {
   final Script? scriptToEdit;
@@ -27,29 +31,7 @@ class _EditorScreenState extends State<EditorScreen> {
   final _bodyCtrl = TextEditingController();
 
   String _selectedPlatform = "General";
-  final List<Map<String, dynamic>> _platforms = [
-    {"name": "General", "icon": Icons.article_rounded, "color": Colors.grey},
-    {
-      "name": "YouTube",
-      "icon": Icons.play_arrow_rounded,
-      "color": const Color(0xFFFF0000),
-    },
-    {
-      "name": "Instagram",
-      "icon": Icons.camera_alt_rounded,
-      "color": const Color(0xFFE1306C),
-    },
-    {
-      "name": "TikTok",
-      "icon": Icons.music_note_rounded,
-      "color": const Color(0xFF00F2EA),
-    },
-    {
-      "name": "LinkedIn",
-      "icon": Icons.work_rounded,
-      "color": const Color(0xFF0077B5),
-    },
-  ];
+  final List<Map<String, dynamic>> _platforms = PlatformConfig.platforms;
 
   int _wordCount = 0;
   String _estDuration = "0s";
@@ -62,6 +44,11 @@ class _EditorScreenState extends State<EditorScreen> {
       _bodyCtrl.text = widget.scriptToEdit!.content;
       _detectPlatformFromContent();
       _updateStats();
+      AnalyticsService().logScriptViewed(
+        scriptId: widget.scriptToEdit!.key?.toString() ?? 'unknown',
+        title: widget.scriptToEdit!.title,
+        category: widget.scriptToEdit!.category,
+      );
     }
     _bodyCtrl.addListener(_updateStats);
   }
@@ -73,7 +60,6 @@ class _EditorScreenState extends State<EditorScreen> {
       final name = p['name'] as String;
       if (name == "General") continue;
 
-      // Check if title/content contains the platform name or hashtag
       if (combined.contains(name.toLowerCase())) {
         setState(() {
           _selectedPlatform = name;
@@ -123,12 +109,11 @@ class _EditorScreenState extends State<EditorScreen> {
   }
 
   String _processContentForSave(String rawContent) {
-    // 1. Remove existing platform tags to avoid duplicates (e.g. #YouTube)
     String cleanContent = rawContent;
     for (var p in _platforms) {
       final name = p['name'] as String;
       if (name == "General") continue;
-      // Remove "\n\n#Platform" or just "#Platform"
+
       cleanContent = cleanContent.replaceAll(
         RegExp(r'\n\n#' + name, caseSensitive: false),
         '',
@@ -140,7 +125,6 @@ class _EditorScreenState extends State<EditorScreen> {
     }
     cleanContent = cleanContent.trim();
 
-    // 2. Append new tag if not General
     if (_selectedPlatform != "General") {
       return "$cleanContent\n\n#$_selectedPlatform";
     }
@@ -164,156 +148,30 @@ class _EditorScreenState extends State<EditorScreen> {
       listen: false,
     ).isPremium;
 
-    // Process content to include the platform tag so filters work
     final finalContent = _processContentForSave(_bodyCtrl.text);
 
-    AdHelper.showInterstitialAd(() {
-      if (widget.scriptToEdit != null) {
-        scriptsProvider.updateScript(
-          widget.scriptToEdit!,
-          _titleCtrl.text,
-          finalContent,
-        );
-        ToastService.show("Saved");
-      } else {
-        scriptsProvider.addScript(_titleCtrl.text, finalContent);
-        ToastService.show("Created!");
-        if (widget.onSaveSuccess != null) widget.onSaveSuccess!();
-      }
-      Navigator.pop(context);
-    }, premium);
-  }
-
-  Widget _buildPlatformSelector(bool isDark) {
-    return Container(
-      height: 50.h,
-      margin: EdgeInsets.symmetric(vertical: 10.h),
-      child: ListView.separated(
-        padding: EdgeInsets.symmetric(horizontal: 24.w),
-        scrollDirection: Axis.horizontal,
-        itemCount: _platforms.length,
-        separatorBuilder: (_, __) => SizedBox(width: 12.w),
-        itemBuilder: (context, index) {
-          final p = _platforms[index];
-          final isSelected = _selectedPlatform == p['name'];
-          final color = p['color'] as Color;
-
-          return GestureDetector(
-            onTap: () => setState(() => _selectedPlatform = p['name']),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? color.withOpacity(0.15)
-                    : (isDark ? AppColors.darkSurface : AppColors.lightBg),
-                borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(
-                  color: isSelected
-                      ? color
-                      : (isDark ? AppColors.borderDark : AppColors.borderLight),
-                  width: isSelected ? 1.5 : 1,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    p['icon'],
-                    size: 18.sp,
-                    color: isSelected
-                        ? color
-                        : (isDark ? Colors.grey : Colors.grey.shade600),
-                  ),
-                  if (isSelected) ...[
-                    SizedBox(width: 6.w),
-                    Text(
-                      p['name'],
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.bold,
-                        color: color,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
+    InterstitialAdHelper.show(
+      isPremium: premium,
+      onComplete: () {
+        if (widget.scriptToEdit != null) {
+          scriptsProvider.updateScript(
+            widget.scriptToEdit!,
+            _titleCtrl.text.trim(),
+            finalContent,
+            _selectedPlatform,
           );
-        },
-      ),
-    );
-  }
-
-  Widget _buildStatsBar(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final pillColor = isDark ? AppColors.darkSurface : Colors.white;
-    final textColor = isDark ? AppColors.textWhite70 : AppColors.textGrey;
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-      color: isDark ? AppColors.darkBg : AppColors.lightBg,
-      child: Row(
-        children: [
-          _buildPill(Icons.text_fields, "$_wordCount w", pillColor, textColor),
-          SizedBox(width: 10.w),
-          _buildPill(Icons.timer_outlined, _estDuration, pillColor, textColor),
-          const Spacer(),
-          InkWell(
-            onTap: _pasteFromClipboard,
-            borderRadius: BorderRadius.circular(8.r),
-            child: Padding(
-              padding: EdgeInsets.all(8.0.r),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.paste_rounded,
-                    size: 16.sp,
-                    color: AppColors.primary,
-                  ),
-                  SizedBox(width: 4.w),
-                  Text(
-                    "Paste",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12.sp,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPill(IconData icon, String text, Color bg, Color textC) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(
-          color: bg == Colors.white
-              ? AppColors.borderLight
-              : Colors.transparent,
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 14.sp, color: textC),
-          SizedBox(width: 6.w),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.bold,
-              color: textC,
-            ),
-          ),
-        ],
-      ),
+          ToastService.show("Saved");
+        } else {
+          scriptsProvider.addScript(
+            _titleCtrl.text.trim(),
+            finalContent,
+            _selectedPlatform,
+          );
+          ToastService.show("Created!");
+          if (widget.onSaveSuccess != null) widget.onSaveSuccess!();
+        }
+        Navigator.pop(context);
+      },
     );
   }
 
@@ -323,7 +181,7 @@ class _EditorScreenState extends State<EditorScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBg : AppColors.lightBg,
+      backgroundColor: isDark ? AppColors.darkBg : Colors.white,
 
       appBar: AdaptiveAppBar(
         title: isEditing ? "Edit Script" : "New Script",
@@ -361,18 +219,23 @@ class _EditorScreenState extends State<EditorScreen> {
                       style: GoogleFonts.manrope(
                         fontSize: 24.sp,
                         fontWeight: FontWeight.w800,
-                        color: isDark
-                            ? AppColors.textWhite
-                            : AppColors.textBlack,
                       ),
+
                       decoration: InputDecoration(
+                        filled: false,
                         hintText: "Script Title...",
                         hintStyle: TextStyle(
-                          color: isDark ? Colors.white24 : Colors.grey.shade300,
+                          color: AppColors.textGrey.withOpacity(0.3),
                           fontWeight: FontWeight.w800,
                           fontSize: 24.sp,
                         ),
+
                         border: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        disabledBorder: InputBorder.none,
+                        errorBorder: InputBorder.none,
+                        focusedErrorBorder: InputBorder.none,
                         contentPadding: EdgeInsets.zero,
                       ),
                     ),
@@ -389,16 +252,26 @@ class _EditorScreenState extends State<EditorScreen> {
                       style: TextStyle(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white38 : Colors.grey,
+                        color: AppColors.textGrey,
                         letterSpacing: 1.0,
                       ),
                     ),
                   ),
-                  _buildPlatformSelector(isDark),
+                  PlatformSelector(
+                    platforms: _platforms,
+                    selectedPlatform: _selectedPlatform,
+                    onPlatformSelected: (platform) =>
+                        setState(() => _selectedPlatform = platform),
+                    isDark: isDark,
+                  ),
 
-                  Divider(height: 30.h),
+                  SizedBox(height: 10.h),
 
-                  _buildStatsBar(context),
+                  EditorStatsBar(
+                    wordCount: _wordCount,
+                    estDuration: _estDuration,
+                    onPaste: _pasteFromClipboard,
+                  ),
 
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -407,20 +280,20 @@ class _EditorScreenState extends State<EditorScreen> {
                       maxLines: null,
                       keyboardType: TextInputType.multiline,
                       textCapitalization: TextCapitalization.sentences,
-                      style: TextStyle(
-                        fontSize: 17.sp,
-                        height: 1.6,
-                        color: isDark
-                            ? AppColors.textWhite70
-                            : AppColors.textBlack,
-                      ),
+                      style: TextStyle(fontSize: 17.sp, height: 1.6),
                       decoration: InputDecoration(
+                        filled: false,
                         hintText: "Start writing your script here...",
                         hintStyle: TextStyle(
-                          color: isDark ? Colors.white24 : Colors.grey.shade400,
+                          color: AppColors.textGrey.withOpacity(0.4),
                           fontSize: 17.sp,
                         ),
                         border: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        disabledBorder: InputBorder.none,
+                        errorBorder: InputBorder.none,
+                        focusedErrorBorder: InputBorder.none,
                       ),
                     ),
                   ),
