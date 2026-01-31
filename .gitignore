@@ -50,3 +50,7 @@ app.*.map.json
 # Keystore files (if you want to keep your release key out of Git!)
 android/app/*.jks
 key.properties
+
+# Firebase configuration files
+android/app/google-services.json
+lib/firebase_options.dart
