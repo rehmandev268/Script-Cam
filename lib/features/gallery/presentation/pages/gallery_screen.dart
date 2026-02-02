@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_application_6/core/utils/responsive_config.dart';
 import 'package:flutter_application_6/core/utils/toast_service.dart';
@@ -35,23 +36,28 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   void _confirmDelete(BuildContext context, VideoRecord video) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
+    final galleryProvider = context.read<GalleryProvider>();
     final confirm = await AppDialogs.showConfirmDelete(
       context: context,
-      title: "Delete Video?",
-      content: "This action cannot be undone.",
+      title: l10n.deleteVideoTitle,
+      content: l10n.deleteScriptMessage,
       isDark: isDark,
     );
 
     if (confirm && mounted) {
-      context.read<GalleryProvider>().deleteVideo(video);
-      ToastService.show("Video deleted", isError: true);
+      galleryProvider.deleteVideo(video);
+      ToastService.show(l10n.videoDeleted, isError: true);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const AdaptiveAppBar(title: "Gallery", showBackButton: false),
+      appBar: AdaptiveAppBar(
+        title: AppLocalizations.of(context).gallery,
+        showBackButton: false,
+      ),
       body: Consumer<GalleryProvider>(
         builder: (context, provider, _) {
           if (provider.videos.isEmpty) {

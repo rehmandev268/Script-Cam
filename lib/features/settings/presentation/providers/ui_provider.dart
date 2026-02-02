@@ -18,7 +18,11 @@ class UIProvider extends ChangeNotifier {
   bool _mirrorTextEnabled = false;
   bool get mirrorTextEnabled => _mirrorTextEnabled;
 
+  bool _languageSelected = false;
+  bool get languageSelected => _languageSelected;
+
   UIProvider(this._settingsBox) {
+    _checkLanguageSelection();
     _checkOnboarding();
     _checkShowcase();
     _loadVoiceSyncSetting();
@@ -84,6 +88,20 @@ class UIProvider extends ChangeNotifier {
   void completeShowcase() {
     _settingsBox.put('showcase_seen', true);
     _showcaseSeen = true;
+    notifyListeners();
+  }
+
+  void _checkLanguageSelection() {
+    _languageSelected = _settingsBox.get(
+      'language_selected',
+      defaultValue: false,
+    );
+    notifyListeners();
+  }
+
+  void completeLanguageSelection() {
+    _settingsBox.put('language_selected', true);
+    _languageSelected = true;
     notifyListeners();
   }
 }

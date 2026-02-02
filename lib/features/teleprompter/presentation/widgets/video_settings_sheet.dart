@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:camerawesome/pigeon.dart';
 import 'package:flutter_application_6/core/utils/responsive_config.dart';
@@ -33,7 +34,7 @@ class VideoSettingsSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Video Quality",
+            AppLocalizations.of(context).videoSettings,
             style: TextStyle(
               color: Colors.white,
               fontSize: 20.sp,
@@ -42,7 +43,7 @@ class VideoSettingsSheet extends StatelessWidget {
           ),
           SizedBox(height: 24.h),
           Text(
-            "Resolution",
+            AppLocalizations.of(context).resolution,
             style: TextStyle(color: Colors.white70, fontSize: 14.sp),
           ),
           SizedBox(height: 12.h),
@@ -91,7 +92,7 @@ class VideoSettingsSheet extends StatelessWidget {
           ),
           SizedBox(height: 24.h),
           Text(
-            "Target FPS",
+            AppLocalizations.of(context).targetFps,
             style: TextStyle(color: Colors.white70, fontSize: 14.sp),
           ),
           SizedBox(height: 12.h),

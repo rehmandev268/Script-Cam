@@ -12,7 +12,7 @@ class PremiumProvider extends ChangeNotifier {
   final InAppPurchase _iap = InAppPurchase.instance;
   late StreamSubscription<List<PurchaseDetails>> _subscription;
 
-  bool _isPremium = true;
+  bool _isPremium = false;
   bool _isPurchasing = false;
   List<ProductDetails> _products = [];
 

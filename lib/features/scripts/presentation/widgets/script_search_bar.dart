@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/responsive_config.dart';
@@ -41,7 +42,7 @@ class _ScriptSearchBarState extends State<ScriptSearchBar> {
           onChanged: (v) => context.read<ScriptsProvider>().setSearchQuery(v),
           style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w500),
           decoration: InputDecoration(
-            hintText: "Search your scripts...",
+            hintText: AppLocalizations.of(context).searchScripts,
             hintStyle: TextStyle(
               color: AppColors.textGrey.withValues(alpha: 0.6),
               fontSize: 15.sp,

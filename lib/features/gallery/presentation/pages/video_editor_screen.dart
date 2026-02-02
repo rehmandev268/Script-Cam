@@ -45,7 +45,7 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
   double _startTrim = 0.0;
   double _endTrim = 1.0;
   Duration _videoDuration = Duration.zero;
-  List<String> _thumbnails = [];
+  final List<String> _thumbnails = [];
   bool _generatingThumbnails = true;
 
   int _rotation = 0;
@@ -73,10 +73,10 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
     _showOverlay.dispose();
     _overlayTimer?.cancel();
     _progressNotifier.dispose();
-    if (_isLoaded) {
+    try {
       _controller.removeListener(_onVideoTick);
       _controller.dispose();
-    }
+    } catch (_) {}
     super.dispose();
   }
 
@@ -251,7 +251,6 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
       // editor = editor.compress(resolution: quality);
 
       // Export video
-      debugPrint('Starting export...');
       final resultPath = await editor.export(
         onProgress: (p) {
           // Ensure monotonic progress (only increase, never decrease)
@@ -259,12 +258,6 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
             _lastProgress = p;
             if (mounted) {
               _progressNotifier.value = p;
-              if (p == 0.0 ||
-                  p == 0.5 ||
-                  p == 1.0 ||
-                  (p * 100).toInt() % 10 == 0) {
-                debugPrint('Export progress: ${(p * 100).toInt()}%');
-              }
             }
           }
         },
@@ -306,7 +299,7 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
       }
 
       if (fileSize < 1024) {
-        debugPrint('WARNING: File size is very small (${fileSize} bytes)');
+        debugPrint('WARNING: File size is very small ($fileSize bytes)');
       }
 
       // Save to gallery

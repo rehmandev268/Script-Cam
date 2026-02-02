@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import '../../../../core/utils/responsive_config.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../features/scripts/data/models/script_model.dart';
@@ -151,8 +152,11 @@ class _PrompterTextList extends StatelessWidget {
               builder: (context, ui, _) {
                 return Transform(
                   alignment: Alignment.center,
-                  transform: Matrix4.identity()
-                    ..scale(ui.mirrorTextEnabled ? -1.0 : 1.0, 1.0),
+                  transform: Matrix4.diagonal3Values(
+                    ui.mirrorTextEnabled ? -1.0 : 1.0,
+                    1.0,
+                    1.0,
+                  ),
                   child: RotatedBox(
                     quarterTurns: orientation,
                     child: ShaderMask(
@@ -221,6 +225,8 @@ class _PrompterSettingsOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Positioned.fill(
       bottom: 64.h,
       child: ClipRRect(
@@ -234,15 +240,21 @@ class _PrompterSettingsOverlay extends StatelessWidget {
               children: [
                 _SettingRow(
                   icon: Icons.text_fields_rounded,
-                  label: "TEXT SIZE",
+                  label: l10n.fontSize,
                   notifier: fontSize,
                   min: 16,
                   max: 50,
+                  onChangeEnd: (v) {
+                    AnalyticsService().logTeleprompterSettingsChanged(
+                      fontSize: v,
+                      scrollSpeed: 0,
+                    );
+                  },
                 ),
                 SizedBox(height: 20.h),
                 _SettingRow(
                   icon: Icons.opacity_rounded,
-                  label: "OPACITY",
+                  label: l10n.opacity,
                   notifier: prompterOpacity,
                   min: 0.1,
                   max: 0.9,
@@ -251,10 +263,16 @@ class _PrompterSettingsOverlay extends StatelessWidget {
                 SizedBox(height: 20.h),
                 _SettingRow(
                   icon: Icons.speed_rounded,
-                  label: "SPEED",
+                  label: l10n.speed,
                   notifier: scrollSpeed,
                   min: 10,
                   max: 150,
+                  onChangeEnd: (v) {
+                    AnalyticsService().logTeleprompterSettingsChanged(
+                      fontSize: 0,
+                      scrollSpeed: v,
+                    );
+                  },
                 ),
                 SizedBox(height: 24.h),
                 Container(
@@ -279,7 +297,7 @@ class _PrompterSettingsOverlay extends StatelessWidget {
                             ),
                             SizedBox(width: 12.w),
                             Text(
-                              "Voice Sync",
+                              l10n.voiceSync,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 14.sp,
@@ -308,7 +326,7 @@ class _PrompterSettingsOverlay extends StatelessWidget {
                             ),
                             SizedBox(width: 12.w),
                             Text(
-                              "Mirror Text",
+                              l10n.mirror,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 14.sp,
@@ -347,6 +365,7 @@ class _SettingRow extends StatelessWidget {
   final double min;
   final double max;
   final bool isPercentage;
+  final ValueChanged<double>? onChangeEnd;
 
   const _SettingRow({
     required this.icon,
@@ -355,6 +374,7 @@ class _SettingRow extends StatelessWidget {
     required this.min,
     required this.max,
     this.isPercentage = false,
+    this.onChangeEnd,
   });
 
   @override
@@ -404,19 +424,7 @@ class _SettingRow extends StatelessWidget {
               min: min,
               max: max,
               onChanged: (v) => notifier.value = v,
-              onChangeEnd: (v) {
-                if (label == "TEXT SIZE") {
-                  AnalyticsService().logTeleprompterSettingsChanged(
-                    fontSize: v,
-                    scrollSpeed: 0,
-                  );
-                } else if (label == "SPEED") {
-                  AnalyticsService().logTeleprompterSettingsChanged(
-                    fontSize: 0,
-                    scrollSpeed: v,
-                  );
-                }
-              },
+              onChangeEnd: onChangeEnd,
             ),
           ),
         ],

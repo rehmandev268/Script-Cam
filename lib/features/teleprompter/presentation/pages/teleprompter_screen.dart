@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:camerawesome/pigeon.dart';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
@@ -273,8 +275,8 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
   }
 
   void _onTick(Duration elapsed) {
-    final isManualScrolling =
-        _isPlayingScript && !context.read<UIProvider>().voiceSyncEnabled;
+    if (!mounted) return;
+    final isManualScrolling = _isPlayingScript && !_uiProvider.voiceSyncEnabled;
     if (!isManualScrolling && !_isRecording) {
       _lastElapsed = Duration.zero;
       return;
@@ -295,7 +297,7 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
           _scriptScrollController.position.maxScrollExtent) {
         setState(() => _isPlayingScript = false);
         _stopScrolling();
-      } else if (!context.read<UIProvider>().voiceSyncEnabled) {
+      } else if (!_uiProvider.voiceSyncEnabled) {
         _scriptScrollController.jumpTo(
           _scriptScrollController.offset + (_scrollSpeed.value * delta),
         );
@@ -304,8 +306,7 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
   }
 
   void _startScrolling() {
-    final uiProvider = context.read<UIProvider>();
-    if (uiProvider.voiceSyncEnabled) {
+    if (_uiProvider.voiceSyncEnabled) {
       _voiceSync.startListening(_onVoiceResult);
     } else {
       if (!(_ticker?.isActive ?? false)) _ticker?.start();
@@ -360,6 +361,15 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
   Future<CaptureRequest> _pathBuilder(List<Sensor> sensors) async {
     final appDir = await getApplicationDocumentsDirectory();
     final fileName = 'video_${DateTime.now().millisecondsSinceEpoch}.mp4';
+
+    if (sensors.isEmpty) {
+      // Fallback if no sensors detected
+      return SingleCaptureRequest(
+        '${appDir.path}/$fileName',
+        Sensor.position(SensorPosition.front),
+      );
+    }
+
     return SingleCaptureRequest('${appDir.path}/$fileName', sensors.first);
   }
 
@@ -388,6 +398,7 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
 
     _uiProvider.removeListener(_handleUIChanges);
     _voiceSync.removeListener(_handleVoiceChanges);
+    _voiceSync.stopListening();
     _ticker?.dispose();
     _scriptScrollController.dispose();
     _prompterOpacity.dispose();
@@ -576,9 +587,7 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
                   AnalyticsService().logRecordingStarted(
                     scriptId: widget.script.key?.toString() ?? 'unknown',
                     scriptTitle: widget.script.title,
-                    isVoiceSyncEnabled: context
-                        .read<UIProvider>()
-                        .voiceSyncEnabled,
+                    isVoiceSyncEnabled: _uiProvider.voiceSyncEnabled,
                   );
                 }
                 break;
@@ -594,9 +603,9 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
                   scriptId: widget.script.key?.toString() ?? 'unknown',
                   durationSeconds: _recordingDuration.value.inSeconds,
                 );
-                if (path != null) {
+                if (path != null && mounted) {
                   context.read<GalleryProvider>().addVideo(path);
-                  ToastService.show("Video Saved Successfully");
+                  ToastService.show(AppLocalizations.of(context).saved);
                 }
                 break;
               case MediaCaptureStatus.failure:
@@ -605,7 +614,12 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
                   _isPaused = false;
                 });
                 _stopScrolling();
-                ToastService.show("Recording Failed", isError: true);
+                if (mounted) {
+                  ToastService.show(
+                    AppLocalizations.of(context).recordingFailed,
+                    isError: true,
+                  );
+                }
                 break;
             }
           },

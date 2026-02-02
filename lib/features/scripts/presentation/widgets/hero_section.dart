@@ -1,5 +1,6 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/responsive_config.dart';
@@ -11,6 +12,7 @@ class HeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return FadeInDown(
       duration: const Duration(milliseconds: 600),
       child: Container(
@@ -67,7 +69,7 @@ class HeroSection extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Create New Script",
+                                l10n.createNewScript,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16.sp,
@@ -76,7 +78,7 @@ class HeroSection extends StatelessWidget {
                               ),
                               SizedBox(height: 2.h),
                               Text(
-                                "Select platform & start writing",
+                                l10n.selectPlatformDesc,
                                 style: TextStyle(
                                   color: Colors.white70,
                                   fontSize: 12.sp,

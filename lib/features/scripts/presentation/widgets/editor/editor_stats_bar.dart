@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 
 import '../../../../../core/constants/app_constants.dart';
 import '../../../../../core/utils/responsive_config.dart';
@@ -52,7 +53,7 @@ class EditorStatsBar extends StatelessWidget {
                   Icon(Icons.paste_rounded, size: 16.sp, color: actionColor),
                   SizedBox(width: 4.w),
                   Text(
-                    "Paste",
+                    AppLocalizations.of(context).paste,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 12.sp,

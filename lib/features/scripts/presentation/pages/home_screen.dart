@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_6/main.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'dart:math';
 import 'package:provider/provider.dart';
 import 'package:animate_do/animate_do.dart';
@@ -83,13 +83,13 @@ class _HomeScreenState extends State<HomeScreen> {
   void _confirmDelete(BuildContext context, Script script, bool isDark) async {
     bool confirm = await AppDialogs.showConfirmDelete(
       context: context,
-      title: "Delete Script?",
-      content: "This action cannot be undone.",
+      title: AppLocalizations.of(context).deleteScriptTitle,
+      content: AppLocalizations.of(context).deleteScriptMessage,
       isDark: isDark,
     );
     if (confirm && context.mounted) {
       Provider.of<ScriptsProvider>(context, listen: false).deleteScript(script);
-      ToastService.show("Script deleted");
+      ToastService.show(AppLocalizations.of(context).scriptDeleted);
     }
   }
 
@@ -110,20 +110,19 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
+    if (!context.mounted) return;
     final premium = Provider.of<PremiumProvider>(
       context,
       listen: false,
     ).isPremium;
-    InterstitialAdHelper.show(
-      isPremium: premium,
-      onComplete: () {
-        print("Pushing to TeleprompterScreen: $script");
-        Navigator.push(
-          navigatorKey.currentContext!,
-          MaterialPageRoute(builder: (_) => TeleprompterScreen(script: script)),
-        );
-      },
+    // Navigate immediately
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => TeleprompterScreen(script: script)),
     );
+
+    // Show ad independently
+    InterstitialAdHelper.show(isPremium: premium, onComplete: () {});
   }
 
   void _handleEditClick(BuildContext context, Script script) {
@@ -133,11 +132,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  String _getGreeting() {
+  String _getGreeting(AppLocalizations l10n) {
     final hour = DateTime.now().hour;
-    if (hour >= 5 && hour < 12) return "Good Morning";
-    if (hour >= 12 && hour < 17) return "Good Afternoon";
-    return "Good Evening";
+    if (hour >= 5 && hour < 12) return l10n.goodMorning;
+    if (hour >= 12 && hour < 17) return l10n.goodAfternoon;
+    return l10n.goodEvening;
   }
 
   String _getEmoji() {
@@ -151,6 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final TextEditingController titleController = TextEditingController();
     final TextEditingController contentController = TextEditingController();
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
 
     AnalyticsService().logQuickRecordStarted();
 
@@ -197,7 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   SizedBox(width: 12.w),
                   Text(
-                    "Quick Record",
+                    l10n.quickRecord,
                     style: GoogleFonts.manrope(
                       fontSize: 20.sp,
                       fontWeight: FontWeight.w800,
@@ -207,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               SizedBox(height: 16.h),
               Text(
-                "Enter script details below, or skip to open the camera without any text.",
+                l10n.quickRecordDialogDesc,
                 style: TextStyle(
                   fontSize: 14.sp,
                   color: AppColors.textGrey,
@@ -215,16 +215,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               SizedBox(height: 24.h),
-              _buildFieldLabel("Script Title"),
+              _buildFieldLabel(l10n.scriptTitle),
               SizedBox(height: 8.h),
               TextField(
                 controller: titleController,
                 textCapitalization: TextCapitalization.sentences,
                 style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
-                decoration: _buildInputDecoration("e.g. YouTube Intro", isDark),
+                decoration: _buildInputDecoration(l10n.scriptTitleHint, isDark),
               ),
               SizedBox(height: 20.h),
-              _buildFieldLabel("Script Content"),
+              _buildFieldLabel(l10n.scriptContent),
               SizedBox(height: 8.h),
               TextField(
                 controller: contentController,
@@ -232,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 textCapitalization: TextCapitalization.sentences,
                 style: TextStyle(fontSize: 15.sp),
                 decoration: _buildInputDecoration(
-                  "Paste your script content here...",
+                  l10n.scriptContentHint,
                   isDark,
                 ),
               ),
@@ -246,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     final contentInput = contentController.text.trim();
                     final tempScript = Script(
                       createdAt: DateTime.now(),
-                      title: titleInput.isEmpty ? "Quick Record" : titleInput,
+                      title: titleInput.isEmpty ? l10n.quickRecord : titleInput,
                       content: contentInput.isEmpty ? " " : contentInput,
                       category: 'General',
                     );
@@ -262,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     elevation: 0,
                   ),
                   child: Text(
-                    "Start Recording",
+                    l10n.startRecording,
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
@@ -328,6 +328,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final topPadding = MediaQuery.of(context).padding.top;
     final premiumProvider = Provider.of<PremiumProvider>(context);
+    final l10n = AppLocalizations.of(context);
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -362,7 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Transform.scale(
                         scale: (1.0 - _scrollProgress * 0.05).clamp(0.95, 1.0),
                         alignment: Alignment.centerLeft,
-                        child: _buildExpandedHeader(isDark, topPadding),
+                        child: _buildExpandedHeader(isDark, topPadding, l10n),
                       ),
                     ),
                   ),
@@ -377,7 +378,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Transform.scale(
                         scale: (0.95 + _scrollProgress * 0.05).clamp(0.95, 1.0),
                         alignment: Alignment.centerLeft,
-                        child: _buildCollapsedHeader(isDark, topPadding),
+                        child: _buildCollapsedHeader(isDark, topPadding, l10n),
                       ),
                     ),
                   ),
@@ -400,8 +401,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Expanded(
                         child: _buildActionCard(
-                          title: "New Script",
-                          subtitle: "Write from scratch",
+                          title: l10n.newScript,
+                          subtitle: l10n.writeFromScratch,
                           icon: Icons.text_snippet,
                           gradient: [AppColors.primary, AppColors.primaryDark],
                           onTap: widget.onGoToCreate,
@@ -410,8 +411,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       SizedBox(width: 16.w),
                       Expanded(
                         child: _buildActionCard(
-                          title: "Quick Record",
-                          subtitle: "Record on the fly",
+                          title: l10n.quickRecord,
+                          subtitle: l10n.recordOnTheFly,
                           icon: Icons.videocam_rounded,
                           gradient: [
                             const Color(0xFF63F297),
@@ -449,14 +450,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "My Scripts",
+                        l10n.myScripts,
                         style: GoogleFonts.manrope(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
                       Text(
-                        "Recent First",
+                        l10n.recentFirst,
                         style: TextStyle(
                           fontSize: 12.sp,
                           color: AppColors.textGrey,
@@ -537,7 +538,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildExpandedHeader(bool isDark, double topPadding) {
+  Widget _buildExpandedHeader(
+    bool isDark,
+    double topPadding,
+    AppLocalizations l10n,
+  ) {
     return Container(
       key: const ValueKey('expanded'),
       padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 10.h),
@@ -551,7 +556,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   children: [
                     Text(
-                      _getGreeting(),
+                      _getGreeting(l10n),
                       style: GoogleFonts.manrope(
                         fontSize: 24.sp,
                         fontWeight: FontWeight.w800,
@@ -563,7 +568,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
                 Text(
-                  "Ready to create something\namazing?",
+                  l10n.readyToCreate,
                   style: TextStyle(
                     fontSize: 14.sp,
                     color: isDark ? Colors.white70 : AppColors.textGrey,
@@ -589,7 +594,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCollapsedHeader(bool isDark, double topPadding) {
+  Widget _buildCollapsedHeader(
+    bool isDark,
+    double topPadding,
+    AppLocalizations l10n,
+  ) {
     return Container(
       key: const ValueKey('collapsed'),
       padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 15.h),
@@ -628,7 +637,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   dropdownColor: isDark ? AppColors.darkSurface : Colors.white,
                   items: _categories.map((cat) {
-                    return DropdownMenuItem(value: cat, child: Text(cat));
+                    return DropdownMenuItem(
+                      value: cat,
+                      child: Text(cat == 'All' ? l10n.all : cat),
+                    );
                   }).toList(),
                   onChanged: (val) {
                     if (val != null) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:flutter_application_6/core/utils/responsive_config.dart';
 import 'package:flutter_application_6/core/constants/app_constants.dart';
 
@@ -9,6 +10,7 @@ class ExportProgressOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return PopScope(
       canPop: false,
       child: AlertDialog(
@@ -22,7 +24,7 @@ class ExportProgressOverlay extends StatelessWidget {
             const CircularProgressIndicator(color: AppColors.primary),
             SizedBox(height: 20.h),
             Text(
-              "Processing...",
+              l10n.processing,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 16.sp,
@@ -32,7 +34,7 @@ class ExportProgressOverlay extends StatelessWidget {
             SizedBox(height: 10.h),
             ValueListenableBuilder<double>(
               valueListenable: progressNotifier,
-              builder: (_, val, __) => Text(
+              builder: (context, val, _) => Text(
                 "${(val * 100).toInt()}%",
                 style: TextStyle(color: Colors.grey, fontSize: 14.sp),
               ),

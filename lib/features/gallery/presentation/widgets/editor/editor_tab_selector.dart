@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:flutter_application_6/core/utils/responsive_config.dart';
 import 'package:flutter_application_6/core/constants/app_constants.dart';
 import '../../pages/video_editor_screen.dart';
@@ -15,6 +16,7 @@ class EditorTabSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       decoration: const BoxDecoration(
         color: Colors.black,
@@ -26,21 +28,21 @@ class EditorTabSelector extends StatelessWidget {
         children: [
           _TabItem(
             icon: Icons.cut_outlined,
-            label: "Trim",
+            label: l10n.trim,
             tab: EditorTab.trim,
             isActive: activeTab == EditorTab.trim,
             onTap: () => onTabChanged(EditorTab.trim),
           ),
           _TabItem(
             icon: Icons.aspect_ratio,
-            label: "Ratio",
+            label: l10n.ratio,
             tab: EditorTab.ratio,
             isActive: activeTab == EditorTab.ratio,
             onTap: () => onTabChanged(EditorTab.ratio),
           ),
           _TabItem(
             icon: Icons.tune,
-            label: "Adjust",
+            label: l10n.adjust,
             tab: EditorTab.adjust,
             isActive: activeTab == EditorTab.adjust,
             onTap: () => onTabChanged(EditorTab.adjust),

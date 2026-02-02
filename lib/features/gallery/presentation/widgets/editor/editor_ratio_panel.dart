@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:flutter_application_6/core/utils/responsive_config.dart';
 import 'package:flutter_application_6/core/constants/app_constants.dart';
 import 'package:easy_video_editor/easy_video_editor.dart';
@@ -19,11 +20,12 @@ class EditorRatioPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Transform",
+          l10n.transform,
           style: TextStyle(color: Colors.white54, fontSize: 12.sp),
         ),
         SizedBox(height: 10.h),
@@ -34,14 +36,18 @@ class EditorRatioPanel extends StatelessWidget {
             children: [
               _ActionButton(
                 icon: Icons.rotate_right,
-                label: "Rotate",
+                label: l10n.rotate,
                 onTap: onRotate,
               ),
               SizedBox(width: 12.w),
-              _ActionButton(icon: Icons.flip, label: "Mirror", onTap: onMirror),
+              _ActionButton(
+                icon: Icons.flip,
+                label: l10n.mirror,
+                onTap: onMirror,
+              ),
               SizedBox(width: 20.w),
               _RatioButton(
-                label: "Original",
+                label: l10n.original,
                 ratioVal: null,
                 ratioEnum: null,
                 icon: Icons.crop_original,

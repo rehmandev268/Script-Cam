@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -79,11 +80,12 @@ class _EditorScreenState extends State<EditorScreen> {
   void _updateStats() {
     final text = _bodyCtrl.text.trim();
     if (text.isEmpty) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _wordCount = 0;
           _estDuration = "0s";
         });
+      }
       return;
     }
     final count = text.split(RegExp(r'\s+')).length;
@@ -92,11 +94,12 @@ class _EditorScreenState extends State<EditorScreen> {
         ? "${seconds}s"
         : "${(seconds / 60).floor()}m ${seconds % 60}s";
 
-    if (mounted)
+    if (mounted) {
       setState(() {
         _wordCount = count;
         _estDuration = durationStr;
       });
+    }
   }
 
   Future<void> _pasteFromClipboard() async {
@@ -104,7 +107,8 @@ class _EditorScreenState extends State<EditorScreen> {
     if (data?.text != null) {
       _bodyCtrl.text += data!.text!;
       _updateStats();
-      ToastService.show("Text pasted");
+      if (!mounted) return;
+      ToastService.show(AppLocalizations.of(context).textPasted);
     }
   }
 
@@ -134,7 +138,7 @@ class _EditorScreenState extends State<EditorScreen> {
 
   void _save(BuildContext context) async {
     if (_titleCtrl.text.isEmpty) {
-      ToastService.show("Title required");
+      ToastService.show(AppLocalizations.of(context).titleRequired);
       return;
     }
     FocusManager.instance.primaryFocus?.unfocus();
@@ -150,47 +154,47 @@ class _EditorScreenState extends State<EditorScreen> {
 
     final finalContent = _processContentForSave(_bodyCtrl.text);
 
-    InterstitialAdHelper.show(
-      isPremium: premium,
-      onComplete: () {
-        if (widget.scriptToEdit != null) {
-          scriptsProvider.updateScript(
-            widget.scriptToEdit!,
-            _titleCtrl.text.trim(),
-            finalContent,
-            _selectedPlatform,
-          );
-          ToastService.show("Saved");
-        } else {
-          scriptsProvider.addScript(
-            _titleCtrl.text.trim(),
-            finalContent,
-            _selectedPlatform,
-          );
-          ToastService.show("Created!");
-          if (widget.onSaveSuccess != null) widget.onSaveSuccess!();
-        }
-        Navigator.pop(context);
-      },
-    );
+    // Execute task immediately
+    if (widget.scriptToEdit != null) {
+      scriptsProvider.updateScript(
+        widget.scriptToEdit!,
+        _titleCtrl.text.trim(),
+        finalContent,
+        _selectedPlatform,
+      );
+      ToastService.show(AppLocalizations.of(context).saved);
+    } else {
+      scriptsProvider.addScript(
+        _titleCtrl.text.trim(),
+        finalContent,
+        _selectedPlatform,
+      );
+      ToastService.show(AppLocalizations.of(context).created);
+      if (widget.onSaveSuccess != null) widget.onSaveSuccess!();
+    }
+    Navigator.pop(context);
+
+    // Show ad independently
+    InterstitialAdHelper.show(isPremium: premium, onComplete: () {});
   }
 
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.scriptToEdit != null;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBg : Colors.white,
 
       appBar: AdaptiveAppBar(
-        title: isEditing ? "Edit Script" : "New Script",
+        title: isEditing ? l10n.editScript : l10n.newScript,
         showBackButton: true,
         actions: [
           TextButton(
             onPressed: () => _save(context),
             child: Text(
-              "SAVE",
+              l10n.save,
               style: TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.bold,
@@ -223,9 +227,9 @@ class _EditorScreenState extends State<EditorScreen> {
 
                       decoration: InputDecoration(
                         filled: false,
-                        hintText: "Script Title...",
+                        hintText: l10n.scriptTitlePlaceholder,
                         hintStyle: TextStyle(
-                          color: AppColors.textGrey.withOpacity(0.3),
+                          color: AppColors.textGrey.withValues(alpha: 0.3),
                           fontWeight: FontWeight.w800,
                           fontSize: 24.sp,
                         ),
@@ -248,7 +252,7 @@ class _EditorScreenState extends State<EditorScreen> {
                       bottom: 5.h,
                     ),
                     child: Text(
-                      "PLATFORM",
+                      l10n.platform,
                       style: TextStyle(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.bold,
@@ -283,9 +287,9 @@ class _EditorScreenState extends State<EditorScreen> {
                       style: TextStyle(fontSize: 17.sp, height: 1.6),
                       decoration: InputDecoration(
                         filled: false,
-                        hintText: "Start writing your script here...",
+                        hintText: l10n.scriptContentPlaceholder,
                         hintStyle: TextStyle(
-                          color: AppColors.textGrey.withOpacity(0.4),
+                          color: AppColors.textGrey.withValues(alpha: 0.4),
                           fontSize: 17.sp,
                         ),
                         border: InputBorder.none,

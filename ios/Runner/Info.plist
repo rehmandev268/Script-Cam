@@ -29,9 +29,15 @@
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Your own description</string>
+	<string>Script Cam needs camera access to record your videos while reading scripts.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>To enable microphone access when recording video</string>
+	<string>Script Cam needs microphone access to record your voice and enable voice-synced scrolling.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Script Cam uses speech recognition to automatically scroll your script as you speak.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Script Cam needs access to your gallery to save your recorded and edited videos.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Script Cam needs permission to save your videos to the photo library.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>To enable GPS location access for Exif data</string>
 	<key>UISupportedInterfaceOrientations</key>

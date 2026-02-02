@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/responsive_config.dart';
@@ -11,6 +12,7 @@ class PremiumBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isPremium = Provider.of<PremiumProvider>(context).isPremium;
     if (isPremium) return const SizedBox.shrink();
 
@@ -34,7 +36,7 @@ class PremiumBadge extends StatelessWidget {
               Icon(Icons.star_rounded, size: 14.sp, color: Colors.white),
               SizedBox(width: 4.w),
               Text(
-                "PRO",
+                l10n.pro,
                 style: TextStyle(
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w900,

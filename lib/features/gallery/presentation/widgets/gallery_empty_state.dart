@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:flutter_application_6/core/utils/responsive_config.dart';
 import 'package:flutter_application_6/core/constants/app_constants.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -42,7 +43,7 @@ class EmptyGalleryState extends StatelessWidget {
               ),
               SizedBox(height: 25.h),
               Text(
-                "Gallery Empty",
+                AppLocalizations.of(context).emptyGallery,
                 style: GoogleFonts.manrope(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
@@ -50,7 +51,7 @@ class EmptyGalleryState extends StatelessWidget {
               ),
               SizedBox(height: 10.h),
               Text(
-                "Your recordings will appear here.",
+                AppLocalizations.of(context).emptyGalleryDesc,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: AppColors.textGrey,
@@ -63,7 +64,7 @@ class EmptyGalleryState extends StatelessWidget {
                 onPressed: onGoToStudio,
                 icon: Icon(Icons.add_rounded, size: 18.sp),
                 label: Text(
-                  "Create Recording",
+                  AppLocalizations.of(context).startRecording,
                   style: TextStyle(fontSize: 14.sp),
                 ),
                 style: ElevatedButton.styleFrom(

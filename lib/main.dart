@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'generated/l10n/app_localizations.dart';
 import 'core/services/ads_service/interstitial_ad_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'firebase_options.dart';
+import 'dart:ui';
 
 import 'core/constants/app_constants.dart';
 import 'core/services/ads_service/ad_state.dart';
@@ -14,6 +18,7 @@ import 'core/services/ads_service/app_open_ad_manager.dart';
 import 'core/services/gdpr_service.dart';
 import 'core/utils/responsive_config.dart';
 import 'core/theme/theme_provider.dart';
+import 'core/providers/locale_provider.dart';
 
 import 'features/scripts/data/models/script_model.dart';
 import 'features/gallery/data/models/video_model.dart';
@@ -22,6 +27,7 @@ import 'features/gallery/presentation/providers/gallery_provider.dart';
 import 'features/premium/presentation/providers/premium_provider.dart';
 import 'features/settings/presentation/providers/ui_provider.dart';
 import 'features/onboarding/presentation/pages/onboarding_screen.dart';
+import 'features/onboarding/presentation/pages/language_selection_screen.dart';
 import 'features/navigation/presentation/pages/root_navigation_screen.dart';
 import 'widgets/common/app_lifecycle_reactor.dart';
 import 'core/services/voice_sync_service.dart';
@@ -34,20 +40,52 @@ void main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  // Pass all uncaught "fatal" errors from the framework to Crashlytics
+  FlutterError.onError = (errorDetails) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+  };
+
+  // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+
   await Future.wait([Hive.initFlutter(), MobileAds.instance.initialize()]);
 
   Hive.registerAdapter(ScriptAdapter());
   Hive.registerAdapter(VideoAdapter());
 
-  final boxes = await Future.wait([
-    Hive.openBox<Script>(HiveKeys.scriptsBox),
-    Hive.openBox<VideoRecord>(HiveKeys.videosBox),
-    Hive.openBox(HiveKeys.settingsBox),
-  ]);
+  late Box<Script> scriptBox;
+  late Box<VideoRecord> videoBox;
+  late Box settingsBox;
 
-  final scriptBox = boxes[0] as Box<Script>;
-  final videoBox = boxes[1] as Box<VideoRecord>;
-  final settingsBox = boxes[2];
+  try {
+    final boxes = await Future.wait([
+      Hive.openBox<Script>(HiveKeys.scriptsBox),
+      Hive.openBox<VideoRecord>(HiveKeys.videosBox),
+      Hive.openBox(HiveKeys.settingsBox),
+    ]);
+    scriptBox = boxes[0] as Box<Script>;
+    videoBox = boxes[1] as Box<VideoRecord>;
+    settingsBox = boxes[2];
+  } catch (e) {
+    debugPrint("Hive initialization failed: $e");
+    // If opening boxes fails (e.g. corruption), try to recover by deleting and re-opening
+    // This is a last-resort to prevent the app from being stuck on a white screen
+    await Hive.deleteBoxFromDisk(HiveKeys.scriptsBox);
+    await Hive.deleteBoxFromDisk(HiveKeys.videosBox);
+    await Hive.deleteBoxFromDisk(HiveKeys.settingsBox);
+
+    final boxes = await Future.wait([
+      Hive.openBox<Script>(HiveKeys.scriptsBox),
+      Hive.openBox<VideoRecord>(HiveKeys.videosBox),
+      Hive.openBox(HiveKeys.settingsBox),
+    ]);
+    scriptBox = boxes[0] as Box<Script>;
+    videoBox = boxes[1] as Box<VideoRecord>;
+    settingsBox = boxes[2];
+  }
 
   binding.addPostFrameCallback((_) async {
     await MobileAds.instance.updateRequestConfiguration(
@@ -85,6 +123,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => LocaleProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider(settingsBox)),
         ChangeNotifierProvider(create: (_) => ScriptsProvider(scriptBox)),
         ChangeNotifierProvider(create: (_) => GalleryProvider(videoBox)),
@@ -102,13 +141,45 @@ class CinePromptApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, _) {
+    return Consumer2<ThemeProvider, LocaleProvider>(
+      builder: (context, themeProvider, localeProvider, _) {
         return MaterialApp(
           navigatorKey: navigatorKey,
           navigatorObservers: [AnalyticsService().observer],
           title: 'ScriptCam',
           debugShowCheckedModeBanner: false,
+
+          locale: localeProvider.locale,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en'),
+            Locale('es'),
+            Locale('fr'),
+            Locale('de'),
+            Locale('pt'),
+            Locale('zh'),
+            Locale('ja'),
+            Locale('ko'),
+            Locale('ar'),
+            Locale('hi'),
+          ],
+          localeResolutionCallback: (locale, supportedLocales) {
+            if (locale == null) {
+              return supportedLocales.first;
+            }
+            for (var supportedLocale in supportedLocales) {
+              if (supportedLocale.languageCode == locale.languageCode) {
+                return supportedLocale;
+              }
+            }
+            return supportedLocales.first;
+          },
+
           themeMode: themeProvider.themeMode,
           theme: ThemeData.light().copyWith(
             scaffoldBackgroundColor: AppColors.lightBg,
@@ -162,7 +233,7 @@ class CinePromptApp extends StatelessWidget {
             ),
             inputDecorationTheme: InputDecorationTheme(
               filled: true,
-              fillColor: AppColors.borderLight.withOpacity(0.3),
+              fillColor: AppColors.borderLight.withValues(alpha: 0.3),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16.r),
                 borderSide: BorderSide.none,
@@ -263,10 +334,15 @@ class CinePromptApp extends StatelessWidget {
 
           home: Consumer<UIProvider>(
             builder: (context, uiProvider, _) {
-              // Only redirect to onboarding for first-time users
+              // First-time users: show language selection
+              if (!uiProvider.languageSelected) {
+                return const LanguageSelectionScreen();
+              }
+              // Then show onboarding if not completed
               if (uiProvider.showOnboarding) {
                 return const OnboardingScreen();
               }
+              // Finally show main app
               return const RootNavigationScreen();
             },
           ),

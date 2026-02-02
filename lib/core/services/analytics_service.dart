@@ -31,6 +31,7 @@ class AnalyticsService {
         'script_id': scriptId,
         'title': title,
         'category': category,
+        // ignore: use_null_aware_elements
         if (wordCount != null) 'word_count': wordCount,
       },
     );
@@ -48,6 +49,7 @@ class AnalyticsService {
         'script_id': scriptId,
         'title': title,
         'category': category,
+        // ignore: use_null_aware_elements
         if (wordCount != null) 'word_count': wordCount,
       },
     );
@@ -339,6 +341,7 @@ class AnalyticsService {
       parameters: {
         'error_type': errorType,
         'error_message': errorMessage,
+        // ignore: use_null_aware_elements
         if (stackTrace != null) 'stack_trace': stackTrace,
       },
     );

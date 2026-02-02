@@ -1,5 +1,6 @@
 import '../widgets/settings/settings_tile.dart';
 import '../widgets/settings/settings_group.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -9,15 +10,18 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/responsive_config.dart';
+
 import '../../../../core/theme/theme_provider.dart';
+import '../../../../core/services/analytics_service.dart';
+import '../../../../core/providers/locale_provider.dart';
 import '../../../../widgets/ads/custom_native_ad_widget.dart';
 import '../../../../widgets/common/adaptive_app_bar.dart';
 import '../../../premium/presentation/providers/premium_provider.dart';
 import '../../../premium/presentation/screen/premium_screen.dart';
+import 'language_settings_screen.dart';
 import 'how_to_use_screen.dart';
 import '../widgets/settings/theme_option.dart';
 import '../widgets/settings/section_header.dart';
-import '../../../../core/services/analytics_service.dart';
 
 import '../widgets/settings/settings_divider.dart';
 
@@ -42,21 +46,21 @@ class SettingsScreen extends StatelessWidget {
     _launchUrl(emailLaunchUri.toString());
   }
 
-  void _shareApp() {
+  void _shareApp(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     const String packageName = 'com.primeaxius.scriptcam';
     const String playStoreUrl =
         'https://play.google.com/store/apps/details?id=$packageName';
 
-    const String message =
-        'Record professional videos with confidence using ScriptCam! 🎥✨\n\n'
-        'It features a built-in Teleprompter, 4K recording, and Video Editor. '
-        'Try it out here:\n$playStoreUrl';
+    final String message = l10n.shareAppMessage(playStoreUrl);
 
     AnalyticsService().logShareApp(shareMethod: 'system_share');
-    Share.share(message, subject: 'Check out ScriptCam: Video Teleprompter');
+    // ignore: deprecated_member_use
+    Share.share(message, subject: l10n.shareAppSubject);
   }
 
   void _showThemePicker(BuildContext context, ThemeProvider provider) {
+    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     showModalBottomSheet(
@@ -83,7 +87,7 @@ class SettingsScreen extends StatelessWidget {
               ),
               SizedBox(height: 20.h),
               Text(
-                "Appearance",
+                l10n.appearance,
                 style: GoogleFonts.manrope(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w700,
@@ -93,19 +97,19 @@ class SettingsScreen extends StatelessWidget {
               SizedBox(height: 15.h),
               ThemeOption(
                 provider: provider,
-                title: "System Default",
+                title: l10n.systemDefault,
                 icon: Icons.smartphone,
                 mode: ThemeMode.system,
               ),
               ThemeOption(
                 provider: provider,
-                title: "Light Mode",
+                title: l10n.lightMode,
                 icon: Icons.light_mode,
                 mode: ThemeMode.light,
               ),
               ThemeOption(
                 provider: provider,
-                title: "Dark Mode",
+                title: l10n.darkMode,
                 icon: Icons.dark_mode,
                 mode: ThemeMode.dark,
               ),
@@ -123,13 +127,15 @@ class SettingsScreen extends StatelessWidget {
     final premiumProvider = Provider.of<PremiumProvider>(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    String themeText = "System";
-    if (themeProvider.themeMode == ThemeMode.light) themeText = "Light";
-    if (themeProvider.themeMode == ThemeMode.dark) themeText = "Dark";
+    final l10n = AppLocalizations.of(context);
+
+    String themeText = l10n.system;
+    if (themeProvider.themeMode == ThemeMode.light) themeText = l10n.light;
+    if (themeProvider.themeMode == ThemeMode.dark) themeText = l10n.dark;
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBg : AppColors.lightBg,
-      appBar: const AdaptiveAppBar(title: "Settings", showBackButton: false),
+      appBar: AdaptiveAppBar(title: l10n.settings, showBackButton: false),
       body: Column(
         children: [
           Expanded(
@@ -181,7 +187,7 @@ class SettingsScreen extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "Upgrade to Pro",
+                                      l10n.upgradeToPro,
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -190,7 +196,7 @@ class SettingsScreen extends StatelessWidget {
                                     ),
                                     SizedBox(height: 2.h),
                                     Text(
-                                      "Unlock all features & remove ads",
+                                      l10n.unlockAllFeatures,
                                       style: TextStyle(
                                         color: Colors.white70,
                                         fontSize: 12.sp,
@@ -228,7 +234,7 @@ class SettingsScreen extends StatelessWidget {
                     SizedBox(height: 24.h),
                   ],
 
-                  SectionHeader(title: "Preferences"),
+                  SectionHeader(title: l10n.preferences),
                   SettingsGroup(
                     isDark: isDark,
                     children: [
@@ -236,23 +242,46 @@ class SettingsScreen extends StatelessWidget {
                         icon: isDark
                             ? Icons.dark_mode_outlined
                             : Icons.light_mode_outlined,
-                        title: "Appearance",
+                        title: l10n.appearance,
                         value: themeText,
                         color: Colors.purpleAccent,
                         onTap: () => _showThemePicker(context, themeProvider),
                         isDark: isDark,
                       ),
+                      Consumer<LocaleProvider>(
+                        builder: (context, localeProvider, _) {
+                          final languageName = LocaleProvider.getLanguageName(
+                            localeProvider.locale.languageCode,
+                          );
+                          return SettingsTile(
+                            icon: Icons.language_outlined,
+                            title: l10n.language,
+                            value: languageName,
+                            color: Colors.blueAccent,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      const LanguageSettingsScreen(),
+                                ),
+                              );
+                            },
+                            isDark: isDark,
+                          );
+                        },
+                      ),
                     ],
                   ),
                   SizedBox(height: 24.h),
 
-                  SectionHeader(title: "Help"),
+                  SectionHeader(title: l10n.help),
                   SettingsGroup(
                     isDark: isDark,
                     children: [
                       SettingsTile(
                         icon: Icons.help_outline_rounded,
-                        title: "How to Use",
+                        title: l10n.howToUse,
                         color: Colors.orangeAccent,
                         onTap: () => Navigator.push(
                           context,
@@ -266,21 +295,21 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 24.h),
 
-                  SectionHeader(title: "Support"),
+                  SectionHeader(title: l10n.support),
                   SettingsGroup(
                     isDark: isDark,
                     children: [
                       SettingsTile(
                         icon: Icons.share_outlined,
-                        title: "Share App",
+                        title: l10n.shareApp,
                         color: Colors.blueAccent,
-                        onTap: _shareApp,
+                        onTap: () => _shareApp(context),
                         isDark: isDark,
                       ),
                       SettingsDivider(isDark: isDark),
                       SettingsTile(
                         icon: Icons.mail_outline,
-                        title: "Contact Us",
+                        title: l10n.contactUs,
                         color: Colors.tealAccent,
                         onTap: _contactSupport,
                         isDark: isDark,
@@ -288,7 +317,7 @@ class SettingsScreen extends StatelessWidget {
                       SettingsDivider(isDark: isDark),
                       SettingsTile(
                         icon: Icons.star_outline_rounded,
-                        title: "Rate Us",
+                        title: l10n.rateUs,
                         color: Colors.amber,
                         onTap: () {
                           AnalyticsService().logAppRated(
@@ -304,13 +333,13 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 24.h),
 
-                  SectionHeader(title: "About"),
+                  SectionHeader(title: l10n.about),
                   SettingsGroup(
                     isDark: isDark,
                     children: [
                       SettingsTile(
                         icon: Icons.lock_outline_rounded,
-                        title: "Privacy Policy",
+                        title: l10n.privacyPolicy,
                         color: Colors.greenAccent,
                         onTap: () {
                           AnalyticsService().logPrivacyPolicyViewed();
@@ -321,8 +350,8 @@ class SettingsScreen extends StatelessWidget {
                       SettingsDivider(isDark: isDark),
                       SettingsTile(
                         icon: Icons.info_outline_rounded,
-                        title: "Version",
-                        value: "1.0.2",
+                        title: l10n.version,
+                        value: "1.0.3",
                         color: Colors.grey,
                         onTap: null,
                         isDark: isDark,

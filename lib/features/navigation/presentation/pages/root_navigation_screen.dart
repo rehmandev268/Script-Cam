@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'dart:ui';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/responsive_config.dart';
@@ -47,6 +47,7 @@ class _RootNavigationScreenState extends State<RootNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final premiumProvider = Provider.of<PremiumProvider>(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bool showAd = !premiumProvider.isPremium;
@@ -75,7 +76,7 @@ class _RootNavigationScreenState extends State<RootNavigationScreen> {
           color: isDark ? AppColors.darkSurface : Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
               blurRadius: 20,
               offset: const Offset(0, -8),
               spreadRadius: 0,
@@ -129,21 +130,21 @@ class _RootNavigationScreenState extends State<RootNavigationScreen> {
                 children: [
                   NavItem(
                     icon: Icons.dashboard_rounded,
-                    label: "Studio",
+                    label: l10n.studio,
                     index: 0,
                     currentIndex: _index,
                     onTap: _switchTab,
                   ),
                   NavItem(
                     icon: Icons.video_library_rounded,
-                    label: "Gallery",
+                    label: l10n.gallery,
                     index: 1,
                     currentIndex: _index,
                     onTap: _switchTab,
                   ),
                   NavItem(
                     icon: Icons.settings_rounded,
-                    label: "Settings",
+                    label: l10n.settings,
                     index: 2,
                     currentIndex: _index,
                     onTap: _switchTab,
@@ -160,8 +161,8 @@ class _RootNavigationScreenState extends State<RootNavigationScreen> {
                   border: Border(
                     top: BorderSide(
                       color: isDark
-                          ? Colors.white.withOpacity(0.05)
-                          : Colors.black.withOpacity(0.05),
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : Colors.black.withValues(alpha: 0.05),
                       width: 0.5,
                     ),
                   ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:flutter_application_6/core/services/ads_service/interstitial_ad_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:animate_do/animate_do.dart';
@@ -36,39 +37,40 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  final List<Map<String, dynamic>> _pages = [
-    {
-      "title": "Welcome to ScriptCam",
-      "desc":
-          "Your all-in-one Teleprompter studio. Write scripts, record videos, and edit seamlessly.",
-      "icon": Icons.movie_creation_outlined,
-    },
-    {
-      "title": "Script Editor",
-      "desc":
-          "Write and manage your video scripts with ease. Organize your ideas instantly.",
-      "icon": Icons.edit_note_outlined,
-    },
-    {
-      "title": "Teleprompter",
-      "desc":
-          "Read your script while looking directly at the camera. Professional recording made easy.",
-      "icon": Icons.videocam_outlined,
-    },
-    {
-      "title": "Enable Permissions",
-      "desc":
-          "To record videos and sync your voice with the script, we need access to your camera and microphone.",
-      "icon": Icons.security_outlined,
-      "isPermission": true,
-    },
-  ];
+  List<Map<String, dynamic>> _getPages(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return [
+      {
+        "title": l10n.onboardingWelcomeTitle,
+        "desc": l10n.onboardingWelcomeDesc,
+        "icon": Icons.movie_creation_outlined,
+      },
+      {
+        "title": l10n.onboardingScriptEditorTitle,
+        "desc": l10n.onboardingScriptEditorDesc,
+        "icon": Icons.edit_note_outlined,
+      },
+      {
+        "title": l10n.onboardingTeleprompterTitle,
+        "desc": l10n.onboardingTeleprompterDesc,
+        "icon": Icons.videocam_outlined,
+      },
+      {
+        "title": l10n.onboardingPermissionsTitle,
+        "desc": l10n.onboardingPermissionsDesc,
+        "icon": Icons.security_outlined,
+        "isPermission": true,
+      },
+    ];
+  }
 
   Future<void> _requestPermissions() async {
     Map<Permission, PermissionStatus> statuses = await [
       Permission.camera,
       Permission.microphone,
       Permission.speech,
+      Permission.videos,
+      Permission.storage,
     ].request();
 
     AnalyticsService().logPermissionRequested(
@@ -85,7 +87,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       AnalyticsService().logPermissionDenied(
         permissionType: 'onboarding_camera_mic',
       );
-      ToastService.show("Camera and Microphone permissions are required.");
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
+      ToastService.show(l10n.permissionsRequired);
       if (statuses[Permission.camera]!.isPermanentlyDenied ||
           statuses[Permission.microphone]!.isPermanentlyDenied) {
         openAppSettings();
@@ -99,17 +103,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       context,
       listen: false,
     );
+    // Complete onboarding immediately
+    uiProvider.completeOnboarding();
+
+    // Show ad independently
     InterstitialAdHelper.show(
       isPremium: premiumProvider.isPremium,
-      onComplete: () {
-        uiProvider.completeOnboarding();
-      },
+      onComplete: () {},
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBg : AppColors.lightBg,
@@ -122,10 +129,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
             child: PageView.builder(
               controller: _controller,
-              itemCount: _pages.length,
+              itemCount: _getPages(context).length,
               onPageChanged: (idx) => setState(() => _currentPage = idx),
               itemBuilder: (context, index) {
-                final isPermission = _pages[index]['isPermission'] ?? false;
+                final isPermission =
+                    _getPages(context)[index]['isPermission'] ?? false;
 
                 return Padding(
                   padding: EdgeInsets.symmetric(horizontal: 32.w),
@@ -140,7 +148,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
-                            _pages[index]['icon'],
+                            _getPages(context)[index]['icon'],
                             size: 100.sp,
                             color: AppColors.primary,
                           ),
@@ -149,7 +157,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       SizedBox(height: 40.h),
                       FadeInUp(
                         child: Text(
-                          _pages[index]['title'],
+                          _getPages(context)[index]['title'],
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 28.sp,
@@ -161,7 +169,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       FadeInUp(
                         delay: const Duration(milliseconds: 200),
                         child: Text(
-                          _pages[index]['desc'],
+                          _getPages(context)[index]['desc'],
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 16.sp,
@@ -174,12 +182,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         SizedBox(height: 40.h),
                         FadeInUp(
                           delay: const Duration(milliseconds: 400),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: _requestPermissions,
-                              icon: const Icon(Icons.check_circle_outline),
-                              label: const Text("Grant Access"),
+                          child: ElevatedButton.icon(
+                            onPressed: _requestPermissions,
+                            icon: const Icon(Icons.check_circle_outline),
+                            label: Text(l10n.grantAccess),
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 32.w,
+                                vertical: 16.h,
+                              ),
                             ),
                           ),
                         ),
@@ -199,11 +210,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    if (_currentPage == _pages.length - 1) {
+                    if (_currentPage == _getPages(context).length - 1) {
                       _requestPermissions();
                     } else {
                       _controller.nextPage(
-                        duration: const Duration(milliseconds: 400),
+                        duration: const Duration(milliseconds: 300),
                         curve: Curves.easeInOut,
                       );
                     }
@@ -216,7 +227,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ),
                   ),
                   child: Text(
-                    _currentPage == _pages.length - 1 ? "Start" : "Next",
+                    _currentPage == _getPages(context).length - 1
+                        ? l10n.start
+                        : l10n.next,
                   ),
                 ),
               ],
@@ -231,7 +244,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
-                    _pages.length,
+                    _getPages(context).length,
                     (index) => AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       margin: EdgeInsets.symmetric(horizontal: 4.w),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../../core/utils/responsive_config.dart';
@@ -26,7 +27,7 @@ class PlatformSelector extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 24.w),
         scrollDirection: Axis.horizontal,
         itemCount: platforms.length,
-        separatorBuilder: (_, __) => SizedBox(width: 12.w),
+        separatorBuilder: (context, index) => SizedBox(width: 12.w),
         itemBuilder: (context, index) {
           final p = platforms[index];
           final isSelected = selectedPlatform == p['name'];
@@ -101,7 +102,9 @@ class PlatformSelector extends StatelessWidget {
                   FaIcon(p['icon'], size: 14.sp, color: iconColor),
                   SizedBox(width: 8.w),
                   Text(
-                    p['name'],
+                    p['name'] == 'General'
+                        ? AppLocalizations.of(context).general
+                        : p['name'],
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.bold,

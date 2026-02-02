@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:flutter_application_6/core/utils/responsive_config.dart';
 import 'package:flutter_application_6/core/constants/app_constants.dart';
 
@@ -18,6 +19,7 @@ class EditorAdjustmentPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Row(
       children: [
         Expanded(
@@ -29,7 +31,7 @@ class EditorAdjustmentPanel extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Speed",
+                    l10n.speed,
                     style: TextStyle(color: Colors.white54, fontSize: 12.sp),
                   ),
                   Text(
@@ -59,7 +61,7 @@ class EditorAdjustmentPanel extends StatelessWidget {
 
         _AdjustToggle(
           icon: removeAudio ? Icons.volume_off : Icons.volume_up,
-          label: "Mute",
+          label: l10n.mute,
           isActive: removeAudio,
           activeColor: Colors.red,
           onTap: onToggleAudio,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/responsive_config.dart';
@@ -22,6 +23,7 @@ class CategoryTabs extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final scriptsProvider = context.watch<ScriptsProvider>();
+    final l10n = AppLocalizations.of(context);
 
     return SizedBox(
       height: 48.h,
@@ -61,7 +63,7 @@ class CategoryTabs extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    catName,
+                    catName == 'All' ? l10n.all : catName,
                     style: TextStyle(
                       color: isSelected ? Colors.white : AppColors.textGrey,
                       fontSize: 13.sp,

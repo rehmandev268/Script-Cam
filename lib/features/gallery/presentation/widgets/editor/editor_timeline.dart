@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:flutter_application_6/core/utils/responsive_config.dart';
 import 'package:flutter_application_6/core/constants/app_constants.dart';
 import 'editor_shapes.dart';
@@ -31,6 +32,7 @@ class EditorTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     const double handleWidth = 12.0;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -39,7 +41,7 @@ class EditorTimeline extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "Range",
+              l10n.range,
               style: TextStyle(color: Colors.white70, fontSize: 12.sp),
             ),
             Text(

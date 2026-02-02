@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -17,6 +18,7 @@ class EmptyScriptsState extends StatelessWidget {
       (p) => p.isSearching,
     );
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context);
 
     return Center(
       child: Padding(
@@ -41,7 +43,7 @@ class EmptyScriptsState extends StatelessWidget {
             ),
             SizedBox(height: 24.h),
             Text(
-              isSearching ? "No results found" : "Start Your Journey",
+              isSearching ? l10n.noResultsFound : l10n.startYourJourney,
               style: GoogleFonts.manrope(
                 color: isDark ? Colors.white : AppColors.textBlack,
                 fontSize: 20.sp,
@@ -51,8 +53,8 @@ class EmptyScriptsState extends StatelessWidget {
             SizedBox(height: 12.h),
             Text(
               isSearching
-                  ? "We couldn't find any scripts matching your search. Try different keywords!"
-                  : "Your creative space is empty. Create your first script or try recording something on the fly!",
+                  ? l10n.noResultsMessage
+                  : l10n.emptyCreativeSpaceMessage,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppColors.textGrey,

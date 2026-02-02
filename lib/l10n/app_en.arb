@@ -1,0 +1,661 @@
+{
+  "@@locale": "en",
+  
+  "appTitle": "ScriptCam",
+  "@appTitle": {
+    "description": "The application title"
+  },
+
+  "onboardingWelcomeTitle": "Welcome to ScriptCam",
+  "@onboardingWelcomeTitle": {
+    "description": "Title for the welcome onboarding screen"
+  },
+  "onboardingWelcomeDesc": "Your all-in-one Teleprompter studio. Write scripts, record videos, and edit seamlessly.",
+  "@onboardingWelcomeDesc": {
+    "description": "Description for the welcome onboarding screen"
+  },
+
+  "onboardingScriptEditorTitle": "Script Editor",
+  "@onboardingScriptEditorTitle": {
+    "description": "Title for the script editor onboarding screen"
+  },
+  "onboardingScriptEditorDesc": "Write and manage your video scripts with ease. Organize your ideas instantly.",
+  "@onboardingScriptEditorDesc": {
+    "description": "Description for the script editor onboarding screen"
+  },
+
+  "onboardingTeleprompterTitle": "Teleprompter",
+  "@onboardingTeleprompterTitle": {
+    "description": "Title for the teleprompter onboarding screen"
+  },
+  "onboardingTeleprompterDesc": "Read your script while looking directly at the camera. Professional recording made easy.",
+  "@onboardingTeleprompterDesc": {
+    "description": "Description for the teleprompter onboarding screen"
+  },
+
+  "onboardingPermissionsTitle": "Enable Permissions",
+  "@onboardingPermissionsTitle": {
+    "description": "Title for the permissions onboarding screen"
+  },
+  "onboardingPermissionsDesc": "To record videos and sync your voice with the script, we need access to your camera and microphone.",
+  "@onboardingPermissionsDesc": {
+    "description": "Description for the permissions onboarding screen"
+  },
+
+  "grantAccess": "Grant Access",
+  "@grantAccess": {
+    "description": "Button to grant permissions"
+  },
+  "start": "Start",
+  "@start": {
+    "description": "Button to start using the app"
+  },
+  "next": "Next",
+  "@next": {
+    "description": "Button to go to next screen"
+  },
+
+  "permissionsRequired": "Camera and Microphone permissions are required.",
+  "@permissionsRequired": {
+    "description": "Toast message when permissions are denied"
+  },
+
+  "selectLanguage": "Select Language",
+  "@selectLanguage": {
+    "description": "Title for language selection screen"
+  },
+  "selectLanguageDesc": "Choose your preferred language for the app",
+  "@selectLanguageDesc": {
+    "description": "Description for language selection screen"
+  },
+  "continueButton": "Continue",
+  "@continueButton": {
+    "description": "Button to continue to next screen"
+  },
+
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings screen title"
+  },
+  "preferences": "Preferences",
+  "@preferences": {
+    "description": "Preferences section header"
+  },
+  "help": "Help",
+  "@help": {
+    "description": "Help section header"
+  },
+  "support": "Support",
+  "@support": {
+    "description": "Support section header"
+  },
+  "about": "About",
+  "@about": {
+    "description": "About section header"
+  },
+
+  "appearance": "Appearance",
+  "@appearance": {
+    "description": "Appearance settings label"
+  },
+  "language": "Language",
+  "@language": {
+    "description": "Language settings label"
+  },
+  "systemDefault": "System Default",
+  "@systemDefault": {
+    "description": "System default theme option"
+  },
+  "lightMode": "Light Mode",
+  "@lightMode": {
+    "description": "Light theme option"
+  },
+  "darkMode": "Dark Mode",
+  "@darkMode": {
+    "description": "Dark theme option"
+  },
+  "system": "System",
+  "@system": {
+    "description": "System theme short label"
+  },
+  "light": "Light",
+  "@light": {
+    "description": "Light theme short label"
+  },
+  "dark": "Dark",
+  "@dark": {
+    "description": "Dark theme short label"
+  },
+
+  "howToUse": "How to Use",
+  "@howToUse": {
+    "description": "How to use menu item"
+  },
+  "shareApp": "Share App",
+  "@shareApp": {
+    "description": "Share app menu item"
+  },
+  "contactUs": "Contact Us",
+  "@contactUs": {
+    "description": "Contact us menu item"
+  },
+  "rateUs": "Rate Us",
+  "@rateUs": {
+    "description": "Rate us menu item"
+  },
+  "privacyPolicy": "Privacy Policy",
+  "@privacyPolicy": {
+    "description": "Privacy policy menu item"
+  },
+  "version": "Version",
+  "@version": {
+    "description": "Version menu item"
+  },
+
+  "upgradeToPro": "Upgrade to Pro",
+  "@upgradeToPro": {
+    "description": "Premium upgrade banner title"
+  },
+  "unlockAllFeatures": "Unlock all features & remove ads",
+  "@unlockAllFeatures": {
+    "description": "Premium upgrade banner description"
+  },
+
+  "shareAppMessage": "Record professional videos with confidence using ScriptCam! 🎥✨\n\nIt features a built-in Teleprompter, 4K recording, and Video Editor. Try it out here:\n{url}",
+  "@shareAppMessage": {
+    "description": "Message when sharing the app",
+    "placeholders": {
+      "url": {
+        "type": "String",
+        "example": "https://play.google.com/store/apps/details?id=com.example.app"
+      }
+    }
+  },
+  "shareAppSubject": "Check out ScriptCam: Video Teleprompter",
+  "@shareAppSubject": {
+    "description": "Subject when sharing the app"
+  },
+
+  "goodMorning": "Good Morning",
+  "@goodMorning": {
+    "description": "Morning greeting"
+  },
+  "goodAfternoon": "Good Afternoon",
+  "@goodAfternoon": {
+    "description": "Afternoon greeting"
+  },
+  "goodEvening": "Good Evening",
+  "@goodEvening": {
+    "description": "Evening greeting"
+  },
+  "readyToCreate": "Ready to create something\namazing?",
+  "@readyToCreate": {
+    "description": "Home screen tagline"
+  },
+
+  "newScript": "New Script",
+  "@newScript": {
+    "description": "New script action card title"
+  },
+  "writeFromScratch": "Write from scratch",
+  "@writeFromScratch": {
+    "description": "New script action card subtitle"
+  },
+  "quickRecord": "Quick Record",
+  "@quickRecord": {
+    "description": "Quick record action card title"
+  },
+  "recordOnTheFly": "Record on the fly",
+  "@recordOnTheFly": {
+    "description": "Quick record action card subtitle"
+  },
+
+  "myScripts": "My Scripts",
+  "@myScripts": {
+    "description": "My scripts section header"
+  },
+  "recentFirst": "Recent First",
+  "@recentFirst": {
+    "description": "Sort order label"
+  },
+
+  "quickRecordDialogTitle": "Quick Record",
+  "@quickRecordDialogTitle": {
+    "description": "Quick record dialog title"
+  },
+  "quickRecordDialogDesc": "Enter script details below, or skip to open the camera without any text.",
+  "@quickRecordDialogDesc": {
+    "description": "Quick record dialog description"
+  },
+  "scriptTitle": "Script Title",
+  "@scriptTitle": {
+    "description": "Script title field label"
+  },
+  "scriptContent": "Script Content",
+  "@scriptContent": {
+    "description": "Script content field label"
+  },
+  "scriptTitleHint": "e.g. YouTube Intro",
+  "@scriptTitleHint": {
+    "description": "Script title field hint"
+  },
+  "scriptContentHint": "Paste your script content here...",
+  "@scriptContentHint": {
+    "description": "Script content field hint"
+  },
+  "startRecording": "Start Recording",
+  "@startRecording": {
+    "description": "Start recording button"
+  },
+
+  "editScript": "Edit Script",
+  "@editScript": {
+    "description": "Edit script screen title"
+  },
+  "save": "SAVE",
+  "@save": {
+    "description": "Save button"
+  },
+  "scriptTitlePlaceholder": "Script Title...",
+  "@scriptTitlePlaceholder": {
+    "description": "Script title input placeholder"
+  },
+  "scriptContentPlaceholder": "Start writing your script here...",
+  "@scriptContentPlaceholder": {
+    "description": "Script content input placeholder"
+  },
+  "platform": "PLATFORM",
+  "@platform": {
+    "description": "Platform section label"
+  },
+
+  "titleRequired": "Title required",
+  "@titleRequired": {
+    "description": "Toast when title is missing"
+  },
+  "saved": "Saved",
+  "@saved": {
+    "description": "Toast when script is saved"
+  },
+  "created": "Created!",
+  "@created": {
+    "description": "Toast when script is created"
+  },
+  "textPasted": "Text pasted",
+  "@textPasted": {
+    "description": "Toast when text is pasted"
+  },
+  "scriptDeleted": "Script deleted",
+  "@scriptDeleted": {
+    "description": "Toast when script is deleted"
+  },
+
+  "deleteScriptTitle": "Delete Script?",
+  "@deleteScriptTitle": {
+    "description": "Delete confirmation dialog title"
+  },
+  "deleteScriptMessage": "This action cannot be undone.",
+  "@deleteScriptMessage": {
+    "description": "Delete confirmation dialog message"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete button"
+  },
+
+  "appInfoTitle": "ScriptCam",
+  "@appInfoTitle": {
+    "description": "App info dialog title"
+  },
+  "appInfoVersion": "Version 1.0.3",
+  "@appInfoVersion": {
+    "description": "App version in info dialog"
+  },
+  "appInfoDescription": "The ultimate teleprompter and video recording tool for content creators. Create, read, and record seamlessly.",
+  "@appInfoDescription": {
+    "description": "App description in info dialog"
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Close button"
+  },
+
+  "emptyScriptsAll": "No scripts yet",
+  "@emptyScriptsAll": {
+    "description": "Empty state for all scripts"
+  },
+  "emptyScriptsAllDesc": "Create your first script to get started",
+  "@emptyScriptsAllDesc": {
+    "description": "Empty state description for all scripts"
+  },
+  "emptyScriptsCategory": "No {category} scripts",
+  "@emptyScriptsCategory": {
+    "description": "Empty state for specific category",
+    "placeholders": {
+      "category": {
+        "type": "String",
+        "example": "YouTube"
+      }
+    }
+  },
+  "emptyScriptsCategoryDesc": "Create a script for this platform",
+  "@emptyScriptsCategoryDesc": {
+    "description": "Empty state description for category"
+  },
+
+  "gallery": "Gallery",
+  "@gallery": {
+    "description": "Gallery screen title"
+  },
+  "emptyGallery": "No videos yet",
+  "@emptyGallery": {
+    "description": "Empty gallery state"
+  },
+  "emptyGalleryDesc": "Record your first video to see it here",
+  "@emptyGalleryDesc": {
+    "description": "Empty gallery state description"
+  },
+
+  "teleprompter": "Teleprompter",
+  "@teleprompter": {
+    "description": "Teleprompter screen title"
+  },
+  "record": "Record",
+  "@record": {
+    "description": "Record button"
+  },
+  "stop": "Stop",
+  "@stop": {
+    "description": "Stop button"
+  },
+  "pause": "Pause",
+  "@pause": {
+    "description": "Pause button"
+  },
+  "resume": "Resume",
+  "@resume": {
+    "description": "Resume button"
+  },
+
+  "speed": "Speed",
+  "@speed": {
+    "description": "Speed control label"
+  },
+  "fontSize": "Font Size",
+  "@fontSize": {
+    "description": "Font size control label"
+  },
+  "mirror": "Mirror",
+  "@mirror": {
+    "description": "Mirror text toggle label"
+  },
+  "voiceSync": "Voice Sync",
+  "@voiceSync": {
+    "description": "Voice sync toggle label"
+  },
+  "autoScroll": "Auto Scroll",
+  "@autoScroll": {
+    "description": "Auto scroll toggle label"
+  },
+
+  "videoSettings": "Video Settings",
+  "@videoSettings": {
+    "description": "Video settings title"
+  },
+  "resolution": "Resolution",
+  "@resolution": {
+    "description": "Resolution setting label"
+  },
+  "quality": "Quality",
+  "@quality": {
+    "description": "Quality setting label"
+  },
+
+  "premium": "Premium",
+  "@premium": {
+    "description": "Premium screen title"
+  },
+  "getPremium": "Get Premium",
+  "@getPremium": {
+    "description": "Get premium button"
+  },
+  "restorePurchases": "Restore Purchases",
+  "@restorePurchases": {
+    "description": "Restore purchases button"
+  },
+
+  "videoEditor": "Video Editor",
+  "@videoEditor": {
+    "description": "Video editor screen title"
+  },
+  "trim": "Trim",
+  "@trim": {
+    "description": "Trim tab label"
+  },
+  "adjust": "Adjust",
+  "@adjust": {
+    "description": "Adjust tab label"
+  },
+  "filters": "Filters",
+  "@filters": {
+    "description": "Filters tab label"
+  },
+  "export": "Export",
+  "@export": {
+    "description": "Export button"
+  },
+  "exporting": "Exporting...",
+  "@exporting": {
+    "description": "Exporting progress message"
+  },
+  "exportComplete": "Export complete!",
+  "@exportComplete": {
+    "description": "Export complete message"
+  },
+
+  "brightness": "Brightness",
+  "@brightness": {
+    "description": "Brightness adjustment label"
+  },
+  "contrast": "Contrast",
+  "@contrast": {
+    "description": "Contrast adjustment label"
+  },
+  "saturation": "Saturation",
+  "@saturation": {
+    "description": "Saturation adjustment label"
+  },
+
+  "share": "Share",
+  "@share": {
+    "description": "Share button"
+  },
+  "play": "Play",
+  "@play": {
+    "description": "Play button"
+  },
+
+  "all": "All",
+  "@all": {
+    "description": "All category label"
+  },
+  "general": "General",
+  "@general": {
+    "description": "General category label"
+  },
+
+  "search": "Search",
+  "@search": {
+    "description": "Search placeholder"
+  },
+  "searchScripts": "Search scripts...",
+  "@searchScripts": {
+    "description": "Search scripts placeholder"
+  },
+
+  "studio": "Studio",
+  "@studio": {
+    "description": "Dashboard tab label"
+  },
+  "startYourJourney": "Start Your Journey",
+  "@startYourJourney": {
+    "description": "Empty state title when no scripts exist"
+  },
+  "noResultsFound": "No results found",
+  "@noResultsFound": {
+    "description": "Empty state title when search yields no results"
+  },
+  "noResultsMessage": "We couldn't find any scripts matching your search. Try different keywords!",
+  "@noResultsMessage": {
+    "description": "Empty state description when search yields no results"
+  },
+  "emptyCreativeSpaceMessage": "Your creative space is empty. Create your first script or try recording something on the fly!",
+  "@emptyCreativeSpaceMessage": {
+    "description": "Empty state description when no scripts exist"
+  },
+
+  "paste": "Paste",
+  "@paste": {
+    "description": "Paste button"
+  },
+  "createNewScript": "Create New Script",
+  "@createNewScript": {
+    "description": "Create new script button"
+  },
+  "selectPlatformDesc": "Select a platform for your script",
+  "@selectPlatformDesc": {
+    "description": "Platform selection description"
+  },
+  "pro": "PRO",
+  "@pro": {
+    "description": "Pro badge label"
+  },
+  "minRead": "min read",
+  "@minRead": {
+    "description": "Minutes to read label"
+  },
+  "words": "words",
+  "@words": {
+    "description": "Word count label"
+  },
+  "edit": "Edit",
+  "@edit": {
+    "description": "Edit menu item"
+  },
+  "howToUseTitle": "How to Use ScriptCam",
+  "@howToUseTitle": {
+    "description": "How to use screen title"
+  },
+  "step1Title": "Create a Script",
+  "@step1Title": {
+    "description": "Step 1 title"
+  },
+  "step1Desc": "Start by creating a new script or quick record without text",
+  "@step1Desc": {
+    "description": "Step 1 description"
+  },
+  "step2Title": "Setup Teleprompter",
+  "@step2Title": {
+    "description": "Step 2 title"
+  },
+  "step2Desc": "Adjust speed, font size, and enable voice sync for hands-free scrolling",
+  "@step2Desc": {
+    "description": "Step 2 description"
+  },
+  "step3Title": "Record Your Video",
+  "@step3Title": {
+    "description": "Step 3 title"
+  },
+  "step3Desc": "Press record and read your script while looking at the camera",
+  "@step3Desc": {
+    "description": "Step 3 description"
+  },
+  "step4Title": "Edit & Share",
+  "@step4Title": {
+    "description": "Step 4 title"
+  },
+  "step4Desc": "Use the video editor to trim, adjust, and apply filters before sharing",
+  "@step4Desc": {
+    "description": "Step 4 description"
+  },
+  "gotIt": "Got It",
+  "@gotIt": {
+    "description": "Got it button"
+  },
+  "deleteVideoTitle": "Delete Video?",
+  "@deleteVideoTitle": {
+    "description": "Delete video confirmation title"
+  },
+  "videoDeleted": "Video deleted",
+  "@videoDeleted": {
+    "description": "Video deleted toast message"
+  },
+  "mute": "Mute",
+  "@mute": {
+    "description": "Mute audio toggle"
+  },
+  "opacity": "Opacity",
+  "@opacity": {
+    "description": "Opacity control label"
+  },
+  "original": "Original",
+  "@original": {
+    "description": "Original filter/preset label"
+  },
+  "processing": "Processing...",
+  "@processing": {
+    "description": "Processing message"
+  },
+  "range": "Range",
+  "@range": {
+    "description": "Range control label"
+  },
+  "ratio": "Ratio",
+  "@ratio": {
+    "description": "Aspect ratio label"
+  },
+  "recordingFailed": "Recording failed",
+  "@recordingFailed": {
+    "description": "Recording failed error message"
+  },
+  "rotate": "Rotate",
+  "@rotate": {
+    "description": "Rotate control label"
+  },
+  "targetFps": "Target FPS",
+  "@targetFps": {
+    "description": "Target frames per second label"
+  },
+  "transform": "Transform",
+  "@transform": {
+    "description": "Transform tab label"
+  },
+  "premiumDescription": "Unlock all premium features and enjoy an ad-free experience",
+  "@premiumDescription": {
+    "description": "Premium screen description"
+  },
+  "removeAds": "Remove Ads",
+  "@removeAds": {
+    "description": "Remove ads feature"
+  },
+  "unlimitedScripts": "Unlimited Scripts",
+  "@unlimitedScripts": {
+    "description": "Unlimited scripts feature"
+  },
+  "unlockCreatorPro": "Unlock Creator Pro",
+  "@unlockCreatorPro": {
+    "description": "Unlock creator pro title"
+  },
+  "upgradeForLifetime": "Upgrade for Lifetime Access",
+  "@upgradeForLifetime": {
+    "description": "Upgrade for lifetime button"
+  },
+  "restorePurchaseLink": "Restore Purchase",
+  "@restorePurchaseLink": {
+    "description": "Restore purchase link text"
+  }
+}

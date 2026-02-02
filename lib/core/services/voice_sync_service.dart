@@ -57,6 +57,7 @@ class VoiceSyncService extends ChangeNotifier {
   }
 
   void stopListening() {
+    if (!_isListening) return;
     _speech.stop();
     _isListening = false;
     notifyListeners();

@@ -26,6 +26,7 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
     super.initState();
     _controller = VideoPlayerController.file(File(widget.path))
       ..initialize().then((_) {
+        if (!mounted) return;
         setState(() {});
         _play();
       });

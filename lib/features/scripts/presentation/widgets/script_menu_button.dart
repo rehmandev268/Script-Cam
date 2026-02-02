@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/responsive_config.dart';
@@ -18,6 +19,7 @@ class ScriptMenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return PopupMenuButton<String>(
       padding: EdgeInsets.zero,
       icon: Icon(Icons.more_vert, color: AppColors.textGrey, size: 22.sp),
@@ -36,7 +38,7 @@ class ScriptMenuButton extends StatelessWidget {
               Icon(Icons.edit_rounded, size: 18.sp, color: AppColors.primary),
               SizedBox(width: 12.w),
               Text(
-                "Edit",
+                l10n.edit,
                 style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
               ),
             ],
@@ -53,7 +55,7 @@ class ScriptMenuButton extends StatelessWidget {
               ),
               SizedBox(width: 12.w),
               Text(
-                "Delete",
+                l10n.delete,
                 style: TextStyle(
                   color: Colors.red,
                   fontSize: 14.sp,

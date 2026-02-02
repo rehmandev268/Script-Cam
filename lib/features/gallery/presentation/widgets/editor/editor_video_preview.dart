@@ -77,8 +77,11 @@ class _VideoArea extends StatelessWidget {
               angle: rotation * math.pi / 180,
               child: Transform(
                 alignment: Alignment.center,
-                transform: Matrix4.identity()
-                  ..scale(isFlipped ? -1.0 : 1.0, 1.0, 1.0),
+                transform: Matrix4.diagonal3Values(
+                  isFlipped ? -1.0 : 1.0,
+                  1.0,
+                  1.0,
+                ),
                 child: FittedBox(
                   fit: targetAspectRatio != null ? BoxFit.fill : BoxFit.contain,
                   child: SizedBox(

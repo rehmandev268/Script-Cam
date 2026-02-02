@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -27,6 +28,7 @@ class ScriptCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final wordCount = script.content.trim().isEmpty
         ? 0
         : script.content.trim().split(RegExp(r'\s+')).length;
@@ -109,7 +111,7 @@ class ScriptCard extends StatelessWidget {
                                 ),
                                 SizedBox(width: 4.w),
                                 Text(
-                                  "$readTime min read",
+                                  "$readTime ${l10n.minRead}",
                                   style: TextStyle(
                                     fontSize: 12.sp,
                                     color: AppColors.textGrey,
@@ -124,7 +126,7 @@ class ScriptCard extends StatelessWidget {
                                 ),
                                 SizedBox(width: 4.w),
                                 Text(
-                                  "$wordCount words",
+                                  "$wordCount ${l10n.words}",
                                   style: TextStyle(
                                     fontSize: 12.sp,
                                     color: AppColors.textGrey,
@@ -164,7 +166,8 @@ class ScriptCard extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          brandName.toUpperCase(),
+                          (brandName == 'General' ? l10n.general : brandName)
+                              .toUpperCase(),
                           style: TextStyle(
                             fontSize: 10.sp,
                             fontWeight: FontWeight.w800,

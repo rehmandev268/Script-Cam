@@ -9,18 +9,65 @@ import '../../data/models/video_model.dart';
 import '../pages/video_player_screen.dart';
 import '../../../../core/services/analytics_service.dart';
 
-class VideoListItem extends StatelessWidget {
+class VideoListItem extends StatefulWidget {
   final VideoRecord video;
   final VoidCallback onDelete;
 
   const VideoListItem({super.key, required this.video, required this.onDelete});
 
   @override
+  State<VideoListItem> createState() => _VideoListItemState();
+}
+
+class _VideoListItemState extends State<VideoListItem> {
+  bool _isSharing = false;
+
+  Future<void> _shareVideo() async {
+    if (_isSharing) return;
+
+    setState(() => _isSharing = true);
+
+    try {
+      final file = File(widget.video.path);
+      if (!await file.exists()) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text("Video file not found")));
+        }
+        return;
+      }
+
+      AnalyticsService().logVideoShared(
+        videoId: widget.video.key?.toString() ?? 'unknown',
+        shareMethod: 'native_share',
+      );
+
+      // share_plus version 12 handles background I/O better if awaited properly
+      await Share.shareXFiles(
+        [XFile(widget.video.path)],
+        subject: 'Check out my video!',
+        text: 'Check out my video recorded with Script Cam!',
+      );
+    } catch (e) {
+      debugPrint("Error sharing video: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error sharing video: $e")));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSharing = false);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final bool exists = File(video.path).existsSync();
+    final bool exists = File(widget.video.path).existsSync();
 
     return Card(
-      // margin: EdgeInsets.symmetric(vertical: 8.h),
       child: Center(
         child: ListTile(
           contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -38,7 +85,7 @@ class VideoListItem extends StatelessWidget {
             ),
           ),
           title: Text(
-            video.path.split('/').last,
+            widget.video.path.split('/').last,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.manrope(
@@ -47,34 +94,37 @@ class VideoListItem extends StatelessWidget {
             ),
           ),
           subtitle: Text(
-            DateFormat.yMMMd().format(video.date),
+            DateFormat.yMMMd().format(widget.video.date),
             style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
           ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (exists)
-                IconButton(
-                  icon: Icon(
-                    Icons.share_outlined,
-                    size: 20.sp,
-                    color: AppColors.primary,
-                  ),
-                  onPressed: () {
-                    AnalyticsService().logVideoShared(
-                      videoId: video.key?.toString() ?? 'unknown',
-                      shareMethod: 'native_share',
-                    );
-                    Share.shareXFiles([XFile(video.path)]);
-                  },
-                ),
+                _isSharing
+                    ? SizedBox(
+                        width: 20.w,
+                        height: 20.w,
+                        child: const CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.primary,
+                        ),
+                      )
+                    : IconButton(
+                        icon: Icon(
+                          Icons.share_outlined,
+                          size: 20.sp,
+                          color: AppColors.primary,
+                        ),
+                        onPressed: _shareVideo,
+                      ),
               IconButton(
                 icon: Icon(
                   Icons.delete_outline,
                   size: 20.sp,
                   color: AppColors.error,
                 ),
-                onPressed: onDelete,
+                onPressed: widget.onDelete,
               ),
             ],
           ),
@@ -83,11 +133,12 @@ class VideoListItem extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => FullScreenVideoPlayer(path: video.path),
+                      builder: (_) =>
+                          FullScreenVideoPlayer(path: widget.video.path),
                     ),
                   );
                   AnalyticsService().logVideoPlayed(
-                    videoId: video.key?.toString() ?? 'unknown',
+                    videoId: widget.video.key?.toString() ?? 'unknown',
                     durationSeconds: 0,
                   );
                 }

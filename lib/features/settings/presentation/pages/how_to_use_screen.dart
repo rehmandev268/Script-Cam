@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter_application_6/core/constants/app_constants.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import '../../../../core/utils/responsive_config.dart';
 import '../widgets/step_card.dart';
 import '../../../../core/services/analytics_service.dart';
@@ -21,9 +22,10 @@ class _HowToUseScreenState extends State<HowToUseScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('How to Use ScriptCam', style: TextStyle(fontSize: 18.sp)),
+        title: Text(l10n.howToUseTitle, style: TextStyle(fontSize: 18.sp)),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -32,44 +34,40 @@ class _HowToUseScreenState extends State<HowToUseScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             FadeInDown(
-              child: const StepCard(
+              child: StepCard(
                 number: 1,
-                title: 'Create Your Script',
-                description:
-                    'Go to the Scripts tab and tap the + button to add your content. You can import text or write it from scratch.',
+                title: l10n.step1Title,
+                description: l10n.step1Desc,
                 icon: Icons.description_rounded,
               ),
             ),
             SizedBox(height: 24.h),
             FadeInDown(
               delay: const Duration(milliseconds: 200),
-              child: const StepCard(
+              child: StepCard(
                 number: 2,
-                title: 'Configure the Prompter',
-                description:
-                    'In the recorder, you can move, resize, and adjust the text size, speed, and opacity to your preference.',
+                title: l10n.step2Title,
+                description: l10n.step2Desc,
                 icon: Icons.settings_overscan_rounded,
               ),
             ),
             SizedBox(height: 24.h),
             FadeInDown(
               delay: const Duration(milliseconds: 400),
-              child: const StepCard(
+              child: StepCard(
                 number: 3,
-                title: 'Voice Sync (Beta)',
-                description:
-                    'Enable Voice Sync in settings to let the teleprompter follow your voice automatically.',
+                title: l10n.step3Title,
+                description: l10n.step3Desc,
                 icon: Icons.mic_none_rounded,
               ),
             ),
             SizedBox(height: 24.h),
             FadeInDown(
               delay: const Duration(milliseconds: 600),
-              child: const StepCard(
+              child: StepCard(
                 number: 4,
-                title: 'Record & Edit',
-                description:
-                    'Tap record to start. Once finished, use our built-in editor to trim and polish your video.',
+                title: l10n.step4Title,
+                description: l10n.step4Desc,
                 icon: Icons.videocam_rounded,
               ),
             ),
@@ -91,7 +89,7 @@ class _HowToUseScreenState extends State<HowToUseScreen> {
                     ),
                   ),
                   child: Text(
-                    'Got it!',
+                    l10n.gotIt,
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.bold,

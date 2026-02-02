@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'dart:ui';
 
 import '../../../../core/constants/app_constants.dart';
@@ -40,6 +41,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
     const bgColor = Color(0xFF000000);
     const accentGold = Color(0xFFFFD700);
     const accentOrange = Color(0xFFFF8C00);
+    final l10n = AppLocalizations.of(context);
 
     return Consumer<PremiumProvider>(
       builder: (context, provider, child) {
@@ -143,7 +145,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                             FadeInUp(
                               delay: const Duration(milliseconds: 200),
                               child: Text(
-                                "Unlock Creator Pro",
+                                l10n.unlockCreatorPro,
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.manrope(
                                   fontSize: 28.sp,
@@ -157,7 +159,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                             FadeInUp(
                               delay: const Duration(milliseconds: 300),
                               child: Text(
-                                "Join thousands of creators making professional videos with ScriptCam.",
+                                l10n.premiumDescription,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 14.sp,
@@ -178,13 +180,13 @@ class _PremiumScreenState extends State<PremiumScreen> {
                                 child: Column(
                                   children: [
                                     FeatureItem(
-                                      text: "Remove All Ads",
+                                      text: l10n.removeAds,
                                       icon: Icons.block_flipped,
                                       color: accentGold,
                                     ),
                                     SizedBox(height: 20.h),
                                     FeatureItem(
-                                      text: "Unlimited Scripts",
+                                      text: l10n.unlimitedScripts,
                                       icon: Icons.description_outlined,
                                       color: accentGold,
                                     ),
@@ -237,7 +239,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                                             MainAxisAlignment.center,
                                         children: [
                                           Text(
-                                            "Upgrade for Lifetime",
+                                            l10n.upgradeForLifetime,
                                             style: TextStyle(
                                               fontSize: 16.sp,
                                               fontWeight: FontWeight.w900,
@@ -248,7 +250,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                                           SizedBox(width: 8.w),
                                           Icon(
                                             Icons.arrow_forward_rounded,
-                                            color: Colors.black.withOpacity(
+                                            color: Colors.black.withValues(alpha: 
                                               0.8,
                                             ),
                                             size: 20.sp,
@@ -272,7 +274,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                                       ),
                                     )
                                   : Text(
-                                      "Already purchased? Restore",
+                                      l10n.restorePurchaseLink,
                                       style: TextStyle(
                                         color: Colors.white.withValues(
                                           alpha: 0.6,
