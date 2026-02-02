@@ -61,8 +61,7 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
   bool _isPlayingScript = false;
   bool _showScriptControls = true;
   bool _showSettingsPanel = false;
-  double _dragX = 0.0;
-  double _dragY = 0.0;
+  late final ValueNotifier<Offset> _prompterPosition;
   bool _isPositionInitialized = false;
   String? _lastVideoPath;
 
@@ -82,6 +81,7 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
     _scrollSpeed = ValueNotifier(50.0);
     _textOrientation = ValueNotifier(0);
     _prompterSize = ValueNotifier(Size(double.infinity, 500.h));
+    _prompterPosition = ValueNotifier(Offset.zero);
     _recordingDuration = ValueNotifier(Duration.zero);
 
     _ticker = createTicker(_onTick);
@@ -381,8 +381,7 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
       final prompterWidth = size.width;
       final prompterHeight = size.height * 0.5;
       _prompterSize.value = Size(prompterWidth, prompterHeight);
-      _dragX = 0;
-      _dragY = (size.height - prompterHeight) / 3;
+      _prompterPosition.value = Offset(0, (size.height - prompterHeight) / 3);
       _isPositionInitialized = true;
     }
   }
@@ -406,6 +405,7 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
     _scrollSpeed.dispose();
     _textOrientation.dispose();
     _prompterSize.dispose();
+    _prompterPosition.dispose();
     _recordingDuration.dispose();
     super.dispose();
   }
@@ -463,29 +463,33 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
           middleContentBuilder: (state) => Stack(
             fit: StackFit.expand,
             children: [
-              PrompterOverlay(
-                script: widget.script,
-                isPlayingScript: _isPlayingScript,
-                showScriptControls: _showScriptControls,
-                showSettingsPanel: _showSettingsPanel,
-                dragX: _dragX,
-                dragY: _dragY,
-                prompterSize: _prompterSize,
-                prompterOpacity: _prompterOpacity,
-                fontSize: _fontSize,
-                textOrientation: _textOrientation,
-                scrollSpeed: _scrollSpeed,
-                scrollController: _scriptScrollController,
-                onTogglePlay: _toggleScriptPlay,
-                onToggleSettings: () =>
-                    setState(() => _showSettingsPanel = !_showSettingsPanel),
-                onToggleControls: () =>
-                    setState(() => _showScriptControls = !_showScriptControls),
-                onDrag: (d) => setState(() {
-                  _dragX += d.dx;
-                  _dragY += d.dy;
-                }),
-                onResize: (s) => _prompterSize.value = s,
+              ValueListenableBuilder<Offset>(
+                valueListenable: _prompterPosition,
+                builder: (context, position, _) {
+                  return PrompterOverlay(
+                    script: widget.script,
+                    isPlayingScript: _isPlayingScript,
+                    showScriptControls: _showScriptControls,
+                    showSettingsPanel: _showSettingsPanel,
+                    dragX: position.dx,
+                    dragY: position.dy,
+                    prompterSize: _prompterSize,
+                    prompterOpacity: _prompterOpacity,
+                    fontSize: _fontSize,
+                    textOrientation: _textOrientation,
+                    scrollSpeed: _scrollSpeed,
+                    scrollController: _scriptScrollController,
+                    onTogglePlay: _toggleScriptPlay,
+                    onToggleSettings: () => setState(
+                      () => _showSettingsPanel = !_showSettingsPanel,
+                    ),
+                    onToggleControls: () => setState(
+                      () => _showScriptControls = !_showScriptControls,
+                    ),
+                    onDrag: (d) => _prompterPosition.value += d,
+                    onResize: (s) => _prompterSize.value = s,
+                  );
+                },
               ),
               if (_showProControls && !_isRecording)
                 CameraSideControls(

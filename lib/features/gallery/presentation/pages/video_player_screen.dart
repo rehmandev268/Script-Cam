@@ -30,9 +30,6 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
         setState(() {});
         _play();
       });
-    _controller.addListener(() {
-      setState(() {});
-    });
     _startHideTimer();
   }
 
@@ -68,8 +65,8 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
 
   @override
   void dispose() {
-    _controller.dispose();
     _hideTimer?.cancel();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -139,51 +136,55 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
                         horizontal: 20.w,
                         vertical: 30.h,
                       ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      child: ValueListenableBuilder(
+                        valueListenable: _controller,
+                        builder: (context, value, _) {
+                          return Column(
                             children: [
-                              Text(
-                                _formatDuration(_controller.value.position),
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 12.sp,
-                                ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    _formatDuration(value.position),
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12.sp,
+                                    ),
+                                  ),
+                                  Text(
+                                    _formatDuration(value.duration),
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12.sp,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                _formatDuration(_controller.value.duration),
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 12.sp,
+                              SizedBox(height: 10.h),
+                              SliderTheme(
+                                data: SliderThemeData(
+                                  thumbShape: const RoundSliderThumbShape(
+                                    enabledThumbRadius: 8,
+                                  ),
+                                  thumbColor: AppColors.primary,
+                                  activeTrackColor: AppColors.primary,
+                                  inactiveTrackColor: Colors.white24,
+                                ),
+                                child: Slider(
+                                  value: value.position.inSeconds.toDouble(),
+                                  min: 0.0,
+                                  max: value.duration.inSeconds.toDouble(),
+                                  onChanged: (value) {
+                                    _controller.seekTo(
+                                      Duration(seconds: value.toInt()),
+                                    );
+                                  },
                                 ),
                               ),
                             ],
-                          ),
-                          SizedBox(height: 10.h),
-                          SliderTheme(
-                            data: SliderThemeData(
-                              thumbShape: const RoundSliderThumbShape(
-                                enabledThumbRadius: 8,
-                              ),
-                              thumbColor: AppColors.primary,
-                              activeTrackColor: AppColors.primary,
-                              inactiveTrackColor: Colors.white24,
-                            ),
-                            child: Slider(
-                              value: _controller.value.position.inSeconds
-                                  .toDouble(),
-                              min: 0.0,
-                              max: _controller.value.duration.inSeconds
-                                  .toDouble(),
-                              onChanged: (value) {
-                                _controller.seekTo(
-                                  Duration(seconds: value.toInt()),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
                     ),
                   ],

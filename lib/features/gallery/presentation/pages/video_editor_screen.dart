@@ -42,8 +42,7 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
   final ValueNotifier<bool> _showOverlay = ValueNotifier(false);
   Timer? _overlayTimer;
 
-  double _startTrim = 0.0;
-  double _endTrim = 1.0;
+  late final ValueNotifier<RangeValues> _trimRange;
   Duration _videoDuration = Duration.zero;
   final List<String> _thumbnails = [];
   bool _generatingThumbnails = true;
@@ -64,6 +63,7 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
   @override
   void initState() {
     super.initState();
+    _trimRange = ValueNotifier(const RangeValues(0.0, 1.0));
     _initVideo();
   }
 
@@ -71,6 +71,7 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
   void dispose() {
     _activeTab.dispose();
     _showOverlay.dispose();
+    _trimRange.dispose();
     _overlayTimer?.cancel();
     _progressNotifier.dispose();
     try {
@@ -113,6 +114,7 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
           positionMs: i * interval,
           quality: 20,
         );
+        if (!mounted) break;
         if (path != null && await File(path).exists()) {
           if (mounted) setState(() => _thumbnails.add(path));
         }
@@ -128,8 +130,8 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
     if (durationMs == 0) return;
 
     final currentMs = _controller.value.position.inMilliseconds;
-    final startMs = (_startTrim * durationMs).toInt();
-    final endMs = (_endTrim * durationMs).toInt();
+    final startMs = (_trimRange.value.start * durationMs).toInt();
+    final endMs = (_trimRange.value.end * durationMs).toInt();
 
     if (currentMs >= endMs) {
       _controller.seekTo(Duration(milliseconds: startMs));
@@ -215,8 +217,8 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
     try {
       // Calculate trim times
       final totalMs = _controller.value.duration.inMilliseconds;
-      final startMs = (_startTrim * totalMs).toInt();
-      final endMs = (_endTrim * totalMs).toInt();
+      final startMs = (_trimRange.value.start * totalMs).toInt();
+      final endMs = (_trimRange.value.end * totalMs).toInt();
 
       debugPrint('Export Configuration:');
       debugPrint('  - File name: $fileName');
@@ -532,21 +534,24 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
   Widget _buildTabContent(EditorTab tab) {
     switch (tab) {
       case EditorTab.trim:
-        return EditorTimeline(
-          thumbnails: _thumbnails,
-          generatingThumbnails: _generatingThumbnails,
-          startTrim: _startTrim,
-          endTrim: _endTrim,
-          videoDuration: _videoDuration,
-          onTrimChanged: (v) => setState(() {
-            _startTrim = v.start;
-            _endTrim = v.end;
-          }),
-          onTrimChangeEnd: (v) => _controller.seekTo(
-            Duration(
-              milliseconds: (v.start * _videoDuration.inMilliseconds).toInt(),
-            ),
-          ),
+        return ValueListenableBuilder<RangeValues>(
+          valueListenable: _trimRange,
+          builder: (context, range, _) {
+            return EditorTimeline(
+              thumbnails: _thumbnails,
+              generatingThumbnails: _generatingThumbnails,
+              startTrim: range.start,
+              endTrim: range.end,
+              videoDuration: _videoDuration,
+              onTrimChanged: (v) => _trimRange.value = v,
+              onTrimChangeEnd: (v) => _controller.seekTo(
+                Duration(
+                  milliseconds: (v.start * _videoDuration.inMilliseconds)
+                      .toInt(),
+                ),
+              ),
+            );
+          },
         );
       case EditorTab.ratio:
         return EditorRatioPanel(

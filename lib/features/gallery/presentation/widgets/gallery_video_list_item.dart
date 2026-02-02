@@ -21,6 +21,20 @@ class VideoListItem extends StatefulWidget {
 
 class _VideoListItemState extends State<VideoListItem> {
   bool _isSharing = false;
+  bool _exists = true; // Optimistically assume exists
+
+  @override
+  void initState() {
+    super.initState();
+    _checkFileExistence();
+  }
+
+  Future<void> _checkFileExistence() async {
+    final exists = await File(widget.video.path).exists();
+    if (mounted && exists != _exists) {
+      setState(() => _exists = exists);
+    }
+  }
 
   Future<void> _shareVideo() async {
     if (_isSharing) return;
@@ -65,8 +79,6 @@ class _VideoListItemState extends State<VideoListItem> {
 
   @override
   Widget build(BuildContext context) {
-    final bool exists = File(widget.video.path).existsSync();
-
     return Card(
       child: Center(
         child: ListTile(
@@ -79,7 +91,7 @@ class _VideoListItemState extends State<VideoListItem> {
               borderRadius: BorderRadius.circular(14.r),
             ),
             child: Icon(
-              exists ? Icons.play_arrow_rounded : Icons.broken_image_outlined,
+              _exists ? Icons.play_arrow_rounded : Icons.broken_image_outlined,
               color: AppColors.primary,
               size: 26.sp,
             ),
@@ -100,7 +112,7 @@ class _VideoListItemState extends State<VideoListItem> {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (exists)
+              if (_exists)
                 _isSharing
                     ? SizedBox(
                         width: 20.w,
@@ -128,7 +140,7 @@ class _VideoListItemState extends State<VideoListItem> {
               ),
             ],
           ),
-          onTap: exists
+          onTap: _exists
               ? () {
                   Navigator.push(
                     context,

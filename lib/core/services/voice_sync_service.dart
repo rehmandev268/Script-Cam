@@ -38,7 +38,12 @@ class VoiceSyncService extends ChangeNotifier {
       await initialize();
     }
 
-    if (!_isListening && _isInitialized) {
+    if (_isListening) {
+      // Already listening, this call is redundant or potentially a restart
+      return;
+    }
+
+    if (_isInitialized) {
       _isListening = true;
       _speech.listen(
         onResult: (result) {

@@ -60,7 +60,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
       ),
       body: Consumer<GalleryProvider>(
         builder: (context, provider, _) {
-          if (provider.videos.isEmpty) {
+          final videos = provider.videos;
+          if (videos.isEmpty) {
             return EmptyGalleryState(
               onGoToStudio: () => widget.onGoToStudio?.call(),
             );
@@ -68,7 +69,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
           // Calculate total items including ads
           // First ad after 2 videos, then every 5 videos
-          final videoCount = provider.videos.length;
+          final videoCount = videos.length;
           int adCount = 0;
 
           if (videoCount > 2) {
@@ -122,11 +123,10 @@ class _GalleryScreenState extends State<GalleryScreen> {
               }
 
               // Return video item
-              if (videoIndex < provider.videos.length) {
+              if (videoIndex < videos.length) {
                 return VideoListItem(
-                  video: provider.videos[videoIndex],
-                  onDelete: () =>
-                      _confirmDelete(context, provider.videos[videoIndex]),
+                  video: videos[videoIndex],
+                  onDelete: () => _confirmDelete(context, videos[videoIndex]),
                 );
               }
 

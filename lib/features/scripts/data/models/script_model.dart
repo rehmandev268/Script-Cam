@@ -17,6 +17,11 @@ class Script extends HiveObject {
     required this.createdAt,
     required this.category,
   });
+
+  int get wordCount =>
+      content.trim().isEmpty ? 0 : content.trim().split(RegExp(r'\s+')).length;
+
+  int get readTime => (wordCount / 130).ceil();
 }
 
 class ScriptAdapter extends TypeAdapter<Script> {

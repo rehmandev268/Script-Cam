@@ -29,10 +29,19 @@ class GalleryProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void deleteVideo(VideoRecord video) {
+  Future<void> deleteVideo(VideoRecord video) async {
+    try {
+      final file = File(video.path);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } catch (e) {
+      debugPrint("Error deleting physical file: $e");
+    }
+
     AnalyticsService().logVideoDeleted(
       videoId: video.key?.toString() ?? 'unknown',
-      durationSeconds: 0, // Duration not available in model
+      durationSeconds: 0,
     );
     video.delete();
     notifyListeners();

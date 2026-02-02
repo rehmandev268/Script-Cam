@@ -43,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ...PlatformConfig.platforms.map((p) => p['name'] as String),
   ];
   final ScrollController _scrollController = ScrollController();
-  double _scrollProgress = 0.0;
+  final ValueNotifier<double> _scrollProgress = ValueNotifier<double>(0.0);
 
   @override
   void initState() {
@@ -55,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _scrollProgress.dispose();
     super.dispose();
   }
 
@@ -75,8 +76,8 @@ class _HomeScreenState extends State<HomeScreen> {
         ? 4 * linearProgress * linearProgress * linearProgress
         : 1 - pow(-2 * linearProgress + 2, 3) / 2;
 
-    if ((_scrollProgress - easedProgress).abs() > 0.005) {
-      setState(() => _scrollProgress = easedProgress);
+    if ((_scrollProgress.value - easedProgress).abs() > 0.005) {
+      _scrollProgress.value = easedProgress;
     }
   }
 
@@ -351,39 +352,52 @@ class _HomeScreenState extends State<HomeScreen> {
             scrolledUnderElevation: 2,
             toolbarHeight: 80.h + topPadding,
             titleSpacing: 0,
-            title: Stack(
-              children: [
-                // Expanded header - fades out as we scroll
-                IgnorePointer(
-                  ignoring: _scrollProgress > 0.3,
-                  child: Opacity(
-                    opacity: (1.0 - _scrollProgress * 1.5).clamp(0.0, 1.0),
-                    child: Transform.translate(
-                      offset: Offset(0, -10 * _scrollProgress),
-                      child: Transform.scale(
-                        scale: (1.0 - _scrollProgress * 0.05).clamp(0.95, 1.0),
-                        alignment: Alignment.centerLeft,
-                        child: _buildExpandedHeader(isDark, topPadding, l10n),
+            title: ValueListenableBuilder<double>(
+              valueListenable: _scrollProgress,
+              builder: (context, progress, _) {
+                return Stack(
+                  children: [
+                    // Expanded header - fades out as we scroll
+                    IgnorePointer(
+                      ignoring: progress > 0.3,
+                      child: Opacity(
+                        opacity: (1.0 - progress * 1.5).clamp(0.0, 1.0),
+                        child: Transform.translate(
+                          offset: Offset(0, -10 * progress),
+                          child: Transform.scale(
+                            scale: (1.0 - progress * 0.05).clamp(0.95, 1.0),
+                            alignment: Alignment.centerLeft,
+                            child: _buildExpandedHeader(
+                              isDark,
+                              topPadding,
+                              l10n,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                // Collapsed header - fades in as we scroll
-                IgnorePointer(
-                  ignoring: _scrollProgress < 0.3,
-                  child: Opacity(
-                    opacity: (_scrollProgress * 1.5 - 0.5).clamp(0.0, 1.0),
-                    child: Transform.translate(
-                      offset: Offset(0, 10 * (1.0 - _scrollProgress)),
-                      child: Transform.scale(
-                        scale: (0.95 + _scrollProgress * 0.05).clamp(0.95, 1.0),
-                        alignment: Alignment.centerLeft,
-                        child: _buildCollapsedHeader(isDark, topPadding, l10n),
+                    // Collapsed header - fades in as we scroll
+                    IgnorePointer(
+                      ignoring: progress < 0.3,
+                      child: Opacity(
+                        opacity: (progress * 1.5 - 0.5).clamp(0.0, 1.0),
+                        child: Transform.translate(
+                          offset: Offset(0, 10 * (1.0 - progress)),
+                          child: Transform.scale(
+                            scale: (0.95 + progress * 0.05).clamp(0.95, 1.0),
+                            alignment: Alignment.centerLeft,
+                            child: _buildCollapsedHeader(
+                              isDark,
+                              topPadding,
+                              l10n,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              ],
+                  ],
+                );
+              },
             ),
           ),
 

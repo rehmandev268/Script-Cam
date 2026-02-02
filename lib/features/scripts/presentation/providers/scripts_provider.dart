@@ -9,42 +9,62 @@ class ScriptsProvider extends ChangeNotifier {
 
   ScriptsProvider(this._scriptBox);
 
+  List<Script>? _cachedFilteredScripts;
+  String? _lastSearchQuery;
+  final Map<String, List<Script>> _categoryCache = {};
+
   bool get isSearching => _searchQuery.isNotEmpty;
 
   List<Script> get scripts => _scriptBox.values.toList();
 
   List<Script> get filteredScripts {
-    final all = _scriptBox.values.toList();
-
-    if (_searchQuery.isEmpty) {
-      return all.reversed.toList();
+    if (_cachedFilteredScripts != null && _lastSearchQuery == _searchQuery) {
+      return _cachedFilteredScripts!;
     }
 
-    return all
-        .where(
-          (s) =>
-              s.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-              s.content.toLowerCase().contains(_searchQuery.toLowerCase()),
-        )
-        .toList()
-        .reversed
-        .toList();
+    final all = _scriptBox.values.toList();
+    _lastSearchQuery = _searchQuery;
+
+    if (_searchQuery.isEmpty) {
+      _cachedFilteredScripts = all.reversed.toList();
+    } else {
+      final query = _searchQuery.toLowerCase();
+      _cachedFilteredScripts = all
+          .where(
+            (s) =>
+                s.title.toLowerCase().contains(query) ||
+                s.content.toLowerCase().contains(query),
+          )
+          .toList()
+          .reversed
+          .toList();
+    }
+    return _cachedFilteredScripts!;
   }
 
   List<Script> getScriptsByCategory(String category) {
-    final baseList = filteredScripts;
-
-    if (category == "All") {
-      return baseList;
+    if (_categoryCache.containsKey(category)) {
+      return _categoryCache[category]!;
     }
 
-    return baseList.where((script) {
-      return script.category == category;
-    }).toList();
+    final baseList = filteredScripts;
+    List<Script> result;
+
+    if (category == "All") {
+      result = baseList;
+    } else {
+      result = baseList.where((script) => script.category == category).toList();
+    }
+
+    _categoryCache[category] = result;
+    return result;
   }
 
   void setSearchQuery(String query) {
+    if (_searchQuery == query) return;
     _searchQuery = query;
+    _cachedFilteredScripts = null;
+    _categoryCache.clear();
     if (query.isNotEmpty) {
       AnalyticsService().logSearchPerformed(
         searchTerm: query,
@@ -69,6 +89,8 @@ class ScriptsProvider extends ChangeNotifier {
         wordCount: content.split(' ').length,
       );
     });
+    _cachedFilteredScripts = null;
+    _categoryCache.clear();
     notifyListeners();
   }
 
@@ -78,6 +100,8 @@ class ScriptsProvider extends ChangeNotifier {
       category: script.category,
     );
     script.delete();
+    _cachedFilteredScripts = null;
+    _categoryCache.clear();
     notifyListeners();
   }
 
@@ -97,6 +121,8 @@ class ScriptsProvider extends ChangeNotifier {
       category: newCategory,
       wordCount: newContent.split(' ').length,
     );
+    _cachedFilteredScripts = null;
+    _categoryCache.clear();
     notifyListeners();
   }
 }

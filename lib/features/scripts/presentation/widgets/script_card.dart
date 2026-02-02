@@ -29,10 +29,8 @@ class ScriptCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final wordCount = script.content.trim().isEmpty
-        ? 0
-        : script.content.trim().split(RegExp(r'\s+')).length;
-    final readTime = (wordCount / 130).ceil();
+    final wordCount = script.wordCount;
+    final readTime = script.readTime;
 
     final Color brandColor = platformStyle['color'];
     final IconData brandIcon = platformStyle['icon'];
