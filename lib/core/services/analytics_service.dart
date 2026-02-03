@@ -229,6 +229,21 @@ class AnalyticsService {
     );
   }
 
+  void logRewardedAdWatchClicked() {
+    _analytics.logEvent(name: 'rewarded_ad_watch_clicked', parameters: {});
+  }
+
+  void logRewardedAdRewardEarned() {
+    _analytics.logEvent(name: 'rewarded_ad_reward_earned', parameters: {});
+  }
+
+  void logRewardedAdFailed({required String reason}) {
+    _analytics.logEvent(
+      name: 'rewarded_ad_failed',
+      parameters: {'reason': reason},
+    );
+  }
+
   void logAdClicked({required String adType, required String adPlacement}) {
     _analytics.logEvent(
       name: 'ad_clicked',

@@ -358,129 +358,155 @@ class AppLocalizationsAr extends AppLocalizations {
   String get searchScripts => 'البحث عن نصوص...';
 
   @override
-  String get studio => 'Studio';
+  String get studio => 'الاستوديو';
 
   @override
-  String get startYourJourney => 'Start Your Journey';
+  String get startYourJourney => 'ابدأ رحلتك';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'لم يتم العثور على نتائج';
 
   @override
   String get noResultsMessage =>
-      'We couldn\'t find any scripts matching your search. Try different keywords!';
+      'لم نتمكن من العثور على أي نصوص تطابق بحثك. جرب كلمات مفتاحية مختلفة!';
 
   @override
   String get emptyCreativeSpaceMessage =>
-      'Your creative space is empty. Create your first script or try recording something on the fly!';
+      'مساحتك الإبداعية فارغة. أنشئ نصك الأول أو جرب تسجيل شيء ما على الفور!';
 
   @override
-  String get paste => 'Paste';
+  String get paste => 'لصق';
 
   @override
-  String get createNewScript => 'Create New Script';
+  String get createNewScript => 'إنشاء نص جديد';
 
   @override
-  String get selectPlatformDesc => 'Select a platform for your script';
+  String get selectPlatformDesc => 'اختر منصة لنصك';
 
   @override
   String get pro => 'PRO';
 
   @override
-  String get minRead => 'min read';
+  String get minRead => 'دقيقة قراءة';
 
   @override
-  String get words => 'words';
+  String get words => 'كلمات';
 
   @override
-  String get edit => 'Edit';
+  String get edit => 'تعديل';
 
   @override
-  String get howToUseTitle => 'How to Use ScriptCam';
+  String get howToUseTitle => 'كيفية استخدام ScriptCam';
 
   @override
-  String get step1Title => 'Create a Script';
+  String get step1Title => 'إنشاء نص';
 
   @override
-  String get step1Desc =>
-      'Start by creating a new script or quick record without text';
+  String get step1Desc => 'ابدأ بإنشاء نص جديد أو تسجيل سريع بدون نص';
 
   @override
-  String get step2Title => 'Setup Teleprompter';
+  String get step2Title => 'إعداد التلقين';
 
   @override
   String get step2Desc =>
-      'Adjust speed, font size, and enable voice sync for hands-free scrolling';
+      'اضبط السرعة وحجم الخط وفعل مزامنة الصوت للتمرير بدون استخدام اليدين';
 
   @override
-  String get step3Title => 'Record Your Video';
+  String get step3Title => 'سجل الفيديو الخاص بك';
 
   @override
-  String get step3Desc =>
-      'Press record and read your script while looking at the camera';
+  String get step3Desc => 'اضغط على تسجيل واقرأ نصك أثناء النظر إلى الكاميرا';
 
   @override
-  String get step4Title => 'Edit & Share';
+  String get step4Title => 'التحرير والمشاركة';
 
   @override
   String get step4Desc =>
-      'Use the video editor to trim, adjust, and apply filters before sharing';
+      'استخدم محرر الفيديو للقص والضبط وتطبيق الفلاتر قبل المشاركة';
 
   @override
-  String get gotIt => 'Got It';
+  String get gotIt => 'فهمت';
 
   @override
-  String get deleteVideoTitle => 'Delete Video?';
+  String get deleteVideoTitle => 'حذف الفيديو؟';
 
   @override
-  String get videoDeleted => 'Video deleted';
+  String get videoDeleted => 'تم حذف الفيديو';
 
   @override
-  String get mute => 'Mute';
+  String get mute => 'كتم الصوت';
 
   @override
-  String get opacity => 'Opacity';
+  String get opacity => 'الشفافية';
 
   @override
-  String get original => 'Original';
+  String get original => 'أصلي';
 
   @override
-  String get processing => 'Processing...';
+  String get processing => 'جاري المعالجة...';
 
   @override
-  String get range => 'Range';
+  String get range => 'النطاق';
 
   @override
-  String get ratio => 'Ratio';
+  String get ratio => 'النسبة';
 
   @override
-  String get recordingFailed => 'Recording failed';
+  String get recordingFailed => 'فشل التسجيل';
 
   @override
-  String get rotate => 'Rotate';
+  String get rotate => 'تدوير';
 
   @override
-  String get targetFps => 'Target FPS';
+  String get targetFps => 'FPS المستهدف';
 
   @override
-  String get transform => 'Transform';
+  String get transform => 'تحويل';
 
   @override
   String get premiumDescription =>
-      'Unlock all premium features and enjoy an ad-free experience';
+      'افتح جميع الميزات المميزة واستمتع بتجربة خالية من الإعلانات';
 
   @override
-  String get removeAds => 'Remove Ads';
+  String get removeAds => 'إزالة الإعلانات';
 
   @override
-  String get unlimitedScripts => 'Unlimited Scripts';
+  String get unlimitedScripts => 'نصوص غير محدودة';
 
   @override
-  String get unlockCreatorPro => 'Unlock Creator Pro';
+  String get unlockCreatorPro => 'فتح Creator Pro';
 
   @override
-  String get upgradeForLifetime => 'Upgrade for Lifetime Access';
+  String get upgradeForLifetime => 'ترقية للوصول مدى الحياة';
 
   @override
-  String get restorePurchaseLink => 'Restore Purchase';
+  String get restorePurchaseLink => 'استعادة الشراء';
+
+  @override
+  String get watchAdToRecord => 'Watch Ad to Record';
+
+  @override
+  String get watchAdToRecordDesc =>
+      'Watch a short ad to unlock recording for this script.';
+
+  @override
+  String get premiumBenefitInstantRecord =>
+      'Premium users get instant recording and Voice Sync!';
+
+  @override
+  String get noInternetTitle => 'No Internet Connection';
+
+  @override
+  String get noInternetDesc =>
+      'It seems you are offline. Please check your connection and try again.';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get voiceSyncLocked => 'Voice Sync is a Premium Feature';
+
+  @override
+  String get voiceSyncLockedDesc =>
+      'Upgrade to Pro to enable hands-free voice-synced scrolling.';
 }

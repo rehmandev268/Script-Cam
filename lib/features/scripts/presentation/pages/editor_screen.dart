@@ -6,10 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/utils/responsive_config.dart';
 import '../../../../core/utils/toast_service.dart';
-import '../../../../core/services/ads_service/interstitial_ad_helper.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../widgets/common/adaptive_app_bar.dart';
-import '../../../premium/presentation/providers/premium_provider.dart';
 import '../../data/models/script_model.dart';
 import '../providers/scripts_provider.dart';
 import '../widgets/editor/platform_selector.dart';
@@ -147,10 +145,6 @@ class _EditorScreenState extends State<EditorScreen> {
       context,
       listen: false,
     );
-    final premium = Provider.of<PremiumProvider>(
-      context,
-      listen: false,
-    ).isPremium;
 
     final finalContent = _processContentForSave(_bodyCtrl.text);
 
@@ -173,9 +167,6 @@ class _EditorScreenState extends State<EditorScreen> {
       if (widget.onSaveSuccess != null) widget.onSaveSuccess!();
     }
     Navigator.pop(context);
-
-    // Show ad independently
-    InterstitialAdHelper.show(isPremium: premium, onComplete: () {});
   }
 
   @override

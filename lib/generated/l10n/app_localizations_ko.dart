@@ -477,4 +477,32 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get restorePurchaseLink => '구매 복원';
+
+  @override
+  String get watchAdToRecord => 'Watch Ad to Record';
+
+  @override
+  String get watchAdToRecordDesc =>
+      'Watch a short ad to unlock recording for this script.';
+
+  @override
+  String get premiumBenefitInstantRecord =>
+      'Premium users get instant recording and Voice Sync!';
+
+  @override
+  String get noInternetTitle => 'No Internet Connection';
+
+  @override
+  String get noInternetDesc =>
+      'It seems you are offline. Please check your connection and try again.';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get voiceSyncLocked => 'Voice Sync is a Premium Feature';
+
+  @override
+  String get voiceSyncLockedDesc =>
+      'Upgrade to Pro to enable hands-free voice-synced scrolling.';
 }

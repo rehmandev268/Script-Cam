@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/services/ads_service/ad_state.dart';
-import '../../core/services/ads_service/app_open_ad_manager.dart';
 import '../../core/utils/responsive_config.dart';
 import '../../features/premium/presentation/providers/premium_provider.dart';
 import '../common/glass_container.dart';
@@ -38,7 +37,6 @@ class _CustomNativeAdWidgetState extends State<CustomNativeAdWidget> {
 
   void _checkAndLoadAd() {
     if (!AdState.canRequestAds) return;
-    if (AppOpenAdManager.isShowingInterstitial) return;
 
     final provider = Provider.of<PremiumProvider>(context, listen: false);
     if (provider.isPremium || _isLoaded || _isAdLoading) return;

@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
-import 'package:flutter_application_6/core/services/ads_service/interstitial_ad_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:animate_do/animate_do.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/responsive_config.dart';
 import '../../../../widgets/ads/adaptive_banner_ad.dart';
-import '../../../premium/presentation/providers/premium_provider.dart';
 import '../../../settings/presentation/providers/ui_provider.dart';
 
 import 'package:permission_handler/permission_handler.dart';
@@ -99,18 +97,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _completeOnboarding(BuildContext context) {
     final uiProvider = Provider.of<UIProvider>(context, listen: false);
-    final premiumProvider = Provider.of<PremiumProvider>(
-      context,
-      listen: false,
-    );
-    // Complete onboarding immediately
+    
     uiProvider.completeOnboarding();
 
-    // Show ad independently
-    InterstitialAdHelper.show(
-      isPremium: premiumProvider.isPremium,
-      onComplete: () {},
-    );
+   
   }
 
   @override

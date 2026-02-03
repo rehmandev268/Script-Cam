@@ -657,5 +657,37 @@
   "restorePurchaseLink": "Restore Purchase",
   "@restorePurchaseLink": {
     "description": "Restore purchase link text"
+  },
+  "watchAdToRecord": "Watch Ad to Record",
+  "@watchAdToRecord": {
+    "description": "Title for the rewarded ad dialog"
+  },
+  "watchAdToRecordDesc": "Watch a short ad to unlock recording for this script.",
+  "@watchAdToRecordDesc": {
+    "description": "Description for the rewarded ad dialog"
+  },
+  "premiumBenefitInstantRecord": "Premium users get instant recording and Voice Sync!",
+  "@premiumBenefitInstantRecord": {
+    "description": "Premium benefit highlight in ad dialog"
+  },
+  "noInternetTitle": "No Internet Connection",
+  "@noInternetTitle": {
+    "description": "Title for the no internet screen"
+  },
+  "noInternetDesc": "It seems you are offline. Please check your connection and try again.",
+  "@noInternetDesc": {
+    "description": "Description for the no internet screen"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry button label"
+  },
+  "voiceSyncLocked": "Voice Sync is a Premium Feature",
+  "@voiceSyncLocked": {
+    "description": "Short message when voice sync is locked"
+  },
+  "voiceSyncLockedDesc": "Upgrade to Pro to enable hands-free voice-synced scrolling.",
+  "@voiceSyncLockedDesc": {
+    "description": "Longer message when voice sync is locked"
   }
 }

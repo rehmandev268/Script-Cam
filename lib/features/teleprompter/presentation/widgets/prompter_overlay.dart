@@ -7,6 +7,9 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../features/scripts/data/models/script_model.dart';
 import '../../../settings/presentation/providers/ui_provider.dart';
 import '../../../../core/services/analytics_service.dart';
+import '../../../premium/presentation/providers/premium_provider.dart';
+import '../../../premium/presentation/screen/premium_screen.dart';
+import '../../../../core/utils/toast_service.dart';
 
 class PrompterOverlay extends StatelessWidget {
   final Script script;
@@ -306,12 +309,28 @@ class _PrompterSettingsOverlay extends StatelessWidget {
                               ),
                             ),
                             const Spacer(),
-                            Switch(
-                              value: uiProvider.voiceSyncEnabled,
-                              onChanged: (v) => uiProvider.toggleVoiceSync(v),
-                              activeThumbColor: AppColors.primary,
-                              activeTrackColor: AppColors.primary.withValues(
-                                alpha: 0.3,
+                            Consumer<PremiumProvider>(
+                              builder: (context, premium, _) => Switch(
+                                value:
+                                    uiProvider.voiceSyncEnabled &&
+                                    premium.isPremium,
+                                onChanged: (v) {
+                                  if (premium.isPremium) {
+                                    uiProvider.toggleVoiceSync(v);
+                                  } else {
+                                    ToastService.show(l10n.voiceSyncLocked);
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => const PremiumScreen(),
+                                      ),
+                                    );
+                                  }
+                                },
+                                activeThumbColor: AppColors.primary,
+                                activeTrackColor: AppColors.primary.withValues(
+                                  alpha: 0.3,
+                                ),
                               ),
                             ),
                           ],

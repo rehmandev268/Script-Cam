@@ -18,6 +18,7 @@ import '../../../gallery/presentation/providers/gallery_provider.dart';
 import '../../../gallery/presentation/pages/video_player_screen.dart';
 import '../../../settings/presentation/providers/ui_provider.dart';
 import '../../../../core/services/analytics_service.dart';
+import '../../../premium/presentation/providers/premium_provider.dart';
 
 import '../widgets/camera_side_controls.dart';
 import '../widgets/prompter_overlay.dart';
@@ -93,7 +94,12 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
   }
 
   void _handleVoiceChanges() {
-    if (!mounted || !_isPlayingScript || !_uiProvider.voiceSyncEnabled) return;
+    final isPremium = context.read<PremiumProvider>().isPremium;
+    if (!mounted ||
+        !_isPlayingScript ||
+        !_uiProvider.voiceSyncEnabled ||
+        !isPremium)
+      return;
 
     if (!_voiceSync.isListening &&
         !_isPaused &&
@@ -105,7 +111,8 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
   void _handleUIChanges() {
     if (!mounted || !_isPlayingScript) return;
 
-    if (_uiProvider.voiceSyncEnabled) {
+    final isPremium = context.read<PremiumProvider>().isPremium;
+    if (_uiProvider.voiceSyncEnabled && isPremium) {
       if (!_voiceSync.isListening) {
         _voiceSync.startListening(_onVoiceResult);
       }
@@ -276,7 +283,9 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
 
   void _onTick(Duration elapsed) {
     if (!mounted) return;
-    final isManualScrolling = _isPlayingScript && !_uiProvider.voiceSyncEnabled;
+    final isPremium = context.read<PremiumProvider>().isPremium;
+    final isManualScrolling =
+        _isPlayingScript && !(_uiProvider.voiceSyncEnabled && isPremium);
     if (!isManualScrolling && !_isRecording) {
       _lastElapsed = Duration.zero;
       return;
@@ -297,7 +306,7 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
           _scriptScrollController.position.maxScrollExtent) {
         setState(() => _isPlayingScript = false);
         _stopScrolling();
-      } else if (!_uiProvider.voiceSyncEnabled) {
+      } else if (!(_uiProvider.voiceSyncEnabled && isPremium)) {
         _scriptScrollController.jumpTo(
           _scriptScrollController.offset + (_scrollSpeed.value * delta),
         );
@@ -306,7 +315,8 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
   }
 
   void _startScrolling() {
-    if (_uiProvider.voiceSyncEnabled) {
+    final isPremium = context.read<PremiumProvider>().isPremium;
+    if (_uiProvider.voiceSyncEnabled && isPremium) {
       _voiceSync.startListening(_onVoiceResult);
     } else {
       if (!(_ticker?.isActive ?? false)) _ticker?.start();
@@ -591,7 +601,9 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
                   AnalyticsService().logRecordingStarted(
                     scriptId: widget.script.key?.toString() ?? 'unknown',
                     scriptTitle: widget.script.title,
-                    isVoiceSyncEnabled: _uiProvider.voiceSyncEnabled,
+                    isVoiceSyncEnabled:
+                        _uiProvider.voiceSyncEnabled &&
+                        context.read<PremiumProvider>().isPremium,
                   );
                 }
                 break;

@@ -12,476 +12,507 @@ class AppLocalizationsHi extends AppLocalizations {
   String get appTitle => 'ScriptCam';
 
   @override
-  String get onboardingWelcomeTitle => 'Welcome to ScriptCam';
+  String get onboardingWelcomeTitle => 'ScriptCam में आपका स्वागत है';
 
   @override
   String get onboardingWelcomeDesc =>
-      'Your all-in-one Teleprompter studio. Write scripts, record videos, and edit seamlessly.';
+      'आपका ऑल-इन-वन टेलीप्रॉम्प्टर स्टूडियो। स्क्रिप्ट लिखें, वीडियो रिकॉर्ड करें और आसानी से एडिट करें।';
 
   @override
-  String get onboardingScriptEditorTitle => 'Script Editor';
+  String get onboardingScriptEditorTitle => 'स्क्रिप्ट एडिटर';
 
   @override
   String get onboardingScriptEditorDesc =>
-      'Write and manage your video scripts with ease. Organize your ideas instantly.';
+      'आसानी से अपने वीडियो स्क्रिप्ट लिखें और प्रबंधित करें। अपने विचारों को तुरंत व्यवस्थित करें।';
 
   @override
-  String get onboardingTeleprompterTitle => 'Teleprompter';
+  String get onboardingTeleprompterTitle => 'टेलीप्रॉम्प्टर';
 
   @override
   String get onboardingTeleprompterDesc =>
-      'Read your script while looking directly at the camera. Professional recording made easy.';
+      'सीधे कैमरे की ओर देखते हुए अपनी स्क्रिप्ट पढ़ें। पेशेवर रिकॉर्डिंग हुई आसान।';
 
   @override
-  String get onboardingPermissionsTitle => 'Enable Permissions';
+  String get onboardingPermissionsTitle => 'अनुमतियां सक्षम करें';
 
   @override
   String get onboardingPermissionsDesc =>
-      'To record videos and sync your voice with the script, we need access to your camera and microphone.';
+      'वीडियो रिकॉर्ड करने और स्क्रिप्ट के साथ अपनी आवाज़ सिंक करने के लिए, हमें आपके कैमरे और माइक्रोफ़ोन तक पहुंच की आवश्यकता है।';
 
   @override
-  String get grantAccess => 'Grant Access';
+  String get grantAccess => 'एक्सेस दें';
 
   @override
-  String get start => 'Start';
+  String get start => 'शुरू करें';
 
   @override
-  String get next => 'Next';
+  String get next => 'अगला';
 
   @override
-  String get permissionsRequired =>
-      'Camera and Microphone permissions are required.';
+  String get permissionsRequired => 'कैमरा और माइक्रोफ़ोन अनुमति आवश्यक हैं।';
 
   @override
-  String get selectLanguage => 'Select Language';
+  String get selectLanguage => 'भाषा चुनें';
 
   @override
-  String get selectLanguageDesc => 'Choose your preferred language for the app';
+  String get selectLanguageDesc => 'ऐप के लिए अपनी पसंदीदा भाषा चुनें';
 
   @override
-  String get continueButton => 'Continue';
+  String get continueButton => 'जारी रखें';
 
   @override
-  String get settings => 'Settings';
+  String get settings => 'सेटिंग्स';
 
   @override
-  String get preferences => 'Preferences';
+  String get preferences => 'प्राथमिकताएँ';
 
   @override
-  String get help => 'Help';
+  String get help => 'मदद';
 
   @override
-  String get support => 'Support';
+  String get support => 'सहयोग';
 
   @override
-  String get about => 'About';
+  String get about => 'के बारे में';
 
   @override
-  String get appearance => 'Appearance';
+  String get appearance => 'दिखावट';
 
   @override
-  String get language => 'Language';
+  String get language => 'भाषा';
 
   @override
-  String get systemDefault => 'System Default';
+  String get systemDefault => 'सिस्टम डिफ़ॉल्ट';
 
   @override
-  String get lightMode => 'Light Mode';
+  String get lightMode => 'लाइट मोड';
 
   @override
-  String get darkMode => 'Dark Mode';
+  String get darkMode => 'डार्क मोड';
 
   @override
-  String get system => 'System';
+  String get system => 'सिस्टम';
 
   @override
-  String get light => 'Light';
+  String get light => 'लाइट';
 
   @override
-  String get dark => 'Dark';
+  String get dark => 'डार्क';
 
   @override
-  String get howToUse => 'How to Use';
+  String get howToUse => 'कैसे उपयोग करें';
 
   @override
-  String get shareApp => 'Share App';
+  String get shareApp => 'ऐप शेयर करें';
 
   @override
-  String get contactUs => 'Contact Us';
+  String get contactUs => 'संपर्क करें';
 
   @override
-  String get rateUs => 'Rate Us';
+  String get rateUs => 'हमें रेट करें';
 
   @override
-  String get privacyPolicy => 'Privacy Policy';
+  String get privacyPolicy => 'गोपनीयता नीति';
 
   @override
-  String get version => 'Version';
+  String get version => 'संस्करण';
 
   @override
-  String get upgradeToPro => 'Upgrade to Pro';
+  String get upgradeToPro => 'प्रो में अपग्रेड करें';
 
   @override
-  String get unlockAllFeatures => 'Unlock all features & remove ads';
+  String get unlockAllFeatures => 'सभी सुविधाएँ अनलॉक करें और विज्ञापन हटाएँ';
 
   @override
   String shareAppMessage(String url) {
-    return 'Record professional videos with confidence using ScriptCam! 🎥✨\n\nIt features a built-in Teleprompter, 4K recording, and Video Editor. Try it out here:\n$url';
+    return 'ScriptCam के साथ आत्मविश्वास से पेशेवर वीडियो रिकॉर्ड करें! 🎥✨\n\nइसमें अंतर्निर्मित टेलीप्रॉम्प्टर, 4K रिकॉर्डिंग और वीडियो एडिटर है। यहाँ आज़माएँ:\n$url';
   }
 
   @override
-  String get shareAppSubject => 'Check out ScriptCam: Video Teleprompter';
+  String get shareAppSubject => 'ScriptCam देखें: वीडियो टेलीप्रॉम्प्टर';
 
   @override
-  String get goodMorning => 'Good Morning';
+  String get goodMorning => 'सुप्रभात';
 
   @override
-  String get goodAfternoon => 'Good Afternoon';
+  String get goodAfternoon => 'शुभ अपराह्न';
 
   @override
-  String get goodEvening => 'Good Evening';
+  String get goodEvening => 'शुभ संध्या';
 
   @override
-  String get readyToCreate => 'Ready to create something\namazing?';
+  String get readyToCreate => 'कुछ शानदार बनाने के लिए तैयार हैं?';
 
   @override
-  String get newScript => 'New Script';
+  String get newScript => 'नई स्क्रिप्ट';
 
   @override
-  String get writeFromScratch => 'Write from scratch';
+  String get writeFromScratch => 'शुरु से लिखें';
 
   @override
-  String get quickRecord => 'Quick Record';
+  String get quickRecord => 'क्विक रिकॉर्ड';
 
   @override
-  String get recordOnTheFly => 'Record on the fly';
+  String get recordOnTheFly => 'तुरंत रिकॉर्ड करें';
 
   @override
-  String get myScripts => 'My Scripts';
+  String get myScripts => 'मेरी स्क्रिप्ट्स';
 
   @override
-  String get recentFirst => 'Recent First';
+  String get recentFirst => 'नया पहले';
 
   @override
-  String get quickRecordDialogTitle => 'Quick Record';
+  String get quickRecordDialogTitle => 'क्विक रिकॉर्ड';
 
   @override
   String get quickRecordDialogDesc =>
-      'Enter script details below, or skip to open the camera without any text.';
+      'नीचे स्क्रिप्ट विवरण दर्ज करें, या बिना टेक्स्ट के कैमरा खोलने के लिए छोड़ दें।';
 
   @override
-  String get scriptTitle => 'Script Title';
+  String get scriptTitle => 'स्क्रिप्ट शीर्षक';
 
   @override
-  String get scriptContent => 'Script Content';
+  String get scriptContent => 'स्क्रिप्ट सामग्री';
 
   @override
-  String get scriptTitleHint => 'e.g. YouTube Intro';
+  String get scriptTitleHint => 'जैसे YouTube इंट्रो';
 
   @override
-  String get scriptContentHint => 'Paste your script content here...';
+  String get scriptContentHint => 'अपनी स्क्रिप्ट सामग्री यहाँ पेस्ट करें...';
 
   @override
-  String get startRecording => 'Start Recording';
+  String get startRecording => 'रिकॉर्डिंग शुरू करें';
 
   @override
-  String get editScript => 'Edit Script';
+  String get editScript => 'स्क्रिप्ट एडिट करें';
 
   @override
-  String get save => 'SAVE';
+  String get save => 'सहेजें';
 
   @override
-  String get scriptTitlePlaceholder => 'Script Title...';
+  String get scriptTitlePlaceholder => 'स्क्रिप्ट शीर्षक...';
 
   @override
-  String get scriptContentPlaceholder => 'Start writing your script here...';
+  String get scriptContentPlaceholder =>
+      'अपनी स्क्रिप्ट यहाँ लिखना शुरू करें...';
 
   @override
-  String get platform => 'PLATFORM';
+  String get platform => 'प्लेटफ़ॉर्म';
 
   @override
-  String get titleRequired => 'Title required';
+  String get titleRequired => 'शीर्षक आवश्यक';
 
   @override
-  String get saved => 'Saved';
+  String get saved => 'सहेजा गया';
 
   @override
-  String get created => 'Created!';
+  String get created => 'बनाया गया!';
 
   @override
-  String get textPasted => 'Text pasted';
+  String get textPasted => 'टेक्स्ट पेस्ट किया गया';
 
   @override
-  String get scriptDeleted => 'Script deleted';
+  String get scriptDeleted => 'स्क्रिप्ट हटा दी गई';
 
   @override
-  String get deleteScriptTitle => 'Delete Script?';
+  String get deleteScriptTitle => 'स्क्रिप्ट हटाएँ?';
 
   @override
-  String get deleteScriptMessage => 'This action cannot be undone.';
+  String get deleteScriptMessage => 'यह कार्रवाई पूर्ववत नहीं की जा सकती।';
 
   @override
-  String get cancel => 'Cancel';
+  String get cancel => 'रद्द करें';
 
   @override
-  String get delete => 'Delete';
+  String get delete => 'हटाएँ';
 
   @override
   String get appInfoTitle => 'ScriptCam';
 
   @override
-  String get appInfoVersion => 'Version 1.0.3';
+  String get appInfoVersion => 'संस्करण 1.0.3';
 
   @override
   String get appInfoDescription =>
-      'The ultimate teleprompter and video recording tool for content creators. Create, read, and record seamlessly.';
+      'सामग्री निर्माताओं के लिए अंतिम टेलीप्रॉम्प्टर और वीडियो रिकॉर्डिंग टूल। बनाएँ, पढ़ें और रिकॉर्ड करें बिना किसी रुकावट के।';
 
   @override
-  String get close => 'Close';
+  String get close => 'बंद करें';
 
   @override
-  String get emptyScriptsAll => 'No scripts yet';
+  String get emptyScriptsAll => 'अभी तक कोई स्क्रिप्ट नहीं';
 
   @override
-  String get emptyScriptsAllDesc => 'Create your first script to get started';
+  String get emptyScriptsAllDesc =>
+      'शुरू करने के लिए अपनी पहली स्क्रिप्ट बनाएँ';
 
   @override
   String emptyScriptsCategory(String category) {
-    return 'No $category scripts';
+    return 'कोई $category स्क्रिप्ट नहीं';
   }
 
   @override
-  String get emptyScriptsCategoryDesc => 'Create a script for this platform';
+  String get emptyScriptsCategoryDesc =>
+      'इस प्लेटफ़ॉर्म के लिए एक स्क्रिप्ट बनाएँ';
 
   @override
-  String get gallery => 'Gallery';
+  String get gallery => 'गैलरी';
 
   @override
-  String get emptyGallery => 'No videos yet';
+  String get emptyGallery => 'अभी तक कोई वीडियो नहीं';
 
   @override
-  String get emptyGalleryDesc => 'Record your first video to see it here';
+  String get emptyGalleryDesc =>
+      'इसे यहाँ देखने के लिए अपना पहला वीडियो रिकॉर्ड करें';
 
   @override
-  String get teleprompter => 'Teleprompter';
+  String get teleprompter => 'टेलीप्रॉम्प्टर';
 
   @override
-  String get record => 'Record';
+  String get record => 'रिकॉर्ड';
 
   @override
-  String get stop => 'Stop';
+  String get stop => 'रोकें';
 
   @override
-  String get pause => 'Pause';
+  String get pause => 'पॉज़';
 
   @override
-  String get resume => 'Resume';
+  String get resume => 'फिर से शुरू करें';
 
   @override
-  String get speed => 'Speed';
+  String get speed => 'गति';
 
   @override
-  String get fontSize => 'Font Size';
+  String get fontSize => 'फ़ॉन्ट आकार';
 
   @override
-  String get mirror => 'Mirror';
+  String get mirror => 'मिरर';
 
   @override
-  String get voiceSync => 'Voice Sync';
+  String get voiceSync => 'वॉयस सिंक';
 
   @override
-  String get autoScroll => 'Auto Scroll';
+  String get autoScroll => 'ऑटो स्क्रॉल';
 
   @override
-  String get videoSettings => 'Video Settings';
+  String get videoSettings => 'वीडियो सेटिंग्स';
 
   @override
-  String get resolution => 'Resolution';
+  String get resolution => 'रिज़ॉल्यूशन';
 
   @override
-  String get quality => 'Quality';
+  String get quality => 'गुणवत्ता';
 
   @override
-  String get premium => 'Premium';
+  String get premium => 'प्रीमियम';
 
   @override
-  String get getPremium => 'Get Premium';
+  String get getPremium => 'प्रीमियम प्राप्त करें';
 
   @override
-  String get restorePurchases => 'Restore Purchases';
+  String get restorePurchases => 'खरीदारी बहाल करें';
 
   @override
-  String get videoEditor => 'Video Editor';
+  String get videoEditor => 'वीडियो एडिटर';
 
   @override
-  String get trim => 'Trim';
+  String get trim => 'ट्रिम';
 
   @override
-  String get adjust => 'Adjust';
+  String get adjust => 'समायोजित करें';
 
   @override
-  String get filters => 'Filters';
+  String get filters => 'फ़िल्टर';
 
   @override
-  String get export => 'Export';
+  String get export => 'निर्यात';
 
   @override
-  String get exporting => 'Exporting...';
+  String get exporting => 'निर्यात हो रहा है...';
 
   @override
-  String get exportComplete => 'Export complete!';
+  String get exportComplete => 'निर्यात पूर्ण!';
 
   @override
-  String get brightness => 'Brightness';
+  String get brightness => 'चमक';
 
   @override
-  String get contrast => 'Contrast';
+  String get contrast => 'कंट्रास्ट';
 
   @override
-  String get saturation => 'Saturation';
+  String get saturation => 'संतृप्ति';
 
   @override
-  String get share => 'Share';
+  String get share => 'शेयर';
 
   @override
-  String get play => 'Play';
+  String get play => 'चलाएं';
 
   @override
-  String get all => 'All';
+  String get all => 'सभी';
 
   @override
-  String get general => 'General';
+  String get general => 'सामान्य';
 
   @override
-  String get search => 'Search';
+  String get search => 'खोजें';
 
   @override
-  String get searchScripts => 'Search scripts...';
+  String get searchScripts => 'स्क्रिप्ट खोजें...';
 
   @override
-  String get studio => 'Studio';
+  String get studio => 'स्टूडियो';
 
   @override
-  String get startYourJourney => 'Start Your Journey';
+  String get startYourJourney => 'अपनी यात्रा शुरू करें';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => 'कोई परिणाम नहीं मिला';
 
   @override
   String get noResultsMessage =>
-      'We couldn\'t find any scripts matching your search. Try different keywords!';
+      'हमें आपकी खोज से मेल खाने वाली कोई स्क्रिप्ट नहीं मिली। अलग कीवर्ड आज़माएं!';
 
   @override
   String get emptyCreativeSpaceMessage =>
-      'Your creative space is empty. Create your first script or try recording something on the fly!';
+      'आपका रचनात्मक स्थान खाली है। अपनी पहली स्क्रिप्ट बनाएं या तुरंत कुछ रिकॉर्ड करने का प्रयास करें!';
 
   @override
-  String get paste => 'Paste';
+  String get paste => 'पेस्ट';
 
   @override
-  String get createNewScript => 'Create New Script';
+  String get createNewScript => 'नई स्क्रिप्ट बनाएं';
 
   @override
-  String get selectPlatformDesc => 'Select a platform for your script';
+  String get selectPlatformDesc => 'अपनी स्क्रिप्ट के लिए एक प्लेटफ़ॉर्म चुनें';
 
   @override
-  String get pro => 'PRO';
+  String get pro => 'प्रो';
 
   @override
-  String get minRead => 'min read';
+  String get minRead => 'मिनट पढ़ें';
 
   @override
-  String get words => 'words';
+  String get words => 'शब्द';
 
   @override
-  String get edit => 'Edit';
+  String get edit => 'संपादित करें';
 
   @override
-  String get howToUseTitle => 'How to Use ScriptCam';
+  String get howToUseTitle => 'ScriptCam कैसे उपयोग करें';
 
   @override
-  String get step1Title => 'Create a Script';
+  String get step1Title => 'एक स्क्रिप्ट बनाएँ';
 
   @override
   String get step1Desc =>
-      'Start by creating a new script or quick record without text';
+      'एक नई स्क्रिप्ट या बिना टेक्स्ट के क्विक रिकॉर्ड बनाकर शुरुआत करें';
 
   @override
-  String get step2Title => 'Setup Teleprompter';
+  String get step2Title => 'टेलीप्रॉम्प्टर सेटअप करें';
 
   @override
   String get step2Desc =>
-      'Adjust speed, font size, and enable voice sync for hands-free scrolling';
+      'गति, फ़ॉन्ट आकार समायोजित करें और हैंड्स-फ्री स्क्रॉलिंग के लिए वॉयस सिंक सक्षम करें';
 
   @override
-  String get step3Title => 'Record Your Video';
+  String get step3Title => 'अपना वीडियो रिकॉर्ड करें';
 
   @override
   String get step3Desc =>
-      'Press record and read your script while looking at the camera';
+      'रिकॉर्ड दबाएं और कैमरे को देखते हुए अपनी स्क्रिप्ट पढ़ें';
 
   @override
-  String get step4Title => 'Edit & Share';
+  String get step4Title => 'संपादित करें और साझा करें';
 
   @override
   String get step4Desc =>
-      'Use the video editor to trim, adjust, and apply filters before sharing';
+      'साझा करने से पहले वीडियो एडिटर का उपयोग ट्रिम, समायोजित और फ़िल्टर लागू करने के लिए करें';
 
   @override
-  String get gotIt => 'Got It';
+  String get gotIt => 'समझ गया';
 
   @override
-  String get deleteVideoTitle => 'Delete Video?';
+  String get deleteVideoTitle => 'वीडियो हटाएं?';
 
   @override
-  String get videoDeleted => 'Video deleted';
+  String get videoDeleted => 'वीडियो हटा दिया गया';
 
   @override
-  String get mute => 'Mute';
+  String get mute => 'म्यूट';
 
   @override
-  String get opacity => 'Opacity';
+  String get opacity => 'अपारदर्शिता';
 
   @override
-  String get original => 'Original';
+  String get original => 'मूल';
 
   @override
-  String get processing => 'Processing...';
+  String get processing => 'प्रोसेसिंग...';
 
   @override
-  String get range => 'Range';
+  String get range => 'रेंज';
 
   @override
-  String get ratio => 'Ratio';
+  String get ratio => 'अनुपात';
 
   @override
-  String get recordingFailed => 'Recording failed';
+  String get recordingFailed => 'रिकॉर्डिंग विफल';
 
   @override
-  String get rotate => 'Rotate';
+  String get rotate => 'घुमाएं';
 
   @override
-  String get targetFps => 'Target FPS';
+  String get targetFps => 'लक्ष्य FPS';
 
   @override
-  String get transform => 'Transform';
+  String get transform => 'बदलें';
 
   @override
   String get premiumDescription =>
-      'Unlock all premium features and enjoy an ad-free experience';
+      'सभी प्रीमियम सुविधाओं को अनलॉक करें और विज्ञापन-मुक्त अनुभव का आनंद लें';
 
   @override
-  String get removeAds => 'Remove Ads';
+  String get removeAds => 'विज्ञापन हटाएं';
 
   @override
-  String get unlimitedScripts => 'Unlimited Scripts';
+  String get unlimitedScripts => 'असीमित स्क्रिप्ट';
 
   @override
-  String get unlockCreatorPro => 'Unlock Creator Pro';
+  String get unlockCreatorPro => 'क्रिएटर प्रो अनलॉक करें';
 
   @override
-  String get upgradeForLifetime => 'Upgrade for Lifetime Access';
+  String get upgradeForLifetime => 'जीवनभर की पहुंच के लिए अपग्रेड करें';
 
   @override
-  String get restorePurchaseLink => 'Restore Purchase';
+  String get restorePurchaseLink => 'खरीद बहाल करें';
+
+  @override
+  String get watchAdToRecord => 'Watch Ad to Record';
+
+  @override
+  String get watchAdToRecordDesc =>
+      'Watch a short ad to unlock recording for this script.';
+
+  @override
+  String get premiumBenefitInstantRecord =>
+      'Premium users get instant recording and Voice Sync!';
+
+  @override
+  String get noInternetTitle => 'No Internet Connection';
+
+  @override
+  String get noInternetDesc =>
+      'It seems you are offline. Please check your connection and try again.';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get voiceSyncLocked => 'Voice Sync is a Premium Feature';
+
+  @override
+  String get voiceSyncLockedDesc =>
+      'Upgrade to Pro to enable hands-free voice-synced scrolling.';
 }

@@ -12,476 +12,490 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appTitle => 'ScriptCam';
 
   @override
-  String get onboardingWelcomeTitle => 'Welcome to ScriptCam';
+  String get onboardingWelcomeTitle => '欢迎使用 ScriptCam';
 
   @override
-  String get onboardingWelcomeDesc =>
-      'Your all-in-one Teleprompter studio. Write scripts, record videos, and edit seamlessly.';
+  String get onboardingWelcomeDesc => '您的多合一提词器工作室。撰写脚本、录制视频并无缝编辑。';
 
   @override
-  String get onboardingScriptEditorTitle => 'Script Editor';
+  String get onboardingScriptEditorTitle => '脚本编辑器';
 
   @override
-  String get onboardingScriptEditorDesc =>
-      'Write and manage your video scripts with ease. Organize your ideas instantly.';
+  String get onboardingScriptEditorDesc => '轻松编写和管理您的视频脚本。立即整理您的想法。';
 
   @override
-  String get onboardingTeleprompterTitle => 'Teleprompter';
+  String get onboardingTeleprompterTitle => '提词器';
 
   @override
-  String get onboardingTeleprompterDesc =>
-      'Read your script while looking directly at the camera. Professional recording made easy.';
+  String get onboardingTeleprompterDesc => '直视摄像头阅读脚本。专业录制变得简单。';
 
   @override
-  String get onboardingPermissionsTitle => 'Enable Permissions';
+  String get onboardingPermissionsTitle => '启用权限';
 
   @override
-  String get onboardingPermissionsDesc =>
-      'To record videos and sync your voice with the script, we need access to your camera and microphone.';
+  String get onboardingPermissionsDesc => '为了录制视频并将您的声音与脚本同步，我们需要访问您的摄像头和麦克风。';
 
   @override
-  String get grantAccess => 'Grant Access';
+  String get grantAccess => '授予访问权限';
 
   @override
-  String get start => 'Start';
+  String get start => '开始';
 
   @override
-  String get next => 'Next';
+  String get next => '下一步';
 
   @override
-  String get permissionsRequired =>
-      'Camera and Microphone permissions are required.';
+  String get permissionsRequired => '需要摄像头和麦克风权限。';
 
   @override
-  String get selectLanguage => 'Select Language';
+  String get selectLanguage => '选择语言';
 
   @override
-  String get selectLanguageDesc => 'Choose your preferred language for the app';
+  String get selectLanguageDesc => '选择您偏好的应用语言';
 
   @override
-  String get continueButton => 'Continue';
+  String get continueButton => '继续';
 
   @override
-  String get settings => 'Settings';
+  String get settings => '设置';
 
   @override
-  String get preferences => 'Preferences';
+  String get preferences => '首选项';
 
   @override
-  String get help => 'Help';
+  String get help => '帮助';
 
   @override
-  String get support => 'Support';
+  String get support => '支持';
 
   @override
-  String get about => 'About';
+  String get about => '关于';
 
   @override
-  String get appearance => 'Appearance';
+  String get appearance => '外观';
 
   @override
-  String get language => 'Language';
+  String get language => '语言';
 
   @override
-  String get systemDefault => 'System Default';
+  String get systemDefault => '系统默认';
 
   @override
-  String get lightMode => 'Light Mode';
+  String get lightMode => '浅色模式';
 
   @override
-  String get darkMode => 'Dark Mode';
+  String get darkMode => '深色模式';
 
   @override
-  String get system => 'System';
+  String get system => '系统';
 
   @override
-  String get light => 'Light';
+  String get light => '浅色';
 
   @override
-  String get dark => 'Dark';
+  String get dark => '深色';
 
   @override
-  String get howToUse => 'How to Use';
+  String get howToUse => '如何使用';
 
   @override
-  String get shareApp => 'Share App';
+  String get shareApp => '分享应用';
 
   @override
-  String get contactUs => 'Contact Us';
+  String get contactUs => '联系我们';
 
   @override
-  String get rateUs => 'Rate Us';
+  String get rateUs => '给我们评分';
 
   @override
-  String get privacyPolicy => 'Privacy Policy';
+  String get privacyPolicy => '隐私政策';
 
   @override
-  String get version => 'Version';
+  String get version => '版本';
 
   @override
-  String get upgradeToPro => 'Upgrade to Pro';
+  String get upgradeToPro => '升级到 Pro';
 
   @override
-  String get unlockAllFeatures => 'Unlock all features & remove ads';
+  String get unlockAllFeatures => '解锁所有功能并移除广告';
 
   @override
   String shareAppMessage(String url) {
-    return 'Record professional videos with confidence using ScriptCam! 🎥✨\n\nIt features a built-in Teleprompter, 4K recording, and Video Editor. Try it out here:\n$url';
+    return '使用 ScriptCam 自信地录制专业视频！🎥✨\n\n它具有内置提词器、4K 录制和视频编辑器。在此处试用：\n$url';
   }
 
   @override
-  String get shareAppSubject => 'Check out ScriptCam: Video Teleprompter';
+  String get shareAppSubject => '查看 ScriptCam：视频提词器';
 
   @override
-  String get goodMorning => 'Good Morning';
+  String get goodMorning => '早上好';
 
   @override
-  String get goodAfternoon => 'Good Afternoon';
+  String get goodAfternoon => '下午好';
 
   @override
-  String get goodEvening => 'Good Evening';
+  String get goodEvening => '晚上好';
 
   @override
-  String get readyToCreate => 'Ready to create something\namazing?';
+  String get readyToCreate => '准备好创造\n令人惊叹的内容了吗？';
 
   @override
-  String get newScript => 'New Script';
+  String get newScript => '新脚本';
 
   @override
-  String get writeFromScratch => 'Write from scratch';
+  String get writeFromScratch => '从头开始编写';
 
   @override
-  String get quickRecord => 'Quick Record';
+  String get quickRecord => '快速录制';
 
   @override
-  String get recordOnTheFly => 'Record on the fly';
+  String get recordOnTheFly => '即兴录制';
 
   @override
-  String get myScripts => 'My Scripts';
+  String get myScripts => '我的脚本';
 
   @override
-  String get recentFirst => 'Recent First';
+  String get recentFirst => '最近优先';
 
   @override
-  String get quickRecordDialogTitle => 'Quick Record';
+  String get quickRecordDialogTitle => '快速录制';
 
   @override
-  String get quickRecordDialogDesc =>
-      'Enter script details below, or skip to open the camera without any text.';
+  String get quickRecordDialogDesc => '在下方输入脚本详细信息，或跳过以在没有文本的情况下打开摄像头。';
 
   @override
-  String get scriptTitle => 'Script Title';
+  String get scriptTitle => '脚本标题';
 
   @override
-  String get scriptContent => 'Script Content';
+  String get scriptContent => '脚本内容';
 
   @override
-  String get scriptTitleHint => 'e.g. YouTube Intro';
+  String get scriptTitleHint => '例如 YouTube 开场白';
 
   @override
-  String get scriptContentHint => 'Paste your script content here...';
+  String get scriptContentHint => '在此处粘贴您的脚本内容...';
 
   @override
-  String get startRecording => 'Start Recording';
+  String get startRecording => '开始录制';
 
   @override
-  String get editScript => 'Edit Script';
+  String get editScript => '编辑脚本';
 
   @override
-  String get save => 'SAVE';
+  String get save => '保存';
 
   @override
-  String get scriptTitlePlaceholder => 'Script Title...';
+  String get scriptTitlePlaceholder => '脚本标题...';
 
   @override
-  String get scriptContentPlaceholder => 'Start writing your script here...';
+  String get scriptContentPlaceholder => '在此处开始编写您的脚本...';
 
   @override
-  String get platform => 'PLATFORM';
+  String get platform => '平台';
 
   @override
-  String get titleRequired => 'Title required';
+  String get titleRequired => '需要标题';
 
   @override
-  String get saved => 'Saved';
+  String get saved => '已保存';
 
   @override
-  String get created => 'Created!';
+  String get created => '已创建！';
 
   @override
-  String get textPasted => 'Text pasted';
+  String get textPasted => '文本已粘贴';
 
   @override
-  String get scriptDeleted => 'Script deleted';
+  String get scriptDeleted => '脚本已删除';
 
   @override
-  String get deleteScriptTitle => 'Delete Script?';
+  String get deleteScriptTitle => '删除脚本？';
 
   @override
-  String get deleteScriptMessage => 'This action cannot be undone.';
+  String get deleteScriptMessage => '此操作无法撤销。';
 
   @override
-  String get cancel => 'Cancel';
+  String get cancel => '取消';
 
   @override
-  String get delete => 'Delete';
+  String get delete => '删除';
 
   @override
   String get appInfoTitle => 'ScriptCam';
 
   @override
-  String get appInfoVersion => 'Version 1.0.3';
+  String get appInfoVersion => '版本 1.0.3';
 
   @override
-  String get appInfoDescription =>
-      'The ultimate teleprompter and video recording tool for content creators. Create, read, and record seamlessly.';
+  String get appInfoDescription => '内容创作者的终极提词器和视频录制工具。无缝创建、阅读和录制。';
 
   @override
-  String get close => 'Close';
+  String get close => '关闭';
 
   @override
-  String get emptyScriptsAll => 'No scripts yet';
+  String get emptyScriptsAll => '暂无脚本';
 
   @override
-  String get emptyScriptsAllDesc => 'Create your first script to get started';
+  String get emptyScriptsAllDesc => '创建您的第一个脚本以开始';
 
   @override
   String emptyScriptsCategory(String category) {
-    return 'No $category scripts';
+    return '没有 $category 脚本';
   }
 
   @override
-  String get emptyScriptsCategoryDesc => 'Create a script for this platform';
+  String get emptyScriptsCategoryDesc => '为此平台创建一个脚本';
 
   @override
-  String get gallery => 'Gallery';
+  String get gallery => '画廊';
 
   @override
-  String get emptyGallery => 'No videos yet';
+  String get emptyGallery => '暂无视频';
 
   @override
-  String get emptyGalleryDesc => 'Record your first video to see it here';
+  String get emptyGalleryDesc => '录制您的第一个视频以在此处查看';
 
   @override
-  String get teleprompter => 'Teleprompter';
+  String get teleprompter => '提词器';
 
   @override
-  String get record => 'Record';
+  String get record => '录制';
 
   @override
-  String get stop => 'Stop';
+  String get stop => '停止';
 
   @override
-  String get pause => 'Pause';
+  String get pause => '暂停';
 
   @override
-  String get resume => 'Resume';
+  String get resume => '恢复';
 
   @override
-  String get speed => 'Speed';
+  String get speed => '速度';
 
   @override
-  String get fontSize => 'Font Size';
+  String get fontSize => '字体大小';
 
   @override
-  String get mirror => 'Mirror';
+  String get mirror => '镜像';
 
   @override
-  String get voiceSync => 'Voice Sync';
+  String get voiceSync => '语音同步';
 
   @override
-  String get autoScroll => 'Auto Scroll';
+  String get autoScroll => '自动滚动';
 
   @override
-  String get videoSettings => 'Video Settings';
+  String get videoSettings => '视频设置';
 
   @override
-  String get resolution => 'Resolution';
+  String get resolution => '分辨率';
 
   @override
-  String get quality => 'Quality';
+  String get quality => '质量';
 
   @override
-  String get premium => 'Premium';
+  String get premium => '高级版';
 
   @override
-  String get getPremium => 'Get Premium';
+  String get getPremium => '获取高级版';
 
   @override
-  String get restorePurchases => 'Restore Purchases';
+  String get restorePurchases => '恢复购买';
 
   @override
-  String get videoEditor => 'Video Editor';
+  String get videoEditor => '视频编辑器';
 
   @override
-  String get trim => 'Trim';
+  String get trim => '修剪';
 
   @override
-  String get adjust => 'Adjust';
+  String get adjust => '调整';
 
   @override
-  String get filters => 'Filters';
+  String get filters => '滤镜';
 
   @override
-  String get export => 'Export';
+  String get export => '导出';
 
   @override
-  String get exporting => 'Exporting...';
+  String get exporting => '正在导出...';
 
   @override
-  String get exportComplete => 'Export complete!';
+  String get exportComplete => '导出完成！';
 
   @override
-  String get brightness => 'Brightness';
+  String get brightness => '亮度';
 
   @override
-  String get contrast => 'Contrast';
+  String get contrast => '对比度';
 
   @override
-  String get saturation => 'Saturation';
+  String get saturation => '饱和度';
 
   @override
-  String get share => 'Share';
+  String get share => '分享';
 
   @override
-  String get play => 'Play';
+  String get play => '播放';
 
   @override
-  String get all => 'All';
+  String get all => '全部';
 
   @override
-  String get general => 'General';
+  String get general => '常规';
 
   @override
-  String get search => 'Search';
+  String get search => '搜索';
 
   @override
-  String get searchScripts => 'Search scripts...';
+  String get searchScripts => '搜索脚本...';
 
   @override
-  String get studio => 'Studio';
+  String get studio => '工作室';
 
   @override
-  String get startYourJourney => 'Start Your Journey';
+  String get startYourJourney => '开始您的旅程';
 
   @override
-  String get noResultsFound => 'No results found';
+  String get noResultsFound => '未找到结果';
 
   @override
-  String get noResultsMessage =>
-      'We couldn\'t find any scripts matching your search. Try different keywords!';
+  String get noResultsMessage => '我们找不到任何与您的搜索匹配的脚本。尝试不同的关键字！';
 
   @override
-  String get emptyCreativeSpaceMessage =>
-      'Your creative space is empty. Create your first script or try recording something on the fly!';
+  String get emptyCreativeSpaceMessage => '您的创意空间是空的。创建您的第一个脚本或尝试即兴录制内容！';
 
   @override
-  String get paste => 'Paste';
+  String get paste => '粘贴';
 
   @override
-  String get createNewScript => 'Create New Script';
+  String get createNewScript => '创建新脚本';
 
   @override
-  String get selectPlatformDesc => 'Select a platform for your script';
+  String get selectPlatformDesc => '为您的脚本选择一个平台';
 
   @override
   String get pro => 'PRO';
 
   @override
-  String get minRead => 'min read';
+  String get minRead => '分钟阅读';
 
   @override
-  String get words => 'words';
+  String get words => '字';
 
   @override
-  String get edit => 'Edit';
+  String get edit => '编辑';
 
   @override
-  String get howToUseTitle => 'How to Use ScriptCam';
+  String get howToUseTitle => '如何使用 ScriptCam';
 
   @override
-  String get step1Title => 'Create a Script';
+  String get step1Title => '创建脚本';
 
   @override
-  String get step1Desc =>
-      'Start by creating a new script or quick record without text';
+  String get step1Desc => '首先创建一个新脚本或没有文本的快速录制';
 
   @override
-  String get step2Title => 'Setup Teleprompter';
+  String get step2Title => '设置提词器';
 
   @override
-  String get step2Desc =>
-      'Adjust speed, font size, and enable voice sync for hands-free scrolling';
+  String get step2Desc => '调整速度、字体大小并启用语音同步以实现免提滚动';
 
   @override
-  String get step3Title => 'Record Your Video';
+  String get step3Title => '录制您的视频';
 
   @override
-  String get step3Desc =>
-      'Press record and read your script while looking at the camera';
+  String get step3Desc => '按下录制并看着摄像头阅读您的脚本';
 
   @override
-  String get step4Title => 'Edit & Share';
+  String get step4Title => '编辑和分享';
 
   @override
-  String get step4Desc =>
-      'Use the video editor to trim, adjust, and apply filters before sharing';
+  String get step4Desc => '在分享之前使用视频编辑器修剪、调整和应用滤镜';
 
   @override
-  String get gotIt => 'Got It';
+  String get gotIt => '知道了';
 
   @override
-  String get deleteVideoTitle => 'Delete Video?';
+  String get deleteVideoTitle => '删除视频？';
 
   @override
-  String get videoDeleted => 'Video deleted';
+  String get videoDeleted => '视频已删除';
 
   @override
-  String get mute => 'Mute';
+  String get mute => '静音';
 
   @override
-  String get opacity => 'Opacity';
+  String get opacity => '不透明度';
 
   @override
-  String get original => 'Original';
+  String get original => '原件';
 
   @override
-  String get processing => 'Processing...';
+  String get processing => '处理中...';
 
   @override
-  String get range => 'Range';
+  String get range => '范围';
 
   @override
-  String get ratio => 'Ratio';
+  String get ratio => '比例';
 
   @override
-  String get recordingFailed => 'Recording failed';
+  String get recordingFailed => '录制失败';
 
   @override
-  String get rotate => 'Rotate';
+  String get rotate => '旋转';
 
   @override
-  String get targetFps => 'Target FPS';
+  String get targetFps => '目标 FPS';
 
   @override
-  String get transform => 'Transform';
+  String get transform => '变换';
 
   @override
-  String get premiumDescription =>
-      'Unlock all premium features and enjoy an ad-free experience';
+  String get premiumDescription => '解锁所有高级功能并享受无广告体验';
 
   @override
-  String get removeAds => 'Remove Ads';
+  String get removeAds => '移除广告';
 
   @override
-  String get unlimitedScripts => 'Unlimited Scripts';
+  String get unlimitedScripts => '无限脚本';
 
   @override
-  String get unlockCreatorPro => 'Unlock Creator Pro';
+  String get unlockCreatorPro => '解锁创作者高级版';
 
   @override
-  String get upgradeForLifetime => 'Upgrade for Lifetime Access';
+  String get upgradeForLifetime => '升级以获得终身访问权限';
 
   @override
-  String get restorePurchaseLink => 'Restore Purchase';
+  String get restorePurchaseLink => '恢复购买';
+
+  @override
+  String get watchAdToRecord => 'Watch Ad to Record';
+
+  @override
+  String get watchAdToRecordDesc =>
+      'Watch a short ad to unlock recording for this script.';
+
+  @override
+  String get premiumBenefitInstantRecord =>
+      'Premium users get instant recording and Voice Sync!';
+
+  @override
+  String get noInternetTitle => 'No Internet Connection';
+
+  @override
+  String get noInternetDesc =>
+      'It seems you are offline. Please check your connection and try again.';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get voiceSyncLocked => 'Voice Sync is a Premium Feature';
+
+  @override
+  String get voiceSyncLockedDesc =>
+      'Upgrade to Pro to enable hands-free voice-synced scrolling.';
 }

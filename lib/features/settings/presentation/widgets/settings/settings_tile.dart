@@ -10,12 +10,14 @@ class SettingsTile extends StatelessWidget {
   final Color color;
   final VoidCallback? onTap;
   final bool isDark;
+  final Widget? trailing;
 
   const SettingsTile({
     super.key,
     required this.icon,
     required this.title,
     this.value,
+    this.trailing,
     required this.color,
     required this.onTap,
     required this.isDark,
@@ -59,7 +61,10 @@ class SettingsTile extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-              if (onTap != null) ...[
+              if (trailing != null) ...[
+                SizedBox(width: 8.w),
+                trailing!,
+              ] else if (onTap != null) ...[
                 SizedBox(width: 8.w),
                 Icon(
                   Icons.arrow_forward_ios_rounded,

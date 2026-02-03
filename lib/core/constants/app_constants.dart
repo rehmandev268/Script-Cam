@@ -40,6 +40,7 @@ class AdIds {
   static const String interstitial = 'ca-app-pub-7607398523452249/8236096479';
   static const String native = 'ca-app-pub-7607398523452249/3777976717';
   static const String appOpen = 'ca-app-pub-7607398523452249/2305769488';
+  static const String rewarded = 'ca-app-pub-7607398523452249/3776548036';
   static const String privacyPolicyUrl =
       'https://sites.google.com/view/primexia-studios/home';
 }

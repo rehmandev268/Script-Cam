@@ -1031,6 +1031,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Restore Purchase'**
   String get restorePurchaseLink;
+
+  /// Title for the rewarded ad dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Watch Ad to Record'**
+  String get watchAdToRecord;
+
+  /// Description for the rewarded ad dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Watch a short ad to unlock recording for this script.'**
+  String get watchAdToRecordDesc;
+
+  /// Premium benefit highlight in ad dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Premium users get instant recording and Voice Sync!'**
+  String get premiumBenefitInstantRecord;
+
+  /// Title for the no internet screen
+  ///
+  /// In en, this message translates to:
+  /// **'No Internet Connection'**
+  String get noInternetTitle;
+
+  /// Description for the no internet screen
+  ///
+  /// In en, this message translates to:
+  /// **'It seems you are offline. Please check your connection and try again.'**
+  String get noInternetDesc;
+
+  /// Retry button label
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// Short message when voice sync is locked
+  ///
+  /// In en, this message translates to:
+  /// **'Voice Sync is a Premium Feature'**
+  String get voiceSyncLocked;
+
+  /// Longer message when voice sync is locked
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Pro to enable hands-free voice-synced scrolling.'**
+  String get voiceSyncLockedDesc;
 }
 
 class _AppLocalizationsDelegate

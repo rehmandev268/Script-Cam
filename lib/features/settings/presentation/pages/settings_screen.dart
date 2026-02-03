@@ -24,6 +24,8 @@ import '../widgets/settings/theme_option.dart';
 import '../widgets/settings/section_header.dart';
 
 import '../widgets/settings/settings_divider.dart';
+import '../../../../core/utils/toast_service.dart';
+import '../../../../features/settings/presentation/providers/ui_provider.dart';
 
 class SettingsScreen extends StatelessWidget {
   final double bottomPadding;
@@ -267,6 +269,43 @@ class SettingsScreen extends StatelessWidget {
                                 ),
                               );
                             },
+                            isDark: isDark,
+                          );
+                        },
+                      ),
+                      SettingsDivider(isDark: isDark),
+                      Consumer2<UIProvider, PremiumProvider>(
+                        builder: (context, uiProvider, premium, _) {
+                          return SettingsTile(
+                            icon: Icons.mic_external_on_outlined,
+                            title: l10n.voiceSync,
+                            color: Colors.redAccent,
+                            trailing: premium.isPremium
+                                ? Switch.adaptive(
+                                    value: uiProvider.voiceSyncEnabled,
+                                    activeColor: AppColors.primary,
+                                    onChanged: (value) {
+                                      uiProvider.toggleVoiceSync(value);
+                                    },
+                                  )
+                                : Icon(
+                                    Icons.lock_rounded,
+                                    size: 18.sp,
+                                    color: AppColors.textGrey,
+                                  ),
+                            onTap: premium.isPremium
+                                ? () => uiProvider.toggleVoiceSync(
+                                    !uiProvider.voiceSyncEnabled,
+                                  )
+                                : () {
+                                    ToastService.show(l10n.voiceSyncLocked);
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => const PremiumScreen(),
+                                      ),
+                                    );
+                                  },
                             isDark: isDark,
                           );
                         },

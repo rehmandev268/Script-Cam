@@ -1,37 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'generated/l10n/app_localizations.dart';
-import 'core/services/ads_service/interstitial_ad_helper.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
+import 'package:flutter_application_6/core/services/ads_service/rewarded_ad_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'firebase_options.dart';
+import 'package:flutter_application_6/firebase_options.dart';
 import 'dart:ui';
 
-import 'core/constants/app_constants.dart';
-import 'core/services/ads_service/ad_state.dart';
-import 'core/services/ads_service/app_open_ad_manager.dart';
-import 'core/services/gdpr_service.dart';
-import 'core/utils/responsive_config.dart';
-import 'core/theme/theme_provider.dart';
-import 'core/providers/locale_provider.dart';
+import 'package:flutter_application_6/core/constants/app_constants.dart';
+import 'package:flutter_application_6/core/services/ads_service/ad_state.dart';
+import 'package:flutter_application_6/core/services/gdpr_service.dart';
+import 'package:flutter_application_6/core/utils/responsive_config.dart';
+import 'package:flutter_application_6/core/theme/theme_provider.dart';
+import 'package:flutter_application_6/core/providers/locale_provider.dart';
 
-import 'features/scripts/data/models/script_model.dart';
-import 'features/gallery/data/models/video_model.dart';
-import 'features/scripts/presentation/providers/scripts_provider.dart';
-import 'features/gallery/presentation/providers/gallery_provider.dart';
-import 'features/premium/presentation/providers/premium_provider.dart';
-import 'features/settings/presentation/providers/ui_provider.dart';
-import 'features/onboarding/presentation/pages/onboarding_screen.dart';
-import 'features/onboarding/presentation/pages/language_selection_screen.dart';
-import 'features/navigation/presentation/pages/root_navigation_screen.dart';
-import 'widgets/common/app_lifecycle_reactor.dart';
-import 'core/services/voice_sync_service.dart';
-import 'core/services/analytics_service.dart';
+import 'package:flutter_application_6/features/scripts/data/models/script_model.dart';
+import 'package:flutter_application_6/features/gallery/data/models/video_model.dart';
+import 'package:flutter_application_6/features/scripts/presentation/providers/scripts_provider.dart';
+import 'package:flutter_application_6/features/gallery/presentation/providers/gallery_provider.dart';
+import 'package:flutter_application_6/features/premium/presentation/providers/premium_provider.dart';
+import 'package:flutter_application_6/features/settings/presentation/providers/ui_provider.dart';
+import 'package:flutter_application_6/features/onboarding/presentation/pages/onboarding_screen.dart';
+import 'package:flutter_application_6/features/onboarding/presentation/pages/language_selection_screen.dart';
+import 'package:flutter_application_6/features/navigation/presentation/pages/root_navigation_screen.dart';
+import 'package:flutter_application_6/widgets/common/no_internet_screen.dart';
+import 'package:flutter_application_6/core/services/connectivity_service.dart';
+import 'package:flutter_application_6/core/services/voice_sync_service.dart';
+import 'package:flutter_application_6/core/services/analytics_service.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -40,12 +39,10 @@ void main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Pass all uncaught "fatal" errors from the framework to Crashlytics
   FlutterError.onError = (errorDetails) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
   };
 
-  // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
   PlatformDispatcher.instance.onError = (error, stack) {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     return true;
@@ -71,8 +68,7 @@ void main() async {
     settingsBox = boxes[2];
   } catch (e) {
     debugPrint("Hive initialization failed: $e");
-    // If opening boxes fails (e.g. corruption), try to recover by deleting and re-opening
-    // This is a last-resort to prevent the app from being stuck on a white screen
+    
     await Hive.deleteBoxFromDisk(HiveKeys.scriptsBox);
     await Hive.deleteBoxFromDisk(HiveKeys.videosBox);
     await Hive.deleteBoxFromDisk(HiveKeys.settingsBox);
@@ -93,23 +89,12 @@ void main() async {
     );
     final canRequestAds = await GDPRService().initializeConsent();
     AdState.canRequestAds = canRequestAds;
-
-    InterstitialAdHelper.load();
-
+    RewardedAdHelper.load();
     AnalyticsService().logAppOpen();
   });
 
   final premiumProvider = PremiumProvider();
   final uiProvider = UIProvider(settingsBox);
-  final appOpenAdManager = AppOpenAdManager()..loadAd();
-
-  WidgetsBinding.instance.addObserver(
-    AppLifecycleReactor(
-      appOpenAdManager: appOpenAdManager,
-      premiumProvider: premiumProvider,
-      uiProvider: uiProvider,
-    ),
-  );
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   SystemChrome.setSystemUIOverlayStyle(
@@ -130,6 +115,7 @@ void main() async {
         ChangeNotifierProvider.value(value: premiumProvider),
         ChangeNotifierProvider.value(value: uiProvider),
         ChangeNotifierProvider(create: (_) => VoiceSyncService()),
+        ChangeNotifierProvider(create: (_) => ConnectivityService()),
       ],
       child: const CinePromptApp(),
     ),
@@ -150,35 +136,8 @@ class CinePromptApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
 
           locale: localeProvider.locale,
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale('en'),
-            Locale('es'),
-            Locale('fr'),
-            Locale('de'),
-            Locale('pt'),
-            Locale('zh'),
-            Locale('ja'),
-            Locale('ko'),
-            Locale('ar'),
-            Locale('hi'),
-          ],
-          localeResolutionCallback: (locale, supportedLocales) {
-            if (locale == null) {
-              return supportedLocales.first;
-            }
-            for (var supportedLocale in supportedLocales) {
-              if (supportedLocale.languageCode == locale.languageCode) {
-                return supportedLocale;
-              }
-            }
-            return supportedLocales.first;
-          },
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
 
           themeMode: themeProvider.themeMode,
           theme: ThemeData.light().copyWith(
@@ -329,7 +288,14 @@ class CinePromptApp extends StatelessWidget {
           builder: (context, child) {
             ResponsiveLayout.init(context);
 
-            return FrozenLayoutFix(child: child ?? const SizedBox());
+            return Consumer<ConnectivityService>(
+              builder: (context, connectivity, _) {
+                if (!connectivity.isConnected) {
+                  return const NoInternetScreen();
+                }
+                return FrozenLayoutFix(child: child ?? const SizedBox());
+              },
+            );
           },
 
           home: Consumer<UIProvider>(

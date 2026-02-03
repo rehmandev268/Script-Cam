@@ -7,7 +7,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/utils/responsive_config.dart';
 import '../../../../core/utils/toast_service.dart';
-import '../../../../core/services/ads_service/interstitial_ad_helper.dart';
 import '../../../premium/presentation/providers/premium_provider.dart';
 import '../../../teleprompter/presentation/pages/teleprompter_screen.dart';
 import '../../data/models/script_model.dart';
@@ -18,6 +17,9 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../../core/utils/platform_utils.dart';
 import '../../../../core/utils/app_dialogs.dart';
 import '../../../onboarding/presentation/pages/onboarding_screen.dart';
+import '../../../../widgets/ads/rewarded_ad_dialog.dart';
+import '../../../../core/services/ads_service/rewarded_ad_helper.dart';
+import '../../../premium/presentation/screen/premium_screen.dart';
 import '../widgets/premium_badge.dart';
 import '../widgets/category_tabs.dart';
 import '../widgets/script_card.dart';
@@ -94,15 +96,14 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _handleVideoClick(BuildContext context, Script script) async {
+  void _handleVideoClick(Script script) async {
     FocusManager.instance.primaryFocus?.unfocus();
 
-    // Check permissions before proceeding
     final cameraStatus = await Permission.camera.status;
     final micStatus = await Permission.microphone.status;
 
     if (!cameraStatus.isGranted || !micStatus.isGranted) {
-      if (context.mounted) {
+      if (mounted) {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const OnboardingScreen()),
@@ -111,19 +112,62 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    if (!context.mounted) return;
-    final premium = Provider.of<PremiumProvider>(
+    if (!mounted) return;
+    final premiumProvider = Provider.of<PremiumProvider>(
       context,
       listen: false,
-    ).isPremium;
-    // Navigate immediately
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => TeleprompterScreen(script: script)),
     );
 
-    // Show ad independently
-    InterstitialAdHelper.show(isPremium: premium, onComplete: () {});
+    if (premiumProvider.isPremium) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => TeleprompterScreen(script: script)),
+      );
+    } else {
+      final result = await showModalBottomSheet<String>(
+        context: context,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (ctx) => const RewardedAdDialog(),
+      );
+
+      if (!mounted) return;
+
+      if (result == 'premium') {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const PremiumScreen()),
+        );
+      } else if (result == 'watch') {
+        AnalyticsService().logRewardedAdWatchClicked();
+        RewardedAdHelper.retryAndShow(
+          onRewardEarned: () {
+            AnalyticsService().logRewardedAdRewardEarned();
+            if (mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TeleprompterScreen(script: script),
+                ),
+              );
+            }
+          },
+          onFallbackProceed: () {
+            AnalyticsService().logRewardedAdFailed(
+              reason: 'Ad failed to load/show',
+            );
+            if (mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TeleprompterScreen(script: script),
+                ),
+              );
+            }
+          },
+        );
+      }
+    }
   }
 
   void _handleEditClick(BuildContext context, Script script) {
@@ -251,7 +295,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       content: contentInput.isEmpty ? " " : contentInput,
                       category: 'General',
                     );
-                    _handleVideoClick(ctx, tempScript);
+                    _handleVideoClick(tempScript);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
@@ -532,7 +576,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: () =>
                             _handleEditClick(context, displayedScripts[index]),
                         onRecord: () =>
-                            _handleVideoClick(context, displayedScripts[index]),
+                            _handleVideoClick(displayedScripts[index]),
                         onEdit: () =>
                             _handleEditClick(context, displayedScripts[index]),
                         onDelete: () => _confirmDelete(
@@ -572,7 +616,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       _getGreeting(l10n),
                       style: GoogleFonts.manrope(
-                        fontSize: 24.sp,
+                        fontSize: 22.sp,
                         fontWeight: FontWeight.w800,
                         color: isDark ? Colors.white : Colors.black,
                       ),
