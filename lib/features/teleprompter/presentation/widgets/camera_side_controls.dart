@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:flutter_application_6/core/utils/responsive_config.dart';
+import 'package:flutter_application_6/core/constants/app_constants.dart';
 
 class CameraSideControls extends StatelessWidget {
   final CameraState state;
@@ -46,7 +47,7 @@ class CameraSideControls extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.wb_sunny_rounded,
-                    color: Colors.amber,
+                    color: AppColors.primary,
                     size: 20.sp,
                   ),
                   Expanded(
@@ -59,7 +60,7 @@ class CameraSideControls extends StatelessWidget {
                             enabledThumbRadius: 8.r,
                           ),
                           overlayShape: SliderComponentShape.noOverlay,
-                          activeTrackColor: Colors.amber,
+                          activeTrackColor: AppColors.primary,
                           inactiveTrackColor: Colors.white24,
                           thumbColor: Colors.white,
                         ),

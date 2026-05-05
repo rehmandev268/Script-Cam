@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_6/core/utils/responsive_config.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:easy_video_editor/easy_video_editor.dart';
 import 'package:flutter_application_6/core/constants/app_constants.dart';
 
@@ -19,34 +20,43 @@ class _ExportDialogState extends State<ExportDialog> {
   void dispose() {
     _nameController.dispose();
     super.dispose();
-  }
+  } 
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleColor = isDark ? Colors.white : AppColors.textBlack;
+    final secondaryColor = isDark ? Colors.white70 : AppColors.textGrey;
+    final inputBg = isDark
+        ? Colors.black45
+        : Colors.black.withValues(alpha: 0.05);
     return AlertDialog(
-      backgroundColor: const Color(0xFF1E1E1E),
+      backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16).r),
       title: Text(
-        "Save Video",
-        style: TextStyle(color: Colors.white, fontSize: 18.sp),
+        l10n.saveVideo,
+        style: TextStyle(color: titleColor, fontSize: 18.sp),
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Video Name",
-            style: TextStyle(color: Colors.white70, fontSize: 12.sp),
+            l10n.videoName,
+            style: TextStyle(color: secondaryColor, fontSize: 12.sp),
           ),
           SizedBox(height: 8.h),
           TextField(
             controller: _nameController,
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: titleColor),
             decoration: InputDecoration(
-              hintText: "Enter video name...",
-              hintStyle: const TextStyle(color: Colors.white30),
+              hintText: l10n.videoNameHint,
+              hintStyle: TextStyle(
+                color: isDark ? Colors.white30 : Colors.black38,
+              ),
               filled: true,
-              fillColor: Colors.black45,
+              fillColor: inputBg,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8).r,
                 borderSide: BorderSide.none,
@@ -59,41 +69,42 @@ class _ExportDialogState extends State<ExportDialog> {
           ),
           SizedBox(height: 16.h),
           Text(
-            "Quality",
-            style: TextStyle(color: Colors.white70, fontSize: 12.sp),
+            l10n.qualityLabel,
+            style: TextStyle(color: secondaryColor, fontSize: 12.sp),
           ),
           SizedBox(height: 8.h),
           DropdownButtonFormField<VideoResolution>(
             initialValue: _selectedQuality,
-            dropdownColor: const Color(0xFF2C2C2C),
+            dropdownColor:
+                isDark ? const Color(0xFF2C2C2C) : AppColors.lightSurface,
             decoration: InputDecoration(
               filled: true,
-              fillColor: Colors.black45,
+              fillColor: inputBg,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8).r,
                 borderSide: BorderSide.none,
               ),
             ),
-            items: const [
+            items: [
               DropdownMenuItem(
                 value: VideoResolution.p480,
                 child: Text(
-                  "Low (480p)",
-                  style: TextStyle(color: Colors.white),
+                  l10n.qualityLow,
+                  style: TextStyle(color: titleColor),
                 ),
               ),
               DropdownMenuItem(
                 value: VideoResolution.p720,
                 child: Text(
-                  "Standard (720p)",
-                  style: TextStyle(color: Colors.white),
+                  l10n.qualityStandard,
+                  style: TextStyle(color: titleColor),
                 ),
               ),
               DropdownMenuItem(
                 value: VideoResolution.p1080,
                 child: Text(
-                  "High (1080p)",
-                  style: TextStyle(color: Colors.white),
+                  l10n.qualityHigh,
+                  style: TextStyle(color: titleColor),
                 ),
               ),
             ],
@@ -104,7 +115,7 @@ class _ExportDialogState extends State<ExportDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+          child: Text(l10n.cancel, style: const TextStyle(color: Colors.grey)),
         ),
         ElevatedButton(
           onPressed: () {
@@ -114,8 +125,10 @@ class _ExportDialogState extends State<ExportDialog> {
             }
             widget.onExport(name, _selectedQuality);
           },
-          style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-          child: const Text("Save", style: TextStyle(color: Colors.white)),
+          child: Text(
+            l10n.saveButton,
+            style: const TextStyle(color: Colors.white),
+          ),
         ),
       ],
     );

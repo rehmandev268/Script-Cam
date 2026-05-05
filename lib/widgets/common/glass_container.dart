@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:animate_do/animate_do.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/responsive_config.dart';
 
@@ -75,9 +75,7 @@ Future<bool> showGlassConfirmDialog(
         barrierColor: Colors.black.withValues(alpha: 0.6),
         builder: (context) => BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 5.r, sigmaY: 5.r),
-          child: ZoomIn(
-            duration: const Duration(milliseconds: 200),
-            child: Dialog(
+          child: Dialog(
               backgroundColor: Colors.transparent,
               child: Container(
                 decoration: BoxDecoration(
@@ -137,7 +135,7 @@ Future<bool> showGlassConfirmDialog(
                           child: TextButton(
                             onPressed: () => Navigator.pop(context, false),
                             child: Text(
-                              "Cancel",
+                              AppLocalizations.of(context).cancel,
                               style: TextStyle(
                                 color: isDark ? Colors.white54 : Colors.black45,
                                 fontWeight: FontWeight.bold,
@@ -176,7 +174,6 @@ Future<bool> showGlassConfirmDialog(
                 ),
               ),
             ),
-          ),
         ),
       ) ??
       false;

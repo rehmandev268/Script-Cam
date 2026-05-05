@@ -48,7 +48,7 @@ class _RewardedAdDialogState extends State<RewardedAdDialog> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: EdgeInsets.fromLTRB(24.w, 32.h, 24.w, 24.h),
+      padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 24.h),
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
         borderRadius: BorderRadius.only(
@@ -106,7 +106,7 @@ class _RewardedAdDialogState extends State<RewardedAdDialog> {
               children: [
                 Icon(
                   Icons.workspace_premium_rounded,
-                  color: const Color(0xFFFFD700),
+                  color: AppColors.primary,
                   size: 24.sp,
                 ),
                 SizedBox(width: 12.w),

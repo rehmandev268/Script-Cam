@@ -14,6 +14,7 @@ import 'app_localizations_hi.dart';
 import 'app_localizations_ja.dart';
 import 'app_localizations_ko.dart';
 import 'app_localizations_pt.dart';
+import 'app_localizations_ur.dart';
 import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
@@ -111,128 +112,9 @@ abstract class AppLocalizations {
     Locale('ja'),
     Locale('ko'),
     Locale('pt'),
+    Locale('ur'),
     Locale('zh'),
   ];
-
-  /// The application title
-  ///
-  /// In en, this message translates to:
-  /// **'ScriptCam'**
-  String get appTitle;
-
-  /// Title for the welcome onboarding screen
-  ///
-  /// In en, this message translates to:
-  /// **'Welcome to ScriptCam'**
-  String get onboardingWelcomeTitle;
-
-  /// Description for the welcome onboarding screen
-  ///
-  /// In en, this message translates to:
-  /// **'Your all-in-one Teleprompter studio. Write scripts, record videos, and edit seamlessly.'**
-  String get onboardingWelcomeDesc;
-
-  /// Title for the script editor onboarding screen
-  ///
-  /// In en, this message translates to:
-  /// **'Script Editor'**
-  String get onboardingScriptEditorTitle;
-
-  /// Description for the script editor onboarding screen
-  ///
-  /// In en, this message translates to:
-  /// **'Write and manage your video scripts with ease. Organize your ideas instantly.'**
-  String get onboardingScriptEditorDesc;
-
-  /// Title for the teleprompter onboarding screen
-  ///
-  /// In en, this message translates to:
-  /// **'Teleprompter'**
-  String get onboardingTeleprompterTitle;
-
-  /// Description for the teleprompter onboarding screen
-  ///
-  /// In en, this message translates to:
-  /// **'Read your script while looking directly at the camera. Professional recording made easy.'**
-  String get onboardingTeleprompterDesc;
-
-  /// Title for the permissions onboarding screen
-  ///
-  /// In en, this message translates to:
-  /// **'Enable Permissions'**
-  String get onboardingPermissionsTitle;
-
-  /// Description for the permissions onboarding screen
-  ///
-  /// In en, this message translates to:
-  /// **'To record videos and sync your voice with the script, we need access to your camera and microphone.'**
-  String get onboardingPermissionsDesc;
-
-  /// Button to grant permissions
-  ///
-  /// In en, this message translates to:
-  /// **'Grant Access'**
-  String get grantAccess;
-
-  /// Button to start using the app
-  ///
-  /// In en, this message translates to:
-  /// **'Start'**
-  String get start;
-
-  /// Button to go to next screen
-  ///
-  /// In en, this message translates to:
-  /// **'Next'**
-  String get next;
-
-  /// Toast message when permissions are denied
-  ///
-  /// In en, this message translates to:
-  /// **'Camera and Microphone permissions are required.'**
-  String get permissionsRequired;
-
-  /// Title for language selection screen
-  ///
-  /// In en, this message translates to:
-  /// **'Select Language'**
-  String get selectLanguage;
-
-  /// Description for language selection screen
-  ///
-  /// In en, this message translates to:
-  /// **'Choose your preferred language for the app'**
-  String get selectLanguageDesc;
-
-  /// Button to continue to next screen
-  ///
-  /// In en, this message translates to:
-  /// **'Continue'**
-  String get continueButton;
-
-  /// Settings screen title
-  ///
-  /// In en, this message translates to:
-  /// **'Settings'**
-  String get settings;
-
-  /// Preferences section header
-  ///
-  /// In en, this message translates to:
-  /// **'Preferences'**
-  String get preferences;
-
-  /// Help section header
-  ///
-  /// In en, this message translates to:
-  /// **'Help'**
-  String get help;
-
-  /// Support section header
-  ///
-  /// In en, this message translates to:
-  /// **'Support'**
-  String get support;
 
   /// About section header
   ///
@@ -240,311 +122,59 @@ abstract class AppLocalizations {
   /// **'About'**
   String get about;
 
+  /// Fallback script content prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Add or select a script to begin recording with teleprompter overlay.'**
+  String get addOrSelectScriptPrompt;
+
+  /// Adjust tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust'**
+  String get adjust;
+
+  /// Ad error title
+  ///
+  /// In en, this message translates to:
+  /// **'Ad unavailable'**
+  String get adNotAvailable;
+
+  /// Ad error description on sheet
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load an ad. Try again in a moment.'**
+  String get adNotAvailableDesc;
+
+  /// When user closed ad early
+  ///
+  /// In en, this message translates to:
+  /// **'Ad not finished'**
+  String get adNotCompleted;
+
+  /// Description when ad incomplete
+  ///
+  /// In en, this message translates to:
+  /// **'Watch the full ad to earn recording credits.'**
+  String get adNotCompletedDesc;
+
+  /// All category label
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// Bottom sheet title for scripts picker
+  ///
+  /// In en, this message translates to:
+  /// **'All Scripts'**
+  String get allScriptsTitle;
+
   /// Appearance settings label
   ///
   /// In en, this message translates to:
   /// **'Appearance'**
   String get appearance;
-
-  /// Language settings label
-  ///
-  /// In en, this message translates to:
-  /// **'Language'**
-  String get language;
-
-  /// System default theme option
-  ///
-  /// In en, this message translates to:
-  /// **'System Default'**
-  String get systemDefault;
-
-  /// Light theme option
-  ///
-  /// In en, this message translates to:
-  /// **'Light Mode'**
-  String get lightMode;
-
-  /// Dark theme option
-  ///
-  /// In en, this message translates to:
-  /// **'Dark Mode'**
-  String get darkMode;
-
-  /// System theme short label
-  ///
-  /// In en, this message translates to:
-  /// **'System'**
-  String get system;
-
-  /// Light theme short label
-  ///
-  /// In en, this message translates to:
-  /// **'Light'**
-  String get light;
-
-  /// Dark theme short label
-  ///
-  /// In en, this message translates to:
-  /// **'Dark'**
-  String get dark;
-
-  /// How to use menu item
-  ///
-  /// In en, this message translates to:
-  /// **'How to Use'**
-  String get howToUse;
-
-  /// Share app menu item
-  ///
-  /// In en, this message translates to:
-  /// **'Share App'**
-  String get shareApp;
-
-  /// Contact us menu item
-  ///
-  /// In en, this message translates to:
-  /// **'Contact Us'**
-  String get contactUs;
-
-  /// Rate us menu item
-  ///
-  /// In en, this message translates to:
-  /// **'Rate Us'**
-  String get rateUs;
-
-  /// Privacy policy menu item
-  ///
-  /// In en, this message translates to:
-  /// **'Privacy Policy'**
-  String get privacyPolicy;
-
-  /// Version menu item
-  ///
-  /// In en, this message translates to:
-  /// **'Version'**
-  String get version;
-
-  /// Premium upgrade banner title
-  ///
-  /// In en, this message translates to:
-  /// **'Upgrade to Pro'**
-  String get upgradeToPro;
-
-  /// Premium upgrade banner description
-  ///
-  /// In en, this message translates to:
-  /// **'Unlock all features & remove ads'**
-  String get unlockAllFeatures;
-
-  /// Message when sharing the app
-  ///
-  /// In en, this message translates to:
-  /// **'Record professional videos with confidence using ScriptCam! 🎥✨\n\nIt features a built-in Teleprompter, 4K recording, and Video Editor. Try it out here:\n{url}'**
-  String shareAppMessage(String url);
-
-  /// Subject when sharing the app
-  ///
-  /// In en, this message translates to:
-  /// **'Check out ScriptCam: Video Teleprompter'**
-  String get shareAppSubject;
-
-  /// Morning greeting
-  ///
-  /// In en, this message translates to:
-  /// **'Good Morning'**
-  String get goodMorning;
-
-  /// Afternoon greeting
-  ///
-  /// In en, this message translates to:
-  /// **'Good Afternoon'**
-  String get goodAfternoon;
-
-  /// Evening greeting
-  ///
-  /// In en, this message translates to:
-  /// **'Good Evening'**
-  String get goodEvening;
-
-  /// Home screen tagline
-  ///
-  /// In en, this message translates to:
-  /// **'Ready to create something\namazing?'**
-  String get readyToCreate;
-
-  /// New script action card title
-  ///
-  /// In en, this message translates to:
-  /// **'New Script'**
-  String get newScript;
-
-  /// New script action card subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Write from scratch'**
-  String get writeFromScratch;
-
-  /// Quick record action card title
-  ///
-  /// In en, this message translates to:
-  /// **'Quick Record'**
-  String get quickRecord;
-
-  /// Quick record action card subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Record on the fly'**
-  String get recordOnTheFly;
-
-  /// My scripts section header
-  ///
-  /// In en, this message translates to:
-  /// **'My Scripts'**
-  String get myScripts;
-
-  /// Sort order label
-  ///
-  /// In en, this message translates to:
-  /// **'Recent First'**
-  String get recentFirst;
-
-  /// Quick record dialog title
-  ///
-  /// In en, this message translates to:
-  /// **'Quick Record'**
-  String get quickRecordDialogTitle;
-
-  /// Quick record dialog description
-  ///
-  /// In en, this message translates to:
-  /// **'Enter script details below, or skip to open the camera without any text.'**
-  String get quickRecordDialogDesc;
-
-  /// Script title field label
-  ///
-  /// In en, this message translates to:
-  /// **'Script Title'**
-  String get scriptTitle;
-
-  /// Script content field label
-  ///
-  /// In en, this message translates to:
-  /// **'Script Content'**
-  String get scriptContent;
-
-  /// Script title field hint
-  ///
-  /// In en, this message translates to:
-  /// **'e.g. YouTube Intro'**
-  String get scriptTitleHint;
-
-  /// Script content field hint
-  ///
-  /// In en, this message translates to:
-  /// **'Paste your script content here...'**
-  String get scriptContentHint;
-
-  /// Start recording button
-  ///
-  /// In en, this message translates to:
-  /// **'Start Recording'**
-  String get startRecording;
-
-  /// Edit script screen title
-  ///
-  /// In en, this message translates to:
-  /// **'Edit Script'**
-  String get editScript;
-
-  /// Save button
-  ///
-  /// In en, this message translates to:
-  /// **'SAVE'**
-  String get save;
-
-  /// Script title input placeholder
-  ///
-  /// In en, this message translates to:
-  /// **'Script Title...'**
-  String get scriptTitlePlaceholder;
-
-  /// Script content input placeholder
-  ///
-  /// In en, this message translates to:
-  /// **'Start writing your script here...'**
-  String get scriptContentPlaceholder;
-
-  /// Platform section label
-  ///
-  /// In en, this message translates to:
-  /// **'PLATFORM'**
-  String get platform;
-
-  /// Toast when title is missing
-  ///
-  /// In en, this message translates to:
-  /// **'Title required'**
-  String get titleRequired;
-
-  /// Toast when script is saved
-  ///
-  /// In en, this message translates to:
-  /// **'Saved'**
-  String get saved;
-
-  /// Toast when script is created
-  ///
-  /// In en, this message translates to:
-  /// **'Created!'**
-  String get created;
-
-  /// Toast when text is pasted
-  ///
-  /// In en, this message translates to:
-  /// **'Text pasted'**
-  String get textPasted;
-
-  /// Toast when script is deleted
-  ///
-  /// In en, this message translates to:
-  /// **'Script deleted'**
-  String get scriptDeleted;
-
-  /// Delete confirmation dialog title
-  ///
-  /// In en, this message translates to:
-  /// **'Delete Script?'**
-  String get deleteScriptTitle;
-
-  /// Delete confirmation dialog message
-  ///
-  /// In en, this message translates to:
-  /// **'This action cannot be undone.'**
-  String get deleteScriptMessage;
-
-  /// Cancel button
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel'**
-  String get cancel;
-
-  /// Delete button
-  ///
-  /// In en, this message translates to:
-  /// **'Delete'**
-  String get delete;
-
-  /// App info dialog title
-  ///
-  /// In en, this message translates to:
-  /// **'ScriptCam'**
-  String get appInfoTitle;
-
-  /// App version in info dialog
-  ///
-  /// In en, this message translates to:
-  /// **'Version 1.0.3'**
-  String get appInfoVersion;
 
   /// App description in info dialog
   ///
@@ -552,41 +182,287 @@ abstract class AppLocalizations {
   /// **'The ultimate teleprompter and video recording tool for content creators. Create, read, and record seamlessly.'**
   String get appInfoDescription;
 
+  /// App info dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'ScriptCam'**
+  String get appInfoTitle;
+
+  /// The application title
+  ///
+  /// In en, this message translates to:
+  /// **'ScriptCam'**
+  String get appTitle;
+
+  /// Auto backup toggle title
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic backup'**
+  String get autoBackup;
+
+  /// Auto sync switch label
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Sync'**
+  String get autoSync;
+
+  /// Back camera option label
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get backCamera;
+
+  /// Background color row label
+  ///
+  /// In en, this message translates to:
+  /// **'Background'**
+  String get background;
+
+  /// No description provided for @backupFailedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup error: {error}'**
+  String backupFailedDetail(String error);
+
+  /// Trigger backup action
+  ///
+  /// In en, this message translates to:
+  /// **'Backup now'**
+  String get backupNow;
+
+  /// Include videos in backup toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Backup videos'**
+  String get backupVideos;
+
+  /// Confirm bulk delete from gallery
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Delete this recording?} other{Delete {count} recordings?}}'**
+  String bulkDeleteRecordingsTitle(int count);
+
+  /// Camera mode helper description text
+  ///
+  /// In en, this message translates to:
+  /// **'Camera preview with live teleprompter overlay.'**
+  String get cameraPreviewWithOverlay;
+
+  /// Cancel button
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
   /// Close button
   ///
   /// In en, this message translates to:
   /// **'Close'**
   String get close;
 
-  /// Empty state for all scripts
+  /// Google Drive backup section title and premium feature
   ///
   /// In en, this message translates to:
-  /// **'No scripts yet'**
-  String get emptyScriptsAll;
+  /// **'Cloud Backup'**
+  String get cloudBackup;
 
-  /// Empty state description for all scripts
+  /// Drive connected status
   ///
   /// In en, this message translates to:
-  /// **'Create your first script to get started'**
-  String get emptyScriptsAllDesc;
+  /// **'Connected'**
+  String get connected;
 
-  /// Empty state for specific category
+  /// Backup connect drive tile
   ///
   /// In en, this message translates to:
-  /// **'No {category} scripts'**
-  String emptyScriptsCategory(String category);
+  /// **'Connect Google Drive'**
+  String get connectGoogleDrive;
 
-  /// Empty state description for category
+  /// IAP connection error toast
   ///
   /// In en, this message translates to:
-  /// **'Create a script for this platform'**
-  String get emptyScriptsCategoryDesc;
+  /// **'Connection error. Check your internet and try again.'**
+  String get connectionError;
 
-  /// Gallery screen title
+  /// Contact us menu item
   ///
   /// In en, this message translates to:
-  /// **'Gallery'**
-  String get gallery;
+  /// **'Contact Us'**
+  String get contactUs;
+
+  /// Button to continue to next screen
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueButton;
+
+  /// Editor error title
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load video'**
+  String get couldNotLoadVideo;
+
+  /// Video settings countdown section
+  ///
+  /// In en, this message translates to:
+  /// **'Countdown timer'**
+  String get countdownTimer;
+
+  /// Toast when script is created
+  ///
+  /// In en, this message translates to:
+  /// **'Created!'**
+  String get created;
+
+  /// Create new script button
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Script'**
+  String get createNewScript;
+
+  /// Badge text for remaining credits
+  ///
+  /// In en, this message translates to:
+  /// **'Credits {count}'**
+  String creditsRemaining(int count);
+
+  /// Cue cards mode label
+  ///
+  /// In en, this message translates to:
+  /// **'Cue Cards'**
+  String get cueCards;
+
+  /// No description provided for @currentCreditsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{You have 1 free recording left for this script.} other{You have {count} free recordings left for this script.}}'**
+  String currentCreditsDescription(int count);
+
+  /// Dark theme short label
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get dark;
+
+  /// Dark theme option
+  ///
+  /// In en, this message translates to:
+  /// **'Dark Mode'**
+  String get darkMode;
+
+  /// Settings label for default camera
+  ///
+  /// In en, this message translates to:
+  /// **'Default camera'**
+  String get defaultCamera;
+
+  /// Delete button
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// Delete confirmation dialog message
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone.'**
+  String get deleteScriptMessage;
+
+  /// Delete confirmation dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Script?'**
+  String get deleteScriptTitle;
+
+  /// Delete video confirmation title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Video?'**
+  String get deleteVideoTitle;
+
+  /// Discard edits
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discard;
+
+  /// Exit editor dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get discardChanges;
+
+  /// Exit editor dialog body
+  ///
+  /// In en, this message translates to:
+  /// **'Your edits will be lost.'**
+  String get discardChangesDesc;
+
+  /// Disconnect Google Drive
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get disconnect;
+
+  /// Discount badge text
+  ///
+  /// In en, this message translates to:
+  /// **'20% OFF'**
+  String get discountBadge;
+
+  /// Duplicate action label
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get duplicate;
+
+  /// No description provided for @durationMinutesSecondsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}:{seconds}'**
+  String durationMinutesSecondsShort(int minutes, int seconds);
+
+  /// No description provided for @durationSecondsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds}s'**
+  String durationSecondsShort(int seconds);
+
+  /// Ad gate title when user has credits
+  ///
+  /// In en, this message translates to:
+  /// **'Earn Recording Credits'**
+  String get earnRecordingCredits;
+
+  /// Edit menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// Edit script screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Script'**
+  String get editScript;
+
+  /// Toast when edit blocked during countdown
+  ///
+  /// In en, this message translates to:
+  /// **'Wait for countdown to finish before editing.'**
+  String get editScriptBlockedDuringCountdown;
+
+  /// Toast when edit blocked during recording
+  ///
+  /// In en, this message translates to:
+  /// **'Stop recording to edit your script.'**
+  String get editScriptBlockedWhileRecording;
+
+  /// Empty state description when no scripts exist
+  ///
+  /// In en, this message translates to:
+  /// **'Your creative space is empty. Create your first script or try recording something on the fly!'**
+  String get emptyCreativeSpaceMessage;
 
   /// Empty gallery state
   ///
@@ -600,41 +476,41 @@ abstract class AppLocalizations {
   /// **'Record your first video to see it here'**
   String get emptyGalleryDesc;
 
-  /// Teleprompter screen title
+  /// No description provided for @errorSharingVideo.
   ///
   /// In en, this message translates to:
-  /// **'Teleprompter'**
-  String get teleprompter;
+  /// **'Could not share video: {error}'**
+  String errorSharingVideo(String error);
 
-  /// Record button
+  /// Share subject when exporting a script
   ///
   /// In en, this message translates to:
-  /// **'Record'**
-  String get record;
+  /// **'Exported Script: {title}'**
+  String exportedScriptSubject(String title);
 
-  /// Stop button
+  /// Settings label for export quality
   ///
   /// In en, this message translates to:
-  /// **'Stop'**
-  String get stop;
+  /// **'Export quality'**
+  String get exportQuality;
 
-  /// Pause button
+  /// Toast after export
   ///
   /// In en, this message translates to:
-  /// **'Pause'**
-  String get pause;
+  /// **'Script exported successfully'**
+  String get exportSuccess;
 
-  /// Resume button
+  /// Teleprompter focus line toggle
   ///
   /// In en, this message translates to:
-  /// **'Resume'**
-  String get resume;
+  /// **'Focus line'**
+  String get focusLine;
 
-  /// Speed control label
+  /// Font setting label
   ///
   /// In en, this message translates to:
-  /// **'Speed'**
-  String get speed;
+  /// **'Font'**
+  String get font;
 
   /// Font size control label
   ///
@@ -642,137 +518,29 @@ abstract class AppLocalizations {
   /// **'Font Size'**
   String get fontSize;
 
-  /// Mirror text toggle label
+  /// No description provided for @freeRecordingsLeft.
   ///
   /// In en, this message translates to:
-  /// **'Mirror'**
-  String get mirror;
+  /// **'{count, plural, =1{1 free recording left} other{{count} free recordings left}}'**
+  String freeRecordingsLeft(int count);
 
-  /// Voice sync toggle label
+  /// Legal note for weekly trial plan
   ///
   /// In en, this message translates to:
-  /// **'Voice Sync'**
-  String get voiceSync;
+  /// **'Free trial starts immediately. Cancel anytime before renewal.'**
+  String get freeTrialCancelAnytime;
 
-  /// Auto scroll toggle label
+  /// Front camera option label
   ///
   /// In en, this message translates to:
-  /// **'Auto Scroll'**
-  String get autoScroll;
+  /// **'Front'**
+  String get frontCamera;
 
-  /// Video settings title
+  /// Full duration preset label in editor timeline
   ///
   /// In en, this message translates to:
-  /// **'Video Settings'**
-  String get videoSettings;
-
-  /// Resolution setting label
-  ///
-  /// In en, this message translates to:
-  /// **'Resolution'**
-  String get resolution;
-
-  /// Quality setting label
-  ///
-  /// In en, this message translates to:
-  /// **'Quality'**
-  String get quality;
-
-  /// Premium screen title
-  ///
-  /// In en, this message translates to:
-  /// **'Premium'**
-  String get premium;
-
-  /// Get premium button
-  ///
-  /// In en, this message translates to:
-  /// **'Get Premium'**
-  String get getPremium;
-
-  /// Restore purchases button
-  ///
-  /// In en, this message translates to:
-  /// **'Restore Purchases'**
-  String get restorePurchases;
-
-  /// Video editor screen title
-  ///
-  /// In en, this message translates to:
-  /// **'Video Editor'**
-  String get videoEditor;
-
-  /// Trim tab label
-  ///
-  /// In en, this message translates to:
-  /// **'Trim'**
-  String get trim;
-
-  /// Adjust tab label
-  ///
-  /// In en, this message translates to:
-  /// **'Adjust'**
-  String get adjust;
-
-  /// Filters tab label
-  ///
-  /// In en, this message translates to:
-  /// **'Filters'**
-  String get filters;
-
-  /// Export button
-  ///
-  /// In en, this message translates to:
-  /// **'Export'**
-  String get export;
-
-  /// Exporting progress message
-  ///
-  /// In en, this message translates to:
-  /// **'Exporting...'**
-  String get exporting;
-
-  /// Export complete message
-  ///
-  /// In en, this message translates to:
-  /// **'Export complete!'**
-  String get exportComplete;
-
-  /// Brightness adjustment label
-  ///
-  /// In en, this message translates to:
-  /// **'Brightness'**
-  String get brightness;
-
-  /// Contrast adjustment label
-  ///
-  /// In en, this message translates to:
-  /// **'Contrast'**
-  String get contrast;
-
-  /// Saturation adjustment label
-  ///
-  /// In en, this message translates to:
-  /// **'Saturation'**
-  String get saturation;
-
-  /// Share button
-  ///
-  /// In en, this message translates to:
-  /// **'Share'**
-  String get share;
-
-  /// Play button
-  ///
-  /// In en, this message translates to:
-  /// **'Play'**
-  String get play;
-
-  /// All category label
-  ///
-  /// In en, this message translates to:
-  /// **'All'**
-  String get all;
+  /// **'Full'**
+  String get fullDuration;
 
   /// General category label
   ///
@@ -780,29 +548,221 @@ abstract class AppLocalizations {
   /// **'General'**
   String get general;
 
-  /// Search placeholder
+  /// Get premium button
   ///
   /// In en, this message translates to:
-  /// **'Search'**
-  String get search;
+  /// **'Get Premium'**
+  String get getPremium;
 
-  /// Search scripts placeholder
+  /// Fallback display name for Google account
   ///
   /// In en, this message translates to:
-  /// **'Search scripts...'**
-  String get searchScripts;
+  /// **'Google User'**
+  String get googleUser;
 
-  /// Dashboard tab label
+  /// Button on teleprompter error sheet
   ///
   /// In en, this message translates to:
-  /// **'Studio'**
-  String get studio;
+  /// **'Go Premium'**
+  String get goPremium;
 
-  /// Empty state title when no scripts exist
+  /// Got it button
   ///
   /// In en, this message translates to:
-  /// **'Start Your Journey'**
-  String get startYourJourney;
+  /// **'Got It'**
+  String get gotIt;
+
+  /// Button to grant permissions
+  ///
+  /// In en, this message translates to:
+  /// **'Grant Access'**
+  String get grantAccess;
+
+  /// Help section header
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get help;
+
+  /// Premium feature bullet
+  ///
+  /// In en, this message translates to:
+  /// **'High Quality Video'**
+  String get highQualityVideo;
+
+  /// How to use menu item
+  ///
+  /// In en, this message translates to:
+  /// **'How to Use'**
+  String get howToUse;
+
+  /// How to use screen title
+  ///
+  /// In en, this message translates to:
+  /// **'How to Use ScriptCam'**
+  String get howToUseTitle;
+
+  /// Import script button in editor
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get importScript;
+
+  /// Toast after import
+  ///
+  /// In en, this message translates to:
+  /// **'Script imported successfully'**
+  String get importSuccess;
+
+  /// No description provided for @itemsSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String itemsSelected(int count);
+
+  /// Stay in editor
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get keepEditing;
+
+  /// Language settings label
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// Legal note for lifetime plan
+  ///
+  /// In en, this message translates to:
+  /// **'Lifetime unlock. No recurring billing.'**
+  String get lifetimeNoRecurringBilling;
+
+  /// Lifetime plan subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'One-time purchase. Pay once, unlock forever.'**
+  String get lifetimeOneTimeUnlock;
+
+  /// Lifetime purchase label
+  ///
+  /// In en, this message translates to:
+  /// **'Lifetime Plan'**
+  String get lifetimePlan;
+
+  /// Price-not-loaded warning for lifetime plan
+  ///
+  /// In en, this message translates to:
+  /// **'Lifetime price not loaded from store yet.'**
+  String get lifetimePriceNotLoaded;
+
+  /// Light theme short label
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get light;
+
+  /// Light theme option
+  ///
+  /// In en, this message translates to:
+  /// **'Light Mode'**
+  String get lightMode;
+
+  /// Teleprompter line spacing control
+  ///
+  /// In en, this message translates to:
+  /// **'Line spacing'**
+  String get lineSpacing;
+
+  /// Loop toggle label
+  ///
+  /// In en, this message translates to:
+  /// **'Loop'**
+  String get loop;
+
+  /// Settings link to premium details
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your premium status'**
+  String get managePremiumStatus;
+
+  /// Minutes to read label
+  ///
+  /// In en, this message translates to:
+  /// **'min read'**
+  String get minRead;
+
+  /// Mirror text toggle label
+  ///
+  /// In en, this message translates to:
+  /// **'Mirror'**
+  String get mirror;
+
+  /// Mute audio toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Mute'**
+  String get mute;
+
+  /// Never backed up / restored label
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get never;
+
+  /// New script action card title
+  ///
+  /// In en, this message translates to:
+  /// **'New Script'**
+  String get newScript;
+
+  /// Two-line label on script strip add card
+  ///
+  /// In en, this message translates to:
+  /// **'New\nScript'**
+  String get newScriptMultiline;
+
+  /// Button to go to next screen
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
+  /// Premium feature bullet
+  ///
+  /// In en, this message translates to:
+  /// **'No Ads Forever'**
+  String get noAds;
+
+  /// Description for the no internet screen
+  ///
+  /// In en, this message translates to:
+  /// **'It seems you are offline. Please check your connection and try again.'**
+  String get noInternetDesc;
+
+  /// Short error title
+  ///
+  /// In en, this message translates to:
+  /// **'No internet'**
+  String get noInternetError;
+
+  /// No internet error description
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to the internet and try again.'**
+  String get noInternetErrorDesc;
+
+  /// Title for the no internet screen
+  ///
+  /// In en, this message translates to:
+  /// **'No Internet Connection'**
+  String get noInternetTitle;
+
+  /// When user has zero recording credits
+  ///
+  /// In en, this message translates to:
+  /// **'No recordings left · Watch an ad to continue'**
+  String get noRecordingsLeft;
 
   /// Empty state title when search yields no results
   ///
@@ -816,131 +776,101 @@ abstract class AppLocalizations {
   /// **'We couldn\'t find any scripts matching your search. Try different keywords!'**
   String get noResultsMessage;
 
-  /// Empty state description when no scripts exist
+  /// No selected script status text
   ///
   /// In en, this message translates to:
-  /// **'Your creative space is empty. Create your first script or try recording something on the fly!'**
-  String get emptyCreativeSpaceMessage;
+  /// **'No saved script selected'**
+  String get noSavedScriptSelected;
 
-  /// Paste button
+  /// Backup when user not authenticated
   ///
   /// In en, this message translates to:
-  /// **'Paste'**
-  String get paste;
+  /// **'Not signed in to Google.'**
+  String get notAuthenticated;
 
-  /// Create new script button
+  /// Countdown disabled option
   ///
   /// In en, this message translates to:
-  /// **'Create New Script'**
-  String get createNewScript;
+  /// **'Off'**
+  String get off;
 
-  /// Platform selection description
+  /// Permission row label for camera
   ///
   /// In en, this message translates to:
-  /// **'Select a platform for your script'**
-  String get selectPlatformDesc;
+  /// **'Camera'**
+  String get onboardingAccessCamera;
 
-  /// Pro badge label
+  /// Permission row label for microphone
   ///
   /// In en, this message translates to:
-  /// **'PRO'**
-  String get pro;
+  /// **'Microphone'**
+  String get onboardingAccessMic;
 
-  /// Minutes to read label
+  /// Small recording badge on onboarding mock overlay
   ///
   /// In en, this message translates to:
-  /// **'min read'**
-  String get minRead;
+  /// **'REC'**
+  String get onboardingInteractiveRecLabel;
 
-  /// Word count label
+  /// Small label above onboarding mock preview
   ///
   /// In en, this message translates to:
-  /// **'words'**
-  String get words;
+  /// **'Main view'**
+  String get onboardingInteractiveStep1Eyebrow;
 
-  /// Edit menu item
+  /// Muted text inside onboarding preview card
   ///
   /// In en, this message translates to:
-  /// **'Edit'**
-  String get edit;
+  /// **'Overlay script and framing stay visible together. Scroll to rehearse; start recording when pacing feels right.'**
+  String get onboardingInteractiveStep1Preview;
 
-  /// How to use screen title
+  /// Onboarding page 1 subtitle
   ///
   /// In en, this message translates to:
-  /// **'How to Use ScriptCam'**
-  String get howToUseTitle;
+  /// **'ScriptCam centers on capture. Scripts, credits, and settings stay reachable without crowding what you film.'**
+  String get onboardingInteractiveStep1Subtitle;
 
-  /// Step 1 title
+  /// Onboarding page 1 title
   ///
   /// In en, this message translates to:
-  /// **'Create a Script'**
-  String get step1Title;
+  /// **'Recording-first workspace'**
+  String get onboardingInteractiveStep1Title;
 
-  /// Step 1 description
+  /// Sample teleprompter lines in onboarding
   ///
   /// In en, this message translates to:
-  /// **'Start by creating a new script or quick record without text'**
-  String get step1Desc;
+  /// **'Good morning—thanks for being here.\nWe will keep this brief and practical.\nIf you drift from the lens, settle back deliberately and carry on.'**
+  String get onboardingInteractiveStep2Sample;
 
-  /// Step 2 title
+  /// Onboarding page 2 subtitle
   ///
   /// In en, this message translates to:
-  /// **'Setup Teleprompter'**
-  String get step2Title;
+  /// **'Pause rehearsal with one tap. Adjust scroll pacing and text size from the recording screen when you rehearse or shoot.'**
+  String get onboardingInteractiveStep2Subtitle;
 
-  /// Step 2 description
+  /// Onboarding page 2 title
   ///
   /// In en, this message translates to:
-  /// **'Adjust speed, font size, and enable voice sync for hands-free scrolling'**
-  String get step2Desc;
+  /// **'Teleprompter overlay'**
+  String get onboardingInteractiveStep2Title;
 
-  /// Step 3 title
+  /// Hint under permission rows on onboarding
   ///
   /// In en, this message translates to:
-  /// **'Record Your Video'**
-  String get step3Title;
+  /// **'You can change these anytime in Android or iOS settings.'**
+  String get onboardingInteractiveStep4CardHint;
 
-  /// Step 3 description
+  /// Onboarding page 3 subtitle before permissions
   ///
   /// In en, this message translates to:
-  /// **'Press record and read your script while looking at the camera'**
-  String get step3Desc;
+  /// **'ScriptCam needs camera and microphone so you can see yourself while the script stays in sync with your pace.'**
+  String get onboardingInteractiveStep4Subtitle;
 
-  /// Step 4 title
+  /// Onboarding page 3 title before permissions
   ///
   /// In en, this message translates to:
-  /// **'Edit & Share'**
-  String get step4Title;
-
-  /// Step 4 description
-  ///
-  /// In en, this message translates to:
-  /// **'Use the video editor to trim, adjust, and apply filters before sharing'**
-  String get step4Desc;
-
-  /// Got it button
-  ///
-  /// In en, this message translates to:
-  /// **'Got It'**
-  String get gotIt;
-
-  /// Delete video confirmation title
-  ///
-  /// In en, this message translates to:
-  /// **'Delete Video?'**
-  String get deleteVideoTitle;
-
-  /// Video deleted toast message
-  ///
-  /// In en, this message translates to:
-  /// **'Video deleted'**
-  String get videoDeleted;
-
-  /// Mute audio toggle
-  ///
-  /// In en, this message translates to:
-  /// **'Mute'**
-  String get mute;
+  /// **'Recording access'**
+  String get onboardingInteractiveStep4Title;
 
   /// Opacity control label
   ///
@@ -954,47 +884,47 @@ abstract class AppLocalizations {
   /// **'Original'**
   String get original;
 
-  /// Processing message
+  /// Title of camera preview overlay settings sheet
   ///
   /// In en, this message translates to:
-  /// **'Processing...'**
-  String get processing;
+  /// **'Overlay Settings'**
+  String get overlaySettings;
 
-  /// Range control label
+  /// Paste button
   ///
   /// In en, this message translates to:
-  /// **'Range'**
-  String get range;
+  /// **'Paste'**
+  String get paste;
 
-  /// Aspect ratio label
+  /// Toast message when permissions are denied
   ///
   /// In en, this message translates to:
-  /// **'Ratio'**
-  String get ratio;
+  /// **'Camera and Microphone permissions are required.'**
+  String get permissionsRequired;
 
-  /// Recording failed error message
+  /// Preferences section header
   ///
   /// In en, this message translates to:
-  /// **'Recording failed'**
-  String get recordingFailed;
+  /// **'Preferences'**
+  String get preferences;
 
-  /// Rotate control label
+  /// Premium screen title
   ///
   /// In en, this message translates to:
-  /// **'Rotate'**
-  String get rotate;
+  /// **'Premium'**
+  String get premium;
 
-  /// Target frames per second label
+  /// Title when subscription is active
   ///
   /// In en, this message translates to:
-  /// **'Target FPS'**
-  String get targetFps;
+  /// **'Premium Active'**
+  String get premiumActive;
 
-  /// Transform tab label
+  /// Premium benefit highlight in ad dialog
   ///
   /// In en, this message translates to:
-  /// **'Transform'**
-  String get transform;
+  /// **'Premium users get instant recording and Voice Sync!'**
+  String get premiumBenefitInstantRecord;
 
   /// Premium screen description
   ///
@@ -1002,11 +932,605 @@ abstract class AppLocalizations {
   /// **'Unlock all premium features and enjoy an ad-free experience'**
   String get premiumDescription;
 
+  /// Toast after successful purchase
+  ///
+  /// In en, this message translates to:
+  /// **'Premium unlocked!'**
+  String get premiumUnlocked;
+
+  /// Privacy policy menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicy;
+
+  /// Pro badge label
+  ///
+  /// In en, this message translates to:
+  /// **'PRO'**
+  String get pro;
+
+  /// Processing message
+  ///
+  /// In en, this message translates to:
+  /// **'Processing...'**
+  String get processing;
+
+  /// No description provided for @purchaseErrorDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase failed: {p0}'**
+  String purchaseErrorDetail(String p0);
+
+  /// IAP failed to start purchase
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start purchase. Try again.'**
+  String get purchaseFailedInitiate;
+
+  /// High export quality
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get qualityHigh;
+
+  /// Export quality section
+  ///
+  /// In en, this message translates to:
+  /// **'Quality'**
+  String get qualityLabel;
+
+  /// Low export quality
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get qualityLow;
+
+  /// Standard export quality
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get qualityStandard;
+
+  /// Range control label
+  ///
+  /// In en, this message translates to:
+  /// **'Range'**
+  String get range;
+
+  /// Rate us menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Rate Us'**
+  String get rateUs;
+
+  /// Aspect ratio label
+  ///
+  /// In en, this message translates to:
+  /// **'Ratio'**
+  String get ratio;
+
+  /// Recent scripts section title
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get recent;
+
+  /// Recording failed error message
+  ///
+  /// In en, this message translates to:
+  /// **'Recording failed'**
+  String get recordingFailed;
+
+  /// No description provided for @recordingsDeletedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recording deleted} other{{count} recordings deleted}}'**
+  String recordingsDeletedToast(int count);
+
+  /// No description provided for @recordingsRemainingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} recording{count, plural, =1{} other{s}} remaining · Watch an ad for more'**
+  String recordingsRemainingHint(int count);
+
+  /// Primary CTA on recording intent zone
+  ///
+  /// In en, this message translates to:
+  /// **'Record now'**
+  String get recordNow;
+
+  /// Premium feature line for Bluetooth remote and keyboard
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth Remote & Keyboard'**
+  String get remoteControl;
+
+  /// Toast when remote or keyboard controls require Premium
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth Remote & Keyboard is a Premium Feature'**
+  String get remoteControlLocked;
+
   /// Remove ads feature
   ///
   /// In en, this message translates to:
   /// **'Remove Ads'**
   String get removeAds;
+
+  /// Rename action label
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get rename;
+
+  /// Resolution setting label
+  ///
+  /// In en, this message translates to:
+  /// **'Resolution'**
+  String get resolution;
+
+  /// Restore from backup
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get restore;
+
+  /// Toast after restore
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases restored successfully.'**
+  String get restoredSuccessfully;
+
+  /// No description provided for @restoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore failed: {error}'**
+  String restoreFailed(String error);
+
+  /// Restore purchase link text
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Purchase'**
+  String get restorePurchaseLink;
+
+  /// Retry button label
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// Toast when ad reward granted
+  ///
+  /// In en, this message translates to:
+  /// **'Reward granted: +3 recordings'**
+  String get rewardGranted;
+
+  /// Rotate control label
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate'**
+  String get rotate;
+
+  /// Save button
+  ///
+  /// In en, this message translates to:
+  /// **'SAVE'**
+  String get save;
+
+  /// Confirm save in export dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get saveButton;
+
+  /// Toast when script is saved
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get saved;
+
+  /// No description provided for @savedAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved as {p0}'**
+  String savedAs(String p0);
+
+  /// Editor save action label
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get saveEditorLabel;
+
+  /// Generic save error
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed'**
+  String get saveFailed;
+
+  /// Save error empty output
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to save'**
+  String get saveFailedEmpty;
+
+  /// Save error when gallery fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save to gallery'**
+  String get saveFailedGallery;
+
+  /// Save error path missing
+  ///
+  /// In en, this message translates to:
+  /// **'Save location not found'**
+  String get saveFailedNotFound;
+
+  /// Export dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Save video'**
+  String get saveVideo;
+
+  /// Save in progress label
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get savingEllipsis;
+
+  /// Script content input placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Start writing your script here...'**
+  String get scriptContentPlaceholder;
+
+  /// Toast when script is deleted
+  ///
+  /// In en, this message translates to:
+  /// **'Script deleted'**
+  String get scriptDeleted;
+
+  /// No description provided for @scriptSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{p0} · {p1}'**
+  String scriptSummary(String p0, String p1);
+
+  /// Script title field hint
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. YouTube Intro'**
+  String get scriptTitleHint;
+
+  /// Script title input placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Script Title...'**
+  String get scriptTitlePlaceholder;
+
+  /// Scroll speed slider label
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll Speed'**
+  String get scrollSpeed;
+
+  /// Search scripts placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Search scripts...'**
+  String get searchScripts;
+
+  /// Selected script status text
+  ///
+  /// In en, this message translates to:
+  /// **'Selected script ready'**
+  String get selectedScriptReady;
+
+  /// Title for language selection screen
+  ///
+  /// In en, this message translates to:
+  /// **'Select Language'**
+  String get selectLanguage;
+
+  /// Description for language selection screen
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your preferred language for the app'**
+  String get selectLanguageDesc;
+
+  /// Platform selection description
+  ///
+  /// In en, this message translates to:
+  /// **'Select a platform for your script'**
+  String get selectPlatformDesc;
+
+  /// Settings screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// Share app menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Share App'**
+  String get shareApp;
+
+  /// Message when sharing the app
+  ///
+  /// In en, this message translates to:
+  /// **'Record professional videos with confidence using ScriptCam! 🎥✨\n\nIt features a built-in Teleprompter, 4K recording, and Video Editor. Try it out here:\n{url}'**
+  String shareAppMessage(String url);
+
+  /// Subject when sharing the app
+  ///
+  /// In en, this message translates to:
+  /// **'Check out ScriptCam: Video Teleprompter'**
+  String get shareAppSubject;
+
+  /// Share sheet subject
+  ///
+  /// In en, this message translates to:
+  /// **'Check out my video'**
+  String get shareVideoSubject;
+
+  /// Share sheet message body
+  ///
+  /// In en, this message translates to:
+  /// **'Video recorded with ScriptCam'**
+  String get shareVideoText;
+
+  /// Google sign-in cancelled for backup
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in was cancelled.'**
+  String get signInCancelled;
+
+  /// Soft start toggle label
+  ///
+  /// In en, this message translates to:
+  /// **'Soft Start'**
+  String get softStart;
+
+  /// Speed control label
+  ///
+  /// In en, this message translates to:
+  /// **'Speed'**
+  String get speed;
+
+  /// Speed preset fast
+  ///
+  /// In en, this message translates to:
+  /// **'Fast'**
+  String get speedFast;
+
+  /// Speed preset normal
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get speedNormal;
+
+  /// Speed preset slow
+  ///
+  /// In en, this message translates to:
+  /// **'Slow'**
+  String get speedSlow;
+
+  /// Speed preset turbo
+  ///
+  /// In en, this message translates to:
+  /// **'Turbo'**
+  String get speedTurbo;
+
+  /// CTA for weekly trial plan
+  ///
+  /// In en, this message translates to:
+  /// **'Start Free Trial'**
+  String get startFreeTrial;
+
+  /// Start recording button
+  ///
+  /// In en, this message translates to:
+  /// **'Start Recording'**
+  String get startRecording;
+
+  /// Empty state title when no scripts exist
+  ///
+  /// In en, this message translates to:
+  /// **'Start Your Journey'**
+  String get startYourJourney;
+
+  /// Step 1 description
+  ///
+  /// In en, this message translates to:
+  /// **'Start by creating a new script or quick record without text'**
+  String get step1Desc;
+
+  /// Step 1 title
+  ///
+  /// In en, this message translates to:
+  /// **'Create a Script'**
+  String get step1Title;
+
+  /// Step 2 description
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust speed, font size, and enable voice sync for hands-free scrolling'**
+  String get step2Desc;
+
+  /// Step 2 title
+  ///
+  /// In en, this message translates to:
+  /// **'Setup Teleprompter'**
+  String get step2Title;
+
+  /// Step 3 description
+  ///
+  /// In en, this message translates to:
+  /// **'Press record and read your script while looking at the camera'**
+  String get step3Desc;
+
+  /// Step 3 title
+  ///
+  /// In en, this message translates to:
+  /// **'Record Your Video'**
+  String get step3Title;
+
+  /// Step 4 description
+  ///
+  /// In en, this message translates to:
+  /// **'Use the video editor to trim, adjust, and apply filters before sharing'**
+  String get step4Desc;
+
+  /// Step 4 title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit & Share'**
+  String get step4Title;
+
+  /// How-to step 5 description
+  ///
+  /// In en, this message translates to:
+  /// **'Use a Bluetooth remote or keyboard to play, pause, and adjust scroll speed.'**
+  String get step5Desc;
+
+  /// How-to step 5 title
+  ///
+  /// In en, this message translates to:
+  /// **'Remote control'**
+  String get step5Title;
+
+  /// Message when product pricing cannot load
+  ///
+  /// In en, this message translates to:
+  /// **'Store pricing unavailable right now.'**
+  String get storePricingUnavailable;
+
+  /// IAP store unavailable toast
+  ///
+  /// In en, this message translates to:
+  /// **'Store is unavailable. Try again later.'**
+  String get storeUnavailable;
+
+  /// Toggle label for horizontal script strip
+  ///
+  /// In en, this message translates to:
+  /// **'Strip view'**
+  String get stripView;
+
+  /// Video editor app bar title
+  ///
+  /// In en, this message translates to:
+  /// **'Studio Editor'**
+  String get studioEditor;
+
+  /// Support section header
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get support;
+
+  /// Email body prefix for support
+  ///
+  /// In en, this message translates to:
+  /// **'Hi ScriptCam team,\n\n'**
+  String get supportBody;
+
+  /// Email subject for support
+  ///
+  /// In en, this message translates to:
+  /// **'ScriptCam support'**
+  String get supportSubject;
+
+  /// Switch Google account
+  ///
+  /// In en, this message translates to:
+  /// **'Switch account'**
+  String get switchAccount;
+
+  /// System theme short label
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get system;
+
+  /// System default theme option
+  ///
+  /// In en, this message translates to:
+  /// **'System Default'**
+  String get systemDefault;
+
+  /// Bottom navigation: camera / studio
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get tabCamera;
+
+  /// Bottom navigation: saved recordings
+  ///
+  /// In en, this message translates to:
+  /// **'Recordings'**
+  String get tabRecordings;
+
+  /// Bottom navigation: scripts list
+  ///
+  /// In en, this message translates to:
+  /// **'Scripts'**
+  String get tabScripts;
+
+  /// Target frames per second label
+  ///
+  /// In en, this message translates to:
+  /// **'Target FPS'**
+  String get targetFps;
+
+  /// Text color row label
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get text;
+
+  /// Toast when text is pasted
+  ///
+  /// In en, this message translates to:
+  /// **'Text pasted'**
+  String get textPasted;
+
+  /// Toast when title is missing
+  ///
+  /// In en, this message translates to:
+  /// **'Title required'**
+  String get titleRequired;
+
+  /// Transform tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Transform'**
+  String get transform;
+
+  /// Trim tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Trim'**
+  String get trim;
+
+  /// Generic error title
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get unexpectedError;
+
+  /// Generic error description
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get unexpectedErrorDesc;
+
+  /// Premium feature bullet
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited Recordings'**
+  String get unlimitedRecordings;
 
   /// Unlimited scripts feature
   ///
@@ -1014,11 +1538,23 @@ abstract class AppLocalizations {
   /// **'Unlimited Scripts'**
   String get unlimitedScripts;
 
+  /// Premium upgrade banner description
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock all features & remove ads'**
+  String get unlockAllFeatures;
+
   /// Unlock creator pro title
   ///
   /// In en, this message translates to:
   /// **'Unlock Creator Pro'**
   String get unlockCreatorPro;
+
+  /// Fallback title for empty script
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled Script'**
+  String get untitledScript;
 
   /// Upgrade for lifetime button
   ///
@@ -1026,11 +1562,77 @@ abstract class AppLocalizations {
   /// **'Upgrade for Lifetime Access'**
   String get upgradeForLifetime;
 
-  /// Restore purchase link text
+  /// Premium upgrade banner title
   ///
   /// In en, this message translates to:
-  /// **'Restore Purchase'**
-  String get restorePurchaseLink;
+  /// **'Upgrade to Pro'**
+  String get upgradeToPro;
+
+  /// Toggle label for using saved script
+  ///
+  /// In en, this message translates to:
+  /// **'Use a saved script'**
+  String get useASavedScript;
+
+  /// Version menu item
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get version;
+
+  /// Video deleted toast message
+  ///
+  /// In en, this message translates to:
+  /// **'Video deleted'**
+  String get videoDeleted;
+
+  /// Snackbar when file missing
+  ///
+  /// In en, this message translates to:
+  /// **'Video file not found'**
+  String get videoFileNotFound;
+
+  /// Export file name label
+  ///
+  /// In en, this message translates to:
+  /// **'File name'**
+  String get videoName;
+
+  /// Export file name hint
+  ///
+  /// In en, this message translates to:
+  /// **'MyVideo'**
+  String get videoNameHint;
+
+  /// Video settings title
+  ///
+  /// In en, this message translates to:
+  /// **'Video Settings'**
+  String get videoSettings;
+
+  /// Voice sync toggle label
+  ///
+  /// In en, this message translates to:
+  /// **'Voice Sync'**
+  String get voiceSync;
+
+  /// Premium feature label on details screen
+  ///
+  /// In en, this message translates to:
+  /// **'Voice Sync'**
+  String get voiceSyncFeature;
+
+  /// Short message when voice sync is locked
+  ///
+  /// In en, this message translates to:
+  /// **'Voice Sync is a Premium Feature'**
+  String get voiceSyncLocked;
+
+  /// Ad gate premium-style bullet
+  ///
+  /// In en, this message translates to:
+  /// **'Watch 1 Ad → Get +3 Recordings'**
+  String get watchAdGetRecordings;
 
   /// Title for the rewarded ad dialog
   ///
@@ -1044,41 +1646,83 @@ abstract class AppLocalizations {
   /// **'Watch a short ad to unlock recording for this script.'**
   String get watchAdToRecordDesc;
 
-  /// Premium benefit highlight in ad dialog
+  /// Weekly plan title
   ///
   /// In en, this message translates to:
-  /// **'Premium users get instant recording and Voice Sync!'**
-  String get premiumBenefitInstantRecord;
+  /// **'Weekly'**
+  String get weeklyPlan;
 
-  /// Title for the no internet screen
+  /// Price-not-loaded warning for weekly plan
   ///
   /// In en, this message translates to:
-  /// **'No Internet Connection'**
-  String get noInternetTitle;
+  /// **'Weekly price not loaded from store yet.'**
+  String get weeklyPriceNotLoaded;
 
-  /// Description for the no internet screen
+  /// Weekly plan subtitle when store price unavailable
   ///
   /// In en, this message translates to:
-  /// **'It seems you are offline. Please check your connection and try again.'**
-  String get noInternetDesc;
+  /// **'3-day free trial, weekly price from store'**
+  String get weeklyTrialStorePrice;
 
-  /// Retry button label
+  /// Weekly plan subtitle with price
   ///
   /// In en, this message translates to:
-  /// **'Retry'**
-  String get retry;
+  /// **'3-day free trial, then {price} / week'**
+  String weeklyTrialThenPrice(String price);
 
-  /// Short message when voice sync is locked
+  /// Recording intent zone headline
   ///
   /// In en, this message translates to:
-  /// **'Voice Sync is a Premium Feature'**
-  String get voiceSyncLocked;
+  /// **'What are you\nrecording today?'**
+  String get whatAreYouRecording;
 
-  /// Longer message when voice sync is locked
+  /// Column width row label
   ///
   /// In en, this message translates to:
-  /// **'Upgrade to Pro to enable hands-free voice-synced scrolling.'**
-  String get voiceSyncLockedDesc;
+  /// **'Width'**
+  String get width;
+
+  /// Full width option
+  ///
+  /// In en, this message translates to:
+  /// **'Full'**
+  String get widthFull;
+
+  /// Medium width option
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get widthMedium;
+
+  /// Narrow width option
+  ///
+  /// In en, this message translates to:
+  /// **'Narrow'**
+  String get widthNarrow;
+
+  /// Backup on Wi‑Fi only toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Wi‑Fi only'**
+  String get wifiOnly;
+
+  /// No description provided for @wordCountShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} words'**
+  String wordCountShort(int count);
+
+  /// Word count label
+  ///
+  /// In en, this message translates to:
+  /// **'words'**
+  String get words;
+
+  /// Purchase success headline
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re now Premium!'**
+  String get youAreNowPremium;
 }
 
 class _AppLocalizationsDelegate
@@ -1101,6 +1745,7 @@ class _AppLocalizationsDelegate
     'ja',
     'ko',
     'pt',
+    'ur',
     'zh',
   ].contains(locale.languageCode);
 
@@ -1129,6 +1774,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsKo();
     case 'pt':
       return AppLocalizationsPt();
+    case 'ur':
+      return AppLocalizationsUr();
     case 'zh':
       return AppLocalizationsZh();
   }

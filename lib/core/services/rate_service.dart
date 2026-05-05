@@ -22,7 +22,7 @@ class RateService {
     count++;
     await box.put(_exportCountKey, count);
 
-    if (count == 3) {
+    if (count == 2) {
       await requestReview();
     }
   }

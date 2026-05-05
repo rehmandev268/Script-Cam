@@ -22,6 +22,24 @@ class Script extends HiveObject {
       content.trim().isEmpty ? 0 : content.trim().split(RegExp(r'\s+')).length;
 
   int get readTime => (wordCount / 130).ceil();
+
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'content': content,
+      'createdAt': createdAt.toIso8601String(),
+      'category': category,
+    };
+  }
+
+  factory Script.fromMap(Map<String, dynamic> map) {
+    return Script(
+      title: map['title'] ?? '',
+      content: map['content'] ?? '',
+      createdAt: DateTime.tryParse(map['createdAt'] ?? '') ?? DateTime.now(),
+      category: map['category'] ?? '',
+    );
+  }
 }
 
 class ScriptAdapter extends TypeAdapter<Script> {

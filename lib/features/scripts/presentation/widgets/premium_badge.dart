@@ -26,7 +26,7 @@ class PremiumBadge extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [AppColors.premium, Colors.orange],
+              colors: [AppColors.primary, AppColors.primaryDark],
             ),
             borderRadius: BorderRadius.circular(20.r),
           ),

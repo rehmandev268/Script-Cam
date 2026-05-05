@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_application_6/core/utils/responsive_config.dart';
 import 'package:flutter_application_6/core/utils/toast_service.dart';
-import 'package:flutter_application_6/widgets/ads/custom_native_ad_widget.dart';
 import 'package:flutter_application_6/widgets/common/adaptive_app_bar.dart';
 import '../../data/models/video_model.dart';
 import '../providers/gallery_provider.dart';
 import '../widgets/gallery_video_list_item.dart';
 import '../widgets/gallery_empty_state.dart';
 import 'package:flutter_application_6/core/utils/app_dialogs.dart';
-import 'package:flutter_application_6/features/premium/presentation/providers/premium_provider.dart';
-import 'package:flutter_application_6/core/services/ads_service/ad_state.dart';
 import 'package:flutter_application_6/core/services/analytics_service.dart';
 
 class GalleryScreen extends StatefulWidget {
@@ -25,6 +23,9 @@ class GalleryScreen extends StatefulWidget {
 }
 
 class _GalleryScreenState extends State<GalleryScreen> {
+  final Set<dynamic> _selectedKeys = {};
+  bool _isSelecting = false;
+
   @override
   void initState() {
     super.initState();
@@ -34,7 +35,35 @@ class _GalleryScreenState extends State<GalleryScreen> {
     });
   }
 
-  void _confirmDelete(BuildContext context, VideoRecord video) async {
+  void _toggleSelect(VideoRecord video) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      final key = video.key;
+      if (_selectedKeys.contains(key)) {
+        _selectedKeys.remove(key);
+        if (_selectedKeys.isEmpty) _isSelecting = false;
+      } else {
+        _selectedKeys.add(key);
+      }
+    });
+  }
+
+  void _enterSelectMode(VideoRecord video) {
+    HapticFeedback.mediumImpact();
+    setState(() {
+      _isSelecting = true;
+      _selectedKeys.add(video.key);
+    });
+  }
+
+  void _cancelSelect() {
+    setState(() {
+      _isSelecting = false;
+      _selectedKeys.clear();
+    });
+  }
+
+  Future<void> _confirmDelete(BuildContext context, VideoRecord video) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context);
     final galleryProvider = context.read<GalleryProvider>();
@@ -46,17 +75,61 @@ class _GalleryScreenState extends State<GalleryScreen> {
     );
 
     if (confirm && mounted) {
+      HapticFeedback.mediumImpact();
       galleryProvider.deleteVideo(video);
       ToastService.show(l10n.videoDeleted, isError: true);
     }
   }
 
+  Future<void> _bulkDelete(BuildContext context) async {
+    if (_selectedKeys.isEmpty) return;
+    final l10n = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final count = _selectedKeys.length;
+    final confirm = await AppDialogs.showConfirmDelete(
+      context: context,
+      title: l10n.bulkDeleteRecordingsTitle(count),
+      content: l10n.deleteScriptMessage,
+      isDark: isDark,
+    );
+    if (!confirm || !mounted) return;
+    HapticFeedback.mediumImpact();
+    final provider = context.read<GalleryProvider>();
+    final toDelete = provider.videos
+        .where((v) => _selectedKeys.contains(v.key))
+        .toList();
+    for (final v in toDelete) {
+      await provider.deleteVideo(v);
+    }
+    if (!mounted) return;
+    setState(() {
+      _isSelecting = false;
+      _selectedKeys.clear();
+    });
+    ToastService.show(l10n.recordingsDeletedToast(count), isError: true);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AdaptiveAppBar(
-        title: AppLocalizations.of(context).gallery,
+        title: _isSelecting
+            ? l10n.itemsSelected(_selectedKeys.length)
+            : l10n.tabRecordings,
         showBackButton: false,
+        actions: _isSelecting
+            ? [
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                  onPressed: () => _bulkDelete(context),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: _cancelSelect,
+                ),
+              ]
+            : null,
       ),
       body: Consumer<GalleryProvider>(
         builder: (context, provider, _) {
@@ -67,20 +140,6 @@ class _GalleryScreenState extends State<GalleryScreen> {
             );
           }
 
-          // Calculate total items including ads
-          // First ad after 2 videos, then every 5 videos
-          final videoCount = videos.length;
-          int adCount = 0;
-
-          if (videoCount > 2) {
-            adCount = 1; // First ad after 2 videos
-            final remainingVideos = videoCount - 2;
-            adCount += (remainingVideos / 5)
-                .floor(); // Additional ads every 5 videos
-          }
-
-          final totalItems = videoCount + adCount;
-
           return ListView.builder(
             padding: EdgeInsets.fromLTRB(
               20.w,
@@ -89,48 +148,42 @@ class _GalleryScreenState extends State<GalleryScreen> {
               widget.bottomPadding,
             ),
             physics: const BouncingScrollPhysics(),
-            itemCount: totalItems,
+            itemCount: videos.length,
             itemBuilder: (ctx, index) {
-              // Calculate if this position should be an ad
-              int videoIndex = index;
-              bool isAd = false;
-
-              if (index >= 2) {
-                // After first 2 videos, check for ad positions
-                final positionAfterFirst2 = index - 2;
-
-                // First ad is at position 2 (after 2 videos)
-                if (positionAfterFirst2 == 0) {
-                  isAd = true;
-                } else if (positionAfterFirst2 > 0 &&
-                    (positionAfterFirst2) % 6 == 0) {
-                  isAd = true;
-                }
-
-                if (isAd) {
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: 0.h, top: 8.h),
-                    child: _InlineGalleryAd(index: index),
-                  );
-                } else {
-                  final adsBeforeThisPosition = ((positionAfterFirst2) / 6)
-                      .floor();
-                  videoIndex =
-                      index -
-                      adsBeforeThisPosition -
-                      (positionAfterFirst2 >= 0 ? 1 : 0);
-                }
-              }
-
-              // Return video item
-              if (videoIndex < videos.length) {
-                return VideoListItem(
-                  video: videos[videoIndex],
-                  onDelete: () => _confirmDelete(context, videos[videoIndex]),
-                );
-              }
-
-              return const SizedBox.shrink();
+              final video = videos[index];
+              final currentDate = DateUtils.dateOnly(video.date);
+              final showHeader =
+                  index == 0 ||
+                  DateUtils.dateOnly(videos[index - 1].date) != currentDate;
+              final isSelected = _selectedKeys.contains(video.key);
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (showHeader)
+                    Padding(
+                      padding: EdgeInsets.only(top: index == 0 ? 0 : 12.h, bottom: 8.h),
+                      child: Text(
+                        MaterialLocalizations.of(context).formatMediumDate(currentDate),
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                  _isSelecting
+                      ? _SelectableVideoItem(
+                          video: video,
+                          isSelected: isSelected,
+                          onTap: () => _toggleSelect(video),
+                        )
+                      : VideoListItem(
+                          video: video,
+                          onDelete: () => _confirmDelete(context, video),
+                          onLongPress: () => _enterSelectMode(video),
+                        ),
+                ],
+              );
             },
           );
         },
@@ -139,42 +192,77 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 }
 
-class _InlineGalleryAd extends StatelessWidget {
-  final int index;
+class _SelectableVideoItem extends StatelessWidget {
+  final VideoRecord video;
+  final bool isSelected;
+  final VoidCallback onTap;
 
-  const _InlineGalleryAd({required this.index});
+  const _SelectableVideoItem({
+    required this.video,
+    required this.isSelected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final adWidget = CustomNativeAdWidget(
-      key: ValueKey("InlineGalleryAd_${index}_$isDark"),
-      factoryId: 'adFactoryGallery',
-      height: 90.h,
-      isGlass: false,
-    );
-
-    // Wrap in a builder to check if ad loaded
-    return Consumer<PremiumProvider>(
-      builder: (context, provider, _) {
-        // Don't show ad card if premium or ads can't be requested
-        if (provider.isPremium || !AdState.canRequestAds) {
-          return const SizedBox.shrink();
-        }
-
-        // Show ad with card wrapper
-        return Padding(
-          padding: EdgeInsets.only(bottom: 8.h),
-          child: Card(
-            margin: EdgeInsets.zero,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20.r),
-              child: adWidget,
-            ),
+    final name = video.path.split('/').last.replaceAll('.mp4', '');
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: EdgeInsets.only(bottom: 8.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.12)
+              : Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary
+                : Colors.transparent,
+            width: 1.5,
           ),
-        );
-      },
+        ),
+        child: Row(
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              width: 24.w,
+              height: 24.w,
+              margin: EdgeInsets.only(right: 12.w),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.transparent,
+                border: Border.all(
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.grey,
+                  width: 2,
+                ),
+              ),
+              child: isSelected
+                  ? const Icon(Icons.check, color: Colors.white, size: 14)
+                  : null,
+            ),
+            Icon(Icons.videocam_rounded,
+                color: Theme.of(context).colorScheme.primary, size: 22.sp),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Text(
+                name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14.sp,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

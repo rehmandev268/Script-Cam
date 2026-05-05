@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_6/core/utils/responsive_config.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
@@ -12,8 +13,14 @@ import '../../../../core/services/analytics_service.dart';
 class VideoListItem extends StatefulWidget {
   final VideoRecord video;
   final VoidCallback onDelete;
+  final VoidCallback? onLongPress;
 
-  const VideoListItem({super.key, required this.video, required this.onDelete});
+  const VideoListItem({
+    super.key,
+    required this.video,
+    required this.onDelete,
+    this.onLongPress,
+  });
 
   @override
   State<VideoListItem> createState() => _VideoListItemState();
@@ -45,9 +52,11 @@ class _VideoListItemState extends State<VideoListItem> {
       final file = File(widget.video.path);
       if (!await file.exists()) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text("Video file not found")));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context).videoFileNotFound),
+            ),
+          );
         }
         return;
       }
@@ -60,15 +69,19 @@ class _VideoListItemState extends State<VideoListItem> {
       // share_plus version 12 handles background I/O better if awaited properly
       await Share.shareXFiles(
         [XFile(widget.video.path)],
-        subject: 'Check out my video!',
-        text: 'Check out my video recorded with Script Cam!',
+        subject: AppLocalizations.of(context).shareVideoSubject,
+        text: AppLocalizations.of(context).shareVideoText,
       );
     } catch (e) {
       debugPrint("Error sharing video: $e");
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Error sharing video: $e")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context).errorSharingVideo(e.toString()),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -79,6 +92,8 @@ class _VideoListItemState extends State<VideoListItem> {
 
   @override
   Widget build(BuildContext context) {
+    final fileName = widget.video.path.split('/').last;
+    final scriptName = fileName.replaceAll('.mp4', '');
     return Card(
       child: Center(
         child: ListTile(
@@ -97,7 +112,7 @@ class _VideoListItemState extends State<VideoListItem> {
             ),
           ),
           title: Text(
-            widget.video.path.split('/').last,
+            scriptName,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.manrope(
@@ -106,7 +121,7 @@ class _VideoListItemState extends State<VideoListItem> {
             ),
           ),
           subtitle: Text(
-            DateFormat.yMMMd().format(widget.video.date),
+            '${DateFormat.Hm().format(widget.video.date)}  •  ${DateFormat.yMMMd().format(widget.video.date)}',
             style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
           ),
           trailing: Row(
@@ -140,6 +155,7 @@ class _VideoListItemState extends State<VideoListItem> {
               ),
             ],
           ),
+          onLongPress: widget.onLongPress,
           onTap: _exists
               ? () {
                   Navigator.push(

@@ -3,7 +3,6 @@ import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:flutter_application_6/core/utils/responsive_config.dart';
 import 'package:flutter_application_6/core/constants/app_constants.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:animate_do/animate_do.dart';
 
 class EmptyGalleryState extends StatelessWidget {
   final VoidCallback onGoToStudio;
@@ -13,13 +12,11 @@ class EmptyGalleryState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: FadeInUp(
-        duration: const Duration(milliseconds: 500),
-        child: Padding(
-          padding: EdgeInsets.all(40.0.r),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+      child: Padding(
+        padding: EdgeInsets.all(40.0.r),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
               Container(
                 padding: EdgeInsets.all(30.r),
                 decoration: BoxDecoration(
@@ -67,21 +64,8 @@ class EmptyGalleryState extends StatelessWidget {
                   AppLocalizations.of(context).startRecording,
                   style: TextStyle(fontSize: 14.sp),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 24.w,
-                    vertical: 12.h,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.r),
-                  ),
-                ),
               ),
-            ],
-          ),
+          ],
         ),
       ),
     );

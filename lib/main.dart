@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
@@ -24,9 +25,11 @@ import 'package:flutter_application_6/features/scripts/presentation/providers/sc
 import 'package:flutter_application_6/features/gallery/presentation/providers/gallery_provider.dart';
 import 'package:flutter_application_6/features/premium/presentation/providers/premium_provider.dart';
 import 'package:flutter_application_6/features/settings/presentation/providers/ui_provider.dart';
+import 'package:flutter_application_6/features/settings/presentation/providers/backup_provider.dart';
 import 'package:flutter_application_6/features/onboarding/presentation/pages/onboarding_screen.dart';
 import 'package:flutter_application_6/features/onboarding/presentation/pages/language_selection_screen.dart';
 import 'package:flutter_application_6/features/navigation/presentation/pages/root_navigation_screen.dart';
+import 'package:flutter_application_6/features/teleprompter/presentation/providers/recording_restriction_provider.dart';
 import 'package:flutter_application_6/widgets/common/no_internet_screen.dart';
 import 'package:flutter_application_6/core/services/connectivity_service.dart';
 import 'package:flutter_application_6/core/services/voice_sync_service.dart';
@@ -68,7 +71,7 @@ void main() async {
     settingsBox = boxes[2];
   } catch (e) {
     debugPrint("Hive initialization failed: $e");
-    
+
     await Hive.deleteBoxFromDisk(HiveKeys.scriptsBox);
     await Hive.deleteBoxFromDisk(HiveKeys.videosBox);
     await Hive.deleteBoxFromDisk(HiveKeys.settingsBox);
@@ -85,16 +88,30 @@ void main() async {
 
   binding.addPostFrameCallback((_) async {
     await MobileAds.instance.updateRequestConfiguration(
-      RequestConfiguration(testDeviceIds: ['80C589E82E84A18078D863AD0C946288']),
+      RequestConfiguration(
+        // Test device IDs must NEVER be set in production — they cause requests
+        // with zero fill (counted as impressions never shown), collapsing match rate.
+        testDeviceIds: kDebugMode ? ['80C589E82E84A18078D863AD0C946288'] : [],
+      ),
     );
     final canRequestAds = await GDPRService().initializeConsent();
     AdState.canRequestAds = canRequestAds;
-    RewardedAdHelper.load();
+
+    // Load ads only after consent is confirmed — canRequestAds must be true first.
+    if (canRequestAds) RewardedAdHelper.load();
     AnalyticsService().logAppOpen();
   });
 
   final premiumProvider = PremiumProvider();
   final uiProvider = UIProvider(settingsBox);
+  final backupProvider = BackupProvider();
+
+  // Try silent sign-in on launch
+  backupProvider.checkSilentSignIn(
+    ScriptsProvider(scriptBox),
+    GalleryProvider(videoBox),
+    uiProvider,
+  );
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   SystemChrome.setSystemUIOverlayStyle(
@@ -114,8 +131,10 @@ void main() async {
         ChangeNotifierProvider(create: (_) => GalleryProvider(videoBox)),
         ChangeNotifierProvider.value(value: premiumProvider),
         ChangeNotifierProvider.value(value: uiProvider),
+        ChangeNotifierProvider.value(value: backupProvider),
         ChangeNotifierProvider(create: (_) => VoiceSyncService()),
         ChangeNotifierProvider(create: (_) => ConnectivityService()),
+        ChangeNotifierProvider(create: (_) => RecordingRestrictionProvider()),
       ],
       child: const CinePromptApp(),
     ),
@@ -132,7 +151,8 @@ class CinePromptApp extends StatelessWidget {
         return MaterialApp(
           navigatorKey: navigatorKey,
           navigatorObservers: [AnalyticsService().observer],
-          title: 'ScriptCam',
+          onGenerateTitle: (context) =>
+              AppLocalizations.of(context).appTitle,
           debugShowCheckedModeBanner: false,
 
           locale: localeProvider.locale,
@@ -145,7 +165,7 @@ class CinePromptApp extends StatelessWidget {
             primaryColor: AppColors.primary,
             colorScheme: const ColorScheme.light(
               primary: AppColors.primary,
-              secondary: AppColors.accent,
+              secondary: AppColors.primary,
               surface: AppColors.lightSurface,
               error: AppColors.error,
               onPrimary: Colors.white,
@@ -190,6 +210,35 @@ class CinePromptApp extends StatelessWidget {
                 ),
               ),
             ),
+            outlinedButtonTheme: OutlinedButtonThemeData(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                minimumSize: Size(110.w, 48.h),
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                side: const BorderSide(color: AppColors.borderLight, width: 1),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                textStyle: GoogleFonts.manrope(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                minimumSize: Size(64.w, 40.h),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                textStyle: GoogleFonts.manrope(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
             inputDecorationTheme: InputDecorationTheme(
               filled: true,
               fillColor: AppColors.borderLight.withValues(alpha: 0.3),
@@ -217,7 +266,7 @@ class CinePromptApp extends StatelessWidget {
             primaryColor: AppColors.primary,
             colorScheme: const ColorScheme.dark(
               primary: AppColors.primary,
-              secondary: AppColors.accent,
+              secondary: AppColors.primary,
               surface: AppColors.darkSurface,
               error: AppColors.error,
               onPrimary: Colors.white,
@@ -258,6 +307,35 @@ class CinePromptApp extends StatelessWidget {
                 ),
                 textStyle: GoogleFonts.manrope(
                   fontSize: 16.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            outlinedButtonTheme: OutlinedButtonThemeData(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primaryLight,
+                minimumSize: Size(110.w, 48.h),
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                side: const BorderSide(color: AppColors.borderDark, width: 1),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                textStyle: GoogleFonts.manrope(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primaryLight,
+                minimumSize: Size(64.w, 40.h),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                textStyle: GoogleFonts.manrope(
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
                 ),
               ),

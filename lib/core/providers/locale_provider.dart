@@ -47,6 +47,7 @@ class LocaleProvider extends ChangeNotifier {
     {'code': 'ko', 'name': 'Korean', 'nativeName': '한국어'},
     {'code': 'ar', 'name': 'Arabic', 'nativeName': 'العربية'},
     {'code': 'hi', 'name': 'Hindi', 'nativeName': 'हिन्दी'},
+    {'code': 'ur', 'name': 'Urdu', 'nativeName': 'اردو'},
   ];
 
   static String getLanguageName(String code) {

@@ -11,10 +11,11 @@ class ExportProgressOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return PopScope(
       canPop: false,
       child: AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
+        backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16).r,
         ),
@@ -26,7 +27,7 @@ class ExportProgressOverlay extends StatelessWidget {
             Text(
               l10n.processing,
               style: TextStyle(
-                color: Colors.white,
+                color: isDark ? Colors.white : AppColors.textBlack,
                 fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
               ),

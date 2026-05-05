@@ -6,6 +6,7 @@ class ConnectivityService extends ChangeNotifier {
   final Connectivity _connectivity = Connectivity();
   bool _isConnected = true;
   StreamSubscription<List<ConnectivityResult>>? _subscription;
+  bool _disposed = false;
 
   bool get isConnected => _isConnected;
 
@@ -16,10 +17,14 @@ class ConnectivityService extends ChangeNotifier {
   Future<void> _init() async {
     // Check initial state
     final results = await _connectivity.checkConnectivity();
+    if (_disposed) return;
     _updateState(results);
 
     // Listen to changes
-    _subscription = _connectivity.onConnectivityChanged.listen(_updateState);
+    _subscription = _connectivity.onConnectivityChanged.listen((results) {
+      if (_disposed) return;
+      _updateState(results);
+    });
   }
 
   void _updateState(List<ConnectivityResult> results) {
@@ -30,18 +35,22 @@ class ConnectivityService extends ChangeNotifier {
 
     if (_isConnected != connected) {
       _isConnected = connected;
+      if (_disposed) return;
       notifyListeners();
     }
   }
 
   Future<void> checkConnection() async {
     final results = await _connectivity.checkConnectivity();
+    if (_disposed) return;
     _updateState(results);
   }
 
   @override
   void dispose() {
+    _disposed = true;
     _subscription?.cancel();
+    _subscription = null;
     super.dispose();
   }
 }

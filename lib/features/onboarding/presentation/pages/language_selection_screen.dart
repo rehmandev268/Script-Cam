@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:animate_do/animate_do.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/responsive_config.dart';
@@ -67,22 +66,17 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: 40.h),
-              FadeInDown(
-                child: Text(
-                  l10n.selectLanguage,
-                  style: GoogleFonts.manrope(
-                    fontSize: 32.sp,
-                    fontWeight: FontWeight.w800,
-                  ),
+              Text(
+                l10n.selectLanguage,
+                style: GoogleFonts.manrope(
+                  fontSize: 32.sp,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
               SizedBox(height: 12.h),
-              FadeInDown(
-                delay: const Duration(milliseconds: 100),
-                child: Text(
-                  l10n.selectLanguageDesc,
-                  style: TextStyle(fontSize: 16.sp, color: AppColors.textGrey),
-                ),
+              Text(
+                l10n.selectLanguageDesc,
+                style: TextStyle(fontSize: 16.sp, color: AppColors.textGrey),
               ),
               SizedBox(height: 40.h),
               Expanded(
@@ -96,9 +90,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                     final name = lang['name']!;
                     final isSelected = _selectedLanguageCode == code;
 
-                    return FadeInUp(
-                      duration: Duration(milliseconds: 300 + (index * 50)),
-                      child: Container(
+                    return Container(
                         margin: EdgeInsets.only(bottom: 12.h),
                         decoration: BoxDecoration(
                           color: isSelected
@@ -181,8 +173,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                             ),
                           ),
                         ),
-                      ),
-                    );
+                      );
                   },
                 ),
               ),
@@ -223,6 +214,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
         return '🇸🇦';
       case 'hi':
         return '🇮🇳';
+      case 'ur':
+        return '🇵🇰';
       default:
         return '🌐';
     }

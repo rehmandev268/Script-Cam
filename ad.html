@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScriptCam | Professional Video Ad</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #9d50bb;
+            --primary-dark: #6e48aa;
+            --accent: #63F297;
+            --dark: #0f172a;
+            --text-light: #f8fafc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000;
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* 9:16 Ad Container */
+        #ad-frame {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            height: 85vh;
+            border-radius: 40px;
+            overflow: hidden;
+            box-shadow: 0 0 100px rgba(157, 80, 187, 0.3);
+            background: #000;
+            border: 8px solid #222;
+        }
+
+        .scene {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .scene.active {
+            display: flex;
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(1.1); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .bg-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%);
+            z-index: 2;
+        }
+
+        /* Hook Elements */
+        .hook-text {
+            position: relative;
+            z-index: 10;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .take-counter {
+            background: rgba(255, 0, 0, 0.8);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: 800;
+            display: inline-block;
+            margin-bottom: 20px;
+            animation: blink 0.5s infinite alternate;
+        }
+
+        @keyframes blink {
+            from { opacity: 1; }
+            to { opacity: 0.5; }
+        }
+
+        .big-headline {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        /* UI elements */
+        #teleprompter-interface {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 20;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        #teleprompter-interface.visible {
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        .script-scroll {
+            position: absolute;
+            top: 25%;
+            left: 10%;
+            width: 80%;
+            height: 200px;
+            overflow: hidden;
+            mask-image: linear-gradient(to bottom, transparent, #000 20%, #000 80%, transparent);
+            font-size: 1.5rem;
+            color: #fff;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .scrolling-content {
+            animation: scrollText 10s linear infinite;
+        }
+
+        @keyframes scrollText {
+            0% { transform: translateY(150px); }
+            100% { transform: translateY(-300px); }
+        }
+
+        .camera-ui {
+            position: absolute;
+            bottom: 40px;
+            left: 0;
+            width: 100%;
+            padding: 0 30px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .record-btn {
+            width: 70px;
+            height: 70px;
+            border: 4px solid #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .record-inner {
+            width: 50px;
+            height: 50px;
+            background: #ff0000;
+            border-radius: 50%;
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(0.9); box-shadow: 0 0 10px rgba(255,0,0,0.5); }
+            to { transform: scale(1); box-shadow: 0 0 30px rgba(255,0,0,0.8); }
+        }
+
+        .cta-btn {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #fff;
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 1.2rem;
+            text-decoration: none;
+            box-shadow: 0 10px 40px rgba(157, 80, 187, 0.5);
+            z-index: 50;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .cta-btn:hover {
+            transform: translateX(-50%) scale(1.05);
+        }
+
+        .pro-badge {
+            background: var(--accent);
+            color: #000;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            position: absolute;
+            top: 50px;
+            right: 30px;
+            z-index: 30;
+        }
+
+        /* Controls */
+        #playback-controls {
+            position: absolute;
+            bottom: -60px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .replay-btn {
+            color: #fff;
+            background: none;
+            border: 1px solid #444;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ad-frame">
+        <!-- Scene 1: The Hook -->
+        <div id="scene-hook" class="scene active">
+            <img src="https://raw.githubusercontent.com/saqib-258/Script-Cam/refs/heads/main/assets/onboarding/onboarding_1.png" class="bg-img" alt="Hook" id="hook-image">
+            <div class="overlay"></div>
+            <div class="hook-text">
+                <div class="take-counter">TAKE #52</div>
+                <h1 class="big-headline">STILL<br>FORGETTING<br>LINES?</h1>
+            </div>
+        </div>
+
+        <!-- Scene 2: The Solution (UI Reveal) -->
+        <div id="scene-solution" class="scene">
+            <img src="https://raw.githubusercontent.com/saqib-258/Script-Cam/refs/heads/main/assets/onboarding/onboarding_2.png" class="bg-img" alt="Solution" id="hero-image">
+            <div class="overlay"></div>
+            
+            <div class="pro-badge">PRO LEVEL</div>
+
+            <div id="teleprompter-interface" class="visible">
+                <div class="script-scroll">
+                    <div class="scrolling-content">
+                        Hey everyone! Welcome back.<br><br>
+                        Today, I'm going to show you<br>
+                        exactly how I record perfect<br>
+                        videos in just ONE take.<br><br>
+                        No memorizing. No mistakes.<br>
+                        Just pure confidence.<br><br>
+                        ScriptCam makes it easy...
+                    </div>
+                </div>
+                
+                <div class="camera-ui">
+                    <div style="color: white; font-size: 0.8rem; text-align: center;">
+                        <span style="display: block; font-weight: 800; color: var(--accent);">VOICE SYNC</span>
+                        ACTIVE
+                    </div>
+                    <div class="record-btn">
+                        <div class="record-inner"></div>
+                    </div>
+                    <div style="color: white; font-size: 0.8rem; text-align: center;">
+                        <span style="display: block; font-weight: 800;">4K ULTRA</span>
+                        STABLE
+                    </div>
+                </div>
+            </div>
+
+            <div class="hook-text" style="bottom: 180px; position: absolute; width: 100%;">
+                <h2 style="font-size: 1.8rem; color: #fff;">STOP MEMORIZING.<br><span style="color: var(--accent);">START CREATING.</span></h2>
+            </div>
+
+            <button class="cta-btn">GET SCRIPT CAM</button>
+        </div>
+    </div>
+
+    <div id="playback-controls">
+        <button class="replay-btn" onclick="restartAd()">REPLAY AD</button>
+    </div>
+
+    <script>
+        // Update images with absolute paths for the generated assets
+        const frustrationImg = "file:///Users/mac/.gemini/antigravity/brain/3de873e1-6864-4f82-916f-0279deee96db/creator_frustration_hook_1772468819470.png";
+        const confidentImg = "file:///Users/mac/.gemini/antigravity/brain/3de873e1-6864-4f82-916f-0279deee96db/creator_confident_hero_1772468855421.png";
+
+        // Inject the generated images if they exist in the current folder
+        // (In a real scenario, these would be the local file names)
+        document.getElementById('hook-image').src = frustrationImg;
+        document.getElementById('hero-image').src = confidentImg;
+
+        let currentScene = 0;
+        const scenes = ['scene-hook', 'scene-solution'];
+        
+        function switchScene() {
+            document.getElementById(scenes[currentScene]).classList.remove('active');
+            currentScene = (currentScene + 1) % scenes.length;
+            document.getElementById(scenes[currentScene]).classList.add('active');
+            
+            // Set timers for the cycle
+            if (currentScene === 0) {
+                setTimeout(switchScene, 3000); // Stay on hook for 3s
+            } else {
+                setTimeout(switchScene, 7000); // Stay on solution for 7s
+            }
+        }
+
+        function restartAd() {
+            currentScene = 1;
+            switchScene();
+        }
+
+        // Start the ad flow
+        setTimeout(switchScene, 3500);
+    </script>
+</body>
+</html>

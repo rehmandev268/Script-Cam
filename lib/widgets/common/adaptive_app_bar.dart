@@ -60,6 +60,7 @@ class AdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlayStyle,
       child: AppBar(
+        automaticallyImplyLeading: showBackButton,
         backgroundColor: effectiveBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -80,23 +81,23 @@ class AdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
 
         leading: effectiveLeading,
-        title: Padding(
-          padding: EdgeInsets.only(left: 16.w),
-          child: Text(
-            title,
-            style: GoogleFonts.manrope(
-              fontSize: 17.sp,
-              fontWeight: FontWeight.w800,
-              color: contentColor,
-              letterSpacing: 0.3.w,
-            ),
+        title: Text(
+          title,
+          style: GoogleFonts.manrope(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w800,
+            color: contentColor,
+            letterSpacing: 0.25,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         actions: actions != null ? [...actions!, SizedBox(width: 8.w)] : null,
       ),
     );
   }
 
+  /// Must match [AppBar.toolbarHeight] plus divider [bottom].
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => Size.fromHeight(kToolbarHeight.h + 1.h);
 }

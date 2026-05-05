@@ -9,10 +9,11 @@ import 'package:video_player/video_player.dart';
 
 import 'package:flutter_application_6/core/constants/app_constants.dart';
 import 'package:flutter_application_6/core/utils/toast_service.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:flutter_application_6/widgets/common/adaptive_app_bar.dart';
-import 'package:flutter_application_6/widgets/ads/adaptive_banner_ad.dart';
 import 'package:flutter_application_6/features/scripts/data/models/script_model.dart';
 import 'package:flutter_application_6/core/services/rate_service.dart';
+import 'package:flutter_application_6/core/services/analytics_service.dart';
 import '../providers/gallery_provider.dart';
 
 import '../widgets/editor/editor_video_preview.dart';
@@ -65,6 +66,9 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
     super.initState();
     _trimRange = ValueNotifier(const RangeValues(0.0, 1.0));
     _initVideo();
+    AnalyticsService().logVideoEditorOpened(
+      videoId: widget.file.path.split('/').last,
+    );
   }
 
   @override
@@ -78,7 +82,17 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
       _controller.removeListener(_onVideoTick);
       _controller.dispose();
     } catch (_) {}
+    _cleanupGeneratedThumbnails();
     super.dispose();
+  }
+
+  void _cleanupGeneratedThumbnails() {
+    for (final path in _thumbnails) {
+      try {
+        File(path).deleteSync();
+      } catch (_) {}
+    }
+    _thumbnails.clear();
   }
 
   void _initVideo() async {
@@ -96,7 +110,10 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
       }
     } catch (e) {
       if (mounted) {
-        ToastService.show("Could not load video", isError: true);
+        ToastService.show(
+          AppLocalizations.of(context).couldNotLoadVideo,
+          isError: true,
+        );
         Navigator.pop(context);
       }
     }
@@ -104,20 +121,36 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
 
   Future<void> _generateThumbnails() async {
     if (_videoDuration.inMilliseconds == 0) return;
-    const count = 8;
-    final interval = _videoDuration.inMilliseconds ~/ count;
+    final fileSizeBytes = await widget.file.length();
+    final isLargeVideo = fileSizeBytes > 250 * 1024 * 1024;
+    final isLongVideo = _videoDuration.inMinutes >= 8;
+    final int count = (isLargeVideo || isLongVideo) ? 4 : 6;
+    final interval = (_videoDuration.inMilliseconds ~/ count).clamp(1, 1 << 30);
+
+    // Lower thumbnail quality reduces native bitmap allocations and avoids
+    // OOM crashes seen from easy_video_editor's generateThumbnail on some devices.
+    final thumbQuality = isLargeVideo ? 10 : 14;
     try {
       final editor = VideoEditorBuilder(videoPath: widget.file.path);
       for (int i = 0; i < count; i++) {
         if (!mounted) break;
-        final path = await editor.generateThumbnail(
-          positionMs: i * interval,
-          quality: 20,
-        );
+        String? path;
+        try {
+          path = await editor.generateThumbnail(
+            positionMs: i * interval,
+            quality: thumbQuality,
+          );
+        } catch (_) {
+          // Skip problematic frame positions instead of crashing the editor.
+          continue;
+        }
         if (!mounted) break;
         if (path != null && await File(path).exists()) {
-          if (mounted) setState(() => _thumbnails.add(path));
+          final thumbnailPath = path;
+          if (mounted) setState(() => _thumbnails.add(thumbnailPath));
         }
+        // Let the UI thread breathe between native frame extractions.
+        await Future.delayed(const Duration(milliseconds: 40));
       }
     } finally {
       if (mounted) setState(() => _generatingThumbnails = false);
@@ -158,33 +191,47 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
     _controller.pause();
     final shouldDiscard = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20).r,
-        ),
-        title: const Text(
-          "Discard Changes?",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        content: const Text(
-          "You have unsaved changes. Edits will be lost.",
-          style: TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text("Keep Editing"),
+      builder: (ctx) {
+        final l10n = AppLocalizations.of(ctx);
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        return AlertDialog(
+          backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20).r,
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-            child: const Text("Discard"),
+          title: Text(
+            l10n.discardChanges,
+            style: TextStyle(
+              color: isDark ? Colors.white : AppColors.textBlack,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ],
-      ),
+          content: Text(
+            l10n.discardChangesDesc,
+            style: TextStyle(
+              color: isDark ? Colors.white70 : AppColors.textGrey,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l10n.keepEditing),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+              ),
+              child: Text(l10n.discard),
+            ),
+          ],
+        );
+      },
     );
-    if (shouldDiscard == true && mounted) Navigator.pop(context);
+    if (shouldDiscard == true && mounted) {
+      AnalyticsService().logVideoEditorDiscarded();
+      Navigator.pop(context);
+    }
   }
 
   void _onSavePressed() {
@@ -202,14 +249,21 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
   }
 
   Future<void> _processExport(String fileName, VideoResolution quality) async {
-    // Set exporting state
     setState(() {
       _isExporting = true;
       _progressNotifier.value = 0.0;
-      _lastProgress = 0.0; // Reset progress tracking
+      _lastProgress = 0.0;
     });
 
     final exportStartTime = DateTime.now();
+    AnalyticsService().logVideoEditorExportStarted(
+      quality: quality.toString(),
+      trimStart: _trimRange.value.start,
+      trimEnd: _trimRange.value.end,
+      playbackSpeed: _playbackSpeed,
+      audioRemoved: _removeAudio,
+    );
+
     debugPrint(
       '=== EXPORT STARTED at ${exportStartTime.toIso8601String()} ===',
     );
@@ -337,7 +391,7 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
       }
 
       // Show success message
-      ToastService.show("Saved as $fileName");
+      ToastService.show(AppLocalizations.of(context).savedAs(fileName));
       debugPrint('✓ Success toast shown');
 
       // Increment rate check
@@ -357,6 +411,13 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
       // Close editor screen
       final totalTime = DateTime.now().difference(exportStartTime);
       debugPrint('=== EXPORT SUCCESS in ${totalTime.inSeconds}s ===');
+      final file2 = File(resultPath);
+      final fileSize2 = await file2.length();
+      if (!mounted) return;
+      AnalyticsService().logVideoEditorExportCompleted(
+        durationSeconds: totalTime.inSeconds,
+        fileSizeBytes: fileSize2,
+      );
       debugPrint('Closing editor screen...');
       Navigator.pop(context);
     } catch (e, stackTrace) {
@@ -373,15 +434,16 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
 
       if (mounted) {
         setState(() => _isExporting = false);
+        AnalyticsService().logVideoEditorExportFailed(reason: e.toString());
 
-        // Show user-friendly error message
-        String userMessage = "Save Failed";
+        final l10n = AppLocalizations.of(context);
+        String userMessage = l10n.saveFailed;
         if (e.toString().contains('gallery')) {
-          userMessage = "Failed to save to gallery";
+          userMessage = l10n.saveFailedGallery;
         } else if (e.toString().contains('not found')) {
-          userMessage = "Export file not found";
+          userMessage = l10n.saveFailedNotFound;
         } else if (e.toString().contains('empty')) {
-          userMessage = "Export produced empty file";
+          userMessage = l10n.saveFailedEmpty;
         }
 
         ToastService.show(userMessage, isError: true);
@@ -414,7 +476,7 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
       child: Scaffold(
         backgroundColor: Colors.black,
         appBar: AdaptiveAppBar(
-          title: "Studio Editor",
+          title: AppLocalizations.of(context).studioEditor,
           backgroundColor: Colors.black,
           showBackButton: false,
           leading: IconButton(
@@ -462,7 +524,9 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
                               SizedBox(width: 8.w),
                               Text(
                                 _isSavingToGallery
-                                    ? "Saving..."
+                                    ? AppLocalizations.of(
+                                        context,
+                                      ).savingEllipsis
                                     : "${(progress * 100).toInt()}%",
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
@@ -470,9 +534,9 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
                               ),
                             ],
                           )
-                        : const Text(
-                            "SAVE",
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                        : Text(
+                            AppLocalizations.of(context).saveEditorLabel,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                   );
                 },
@@ -517,14 +581,17 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
                           valueListenable: _activeTab,
                           builder: (context, tab, _) => EditorTabSelector(
                             activeTab: tab,
-                            onTabChanged: (newTab) =>
-                                setState(() => _activeTab.value = newTab),
+                            onTabChanged: (newTab) {
+                              setState(() => _activeTab.value = newTab);
+                              AnalyticsService().logVideoEditorTabChanged(
+                                tab: newTab.name,
+                              );
+                            },
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SafeArea(top: false, child: AdaptiveBannerWidget()),
                 ],
               ),
       ),
@@ -556,12 +623,23 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
       case EditorTab.ratio:
         return EditorRatioPanel(
           selectedRatioEnum: _selectedRatioEnum,
-          onRatioChanged: (val, enm) => setState(() {
-            _targetAspectRatio = val;
-            _selectedRatioEnum = enm;
-          }),
-          onRotate: () => setState(() => _rotation = (_rotation + 90) % 360),
-          onMirror: () => setState(() => _isFlipped = !_isFlipped),
+          onRatioChanged: (val, enm) {
+            setState(() {
+              _targetAspectRatio = val;
+              _selectedRatioEnum = enm;
+            });
+            AnalyticsService().logVideoAspectRatioChanged(
+              ratio: enm?.toString() ?? 'custom',
+            );
+          },
+          onRotate: () {
+            setState(() => _rotation = (_rotation + 90) % 360);
+            AnalyticsService().logVideoRotated(degrees: (_rotation + 90) % 360);
+          },
+          onMirror: () {
+            setState(() => _isFlipped = !_isFlipped);
+            AnalyticsService().logVideoMirrored();
+          },
         );
       case EditorTab.adjust:
         return EditorAdjustmentPanel(
@@ -570,8 +648,14 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
           onSpeedChanged: (v) {
             setState(() => _playbackSpeed = v);
             _controller.setPlaybackSpeed(v);
+            AnalyticsService().logVideoPlaybackSpeedChanged(speed: v);
           },
-          onToggleAudio: () => setState(() => _removeAudio = !_removeAudio),
+          onToggleAudio: () {
+            setState(() => _removeAudio = !_removeAudio);
+            AnalyticsService().logVideoAudioToggled(
+              audioRemoved: !_removeAudio,
+            );
+          },
         );
     }
   }

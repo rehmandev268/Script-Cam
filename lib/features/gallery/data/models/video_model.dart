@@ -7,6 +7,17 @@ class VideoRecord extends HiveObject {
   @HiveField(1)
   DateTime date;
   VideoRecord({required this.path, required this.date});
+
+  Map<String, dynamic> toMap() {
+    return {'path': path, 'date': date.toIso8601String()};
+  }
+
+  factory VideoRecord.fromMap(Map<String, dynamic> map) {
+    return VideoRecord(
+      path: map['path'] ?? '',
+      date: DateTime.tryParse(map['date'] ?? '') ?? DateTime.now(),
+    );
+  }
 }
 
 class VideoAdapter extends TypeAdapter<VideoRecord> {

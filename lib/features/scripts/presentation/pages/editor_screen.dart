@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -10,62 +11,141 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../widgets/common/adaptive_app_bar.dart';
 import '../../data/models/script_model.dart';
 import '../providers/scripts_provider.dart';
-import '../widgets/editor/platform_selector.dart';
 import '../widgets/editor/editor_stats_bar.dart';
-import '../../../../core/utils/platform_utils.dart';
 import '../../../../core/services/analytics_service.dart';
+import '../../../../core/services/file_service.dart';
+import '../../../onboarding/presentation/pages/onboarding_screen.dart';
+import '../../../teleprompter/presentation/pages/teleprompter_screen.dart';
+
+/// Result when [EditorScreen.saveReturnsToTeleprompterOnly] is true (session script).
+///
+/// When [persistedScript] is set, teleprompter should bind to this Hive-backed [Script].
+class TeleprompterScriptEditResult {
+  final String title;
+  final String content;
+  final Script? persistedScript;
+
+  TeleprompterScriptEditResult({
+    required this.title,
+    required this.content,
+    this.persistedScript,
+  });
+}
 
 class EditorScreen extends StatefulWidget {
   final Script? scriptToEdit;
   final VoidCallback? onSaveSuccess;
 
-  const EditorScreen({super.key, this.scriptToEdit, this.onSaveSuccess});
+  /// Prefills title/body when there is no [scriptToEdit] but user opened from recording.
+  final String? teleprompterInitialTitle;
+  final String? teleprompterInitialContent;
+
+  /// Saves only return to caller (no Hive); used for scripts not yet in the library.
+  final bool saveReturnsToTeleprompterOnly;
+
+  const EditorScreen({
+    super.key,
+    this.scriptToEdit,
+    this.onSaveSuccess,
+    this.teleprompterInitialTitle,
+    this.teleprompterInitialContent,
+    this.saveReturnsToTeleprompterOnly = false,
+  });
 
   @override
   State<EditorScreen> createState() => _EditorScreenState();
 }
 
+const List<String> kScriptCategories = [
+  'General',
+  'YouTube',
+  'Podcast',
+  'Sales',
+  'Education',
+  'Social Media',
+  'Interview',
+  'Other',
+];
+
+const List<Map<String, String>> kScriptTemplates = [
+  {
+    'title': 'YouTube Intro',
+    'category': 'YouTube',
+    'content':
+        'Hey everyone, welcome back to my channel!\n\nToday we\'re diving into [TOPIC]. If you\'re new here, make sure to subscribe and hit the bell so you never miss a video.\n\nLet\'s get started!',
+  },
+  {
+    'title': 'Product Pitch',
+    'category': 'Sales',
+    'content':
+        'Are you struggling with [PROBLEM]?\n\nIntroducing [PRODUCT] — the solution that [KEY BENEFIT].\n\nHere\'s how it works: [EXPLANATION].\n\nJoin thousands of happy customers. Try it free today.',
+  },
+  {
+    'title': 'Podcast Intro',
+    'category': 'Podcast',
+    'content':
+        'Welcome to [PODCAST NAME], the show where we [SHOW PREMISE].\n\nI\'m your host, [NAME]. Today\'s guest is [GUEST NAME], who is [GUEST INTRO].\n\nLet\'s jump right in.',
+  },
+  {
+    'title': 'Social Media Reel',
+    'category': 'Social Media',
+    'content':
+        '[HOOK — surprising fact or bold statement]\n\nHere\'s what most people don\'t know about [TOPIC]:\n\n1. [POINT ONE]\n2. [POINT TWO]\n3. [POINT THREE]\n\nSave this for later and follow for more!',
+  },
+  {
+    'title': 'Self Introduction',
+    'category': 'General',
+    'content':
+        'Hi, my name is [NAME] and I\'m a [ROLE/PROFESSION] based in [LOCATION].\n\nI specialize in [SKILLS/EXPERTISE], and I\'m passionate about [INTEREST].\n\nI\'m excited to [PURPOSE OF VIDEO].',
+  },
+  {
+    'title': 'Educational Explainer',
+    'category': 'Education',
+    'content':
+        'Have you ever wondered about [TOPIC]?\n\nToday I\'m going to explain [CONCEPT] in a way that\'s easy to understand.\n\nFirst, let\'s cover [POINT 1].\n\nNext, [POINT 2].\n\nFinally, [POINT 3].\n\nNow you know everything you need about [TOPIC].',
+  },
+  {
+    'title': 'Interview Answer',
+    'category': 'Interview',
+    'content':
+        'That\'s a great question.\n\nIn my previous role at [COMPANY], I was responsible for [RESPONSIBILITY].\n\nOne challenge I faced was [CHALLENGE]. I approached it by [ACTION].\n\nThe result was [OUTCOME], which taught me [LESSON].',
+  },
+];
+
 class _EditorScreenState extends State<EditorScreen> {
+  String _selectedCategory = 'General';
+
   final _titleCtrl = TextEditingController();
   final _bodyCtrl = TextEditingController();
 
-  String _selectedPlatform = "General";
-  final List<Map<String, dynamic>> _platforms = PlatformConfig.platforms;
-
   int _wordCount = 0;
-  String _estDuration = "0s";
+  int _estDurationSeconds = 0;
 
   @override
   void initState() {
     super.initState();
+    AnalyticsService().logEditorOpened(
+      isEditing:
+          widget.scriptToEdit != null || widget.saveReturnsToTeleprompterOnly,
+    );
     if (widget.scriptToEdit != null) {
       _titleCtrl.text = widget.scriptToEdit!.title;
       _bodyCtrl.text = widget.scriptToEdit!.content;
-      _detectPlatformFromContent();
+      _selectedCategory = kScriptCategories.contains(widget.scriptToEdit!.category)
+          ? widget.scriptToEdit!.category
+          : 'General';
       _updateStats();
       AnalyticsService().logScriptViewed(
         scriptId: widget.scriptToEdit!.key?.toString() ?? 'unknown',
         title: widget.scriptToEdit!.title,
         category: widget.scriptToEdit!.category,
       );
+    } else if (widget.saveReturnsToTeleprompterOnly) {
+      _titleCtrl.text = widget.teleprompterInitialTitle ?? '';
+      _bodyCtrl.text = widget.teleprompterInitialContent ?? '';
+      _updateStats();
     }
     _bodyCtrl.addListener(_updateStats);
-  }
-
-  void _detectPlatformFromContent() {
-    final combined = "${_titleCtrl.text} ${_bodyCtrl.text}".toLowerCase();
-
-    for (var p in _platforms) {
-      final name = p['name'] as String;
-      if (name == "General") continue;
-
-      if (combined.contains(name.toLowerCase())) {
-        setState(() {
-          _selectedPlatform = name;
-        });
-        return;
-      }
-    }
   }
 
   @override
@@ -81,23 +161,100 @@ class _EditorScreenState extends State<EditorScreen> {
       if (mounted) {
         setState(() {
           _wordCount = 0;
-          _estDuration = "0s";
+          _estDurationSeconds = 0;
         });
       }
       return;
     }
     final count = text.split(RegExp(r'\s+')).length;
     final seconds = (count / 140 * 60).ceil();
-    final durationStr = seconds < 60
-        ? "${seconds}s"
-        : "${(seconds / 60).floor()}m ${seconds % 60}s";
 
     if (mounted) {
       setState(() {
         _wordCount = count;
-        _estDuration = durationStr;
+        _estDurationSeconds = seconds;
       });
     }
+  }
+
+  void _showTemplates() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (ctx) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 8.h),
+            child: Text(
+              'Templates',
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w800,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 320.h,
+            child: ListView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+              itemCount: kScriptTemplates.length,
+              itemBuilder: (_, i) {
+                final t = kScriptTemplates[i];
+                return ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  leading: Container(
+                    width: 40.w,
+                    height: 40.w,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                    child: Icon(Icons.description_outlined,
+                        color: AppColors.primary, size: 20.sp),
+                  ),
+                  title: Text(
+                    t['title']!,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14.sp,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                  subtitle: Text(
+                    t['category']!,
+                    style: TextStyle(
+                        fontSize: 12.sp, color: AppColors.textGrey),
+                  ),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    if (_titleCtrl.text.isEmpty) {
+                      _titleCtrl.text = t['title']!;
+                    }
+                    _bodyCtrl.text = t['content']!;
+                    setState(() {
+                      if (kScriptCategories.contains(t['category'])) {
+                        _selectedCategory = t['category']!;
+                      }
+                    });
+                    _updateStats();
+                  },
+                );
+              },
+            ),
+          ),
+          SizedBox(height: 12.h),
+        ],
+      ),
+    );
   }
 
   Future<void> _pasteFromClipboard() async {
@@ -105,36 +262,36 @@ class _EditorScreenState extends State<EditorScreen> {
     if (data?.text != null) {
       _bodyCtrl.text += data!.text!;
       _updateStats();
+      AnalyticsService().logScriptPasted(wordCount: _wordCount);
       if (!mounted) return;
       ToastService.show(AppLocalizations.of(context).textPasted);
     }
   }
 
-  String _processContentForSave(String rawContent) {
-    String cleanContent = rawContent;
-    for (var p in _platforms) {
-      final name = p['name'] as String;
-      if (name == "General") continue;
-
-      cleanContent = cleanContent.replaceAll(
-        RegExp(r'\n\n#' + name, caseSensitive: false),
-        '',
+  Future<void> _handleImport() async {
+    final result = await FileService.importScript();
+    if (result != null && mounted) {
+      if (_titleCtrl.text.isEmpty) {
+        _titleCtrl.text = result['title']!;
+      }
+      _bodyCtrl.text = result['content']!;
+      _updateStats();
+      AnalyticsService().logScriptImported(
+        source: 'file',
+        wordCount: _wordCount,
       );
-      cleanContent = cleanContent.replaceAll(
-        RegExp(r'#' + name, caseSensitive: false),
-        '',
-      );
+      ToastService.show(AppLocalizations.of(context).importSuccess);
     }
-    cleanContent = cleanContent.trim();
-
-    if (_selectedPlatform != "General") {
-      return "$cleanContent\n\n#$_selectedPlatform";
-    }
-
-    return cleanContent;
   }
 
-  void _save(BuildContext context) async {
+  /// Trims body and strips a legacy trailing hashtag line (e.g. `#YouTube`).
+  String _normalizeScriptBody(String raw) {
+    var s = raw.trim();
+    s = s.replaceFirst(RegExp(r'\s*\n+#\w+\s*$', caseSensitive: false), '');
+    return s.trim();
+  }
+
+  Future<void> _save(BuildContext context) async {
     if (_titleCtrl.text.isEmpty) {
       ToastService.show(AppLocalizations.of(context).titleRequired);
       return;
@@ -146,22 +303,60 @@ class _EditorScreenState extends State<EditorScreen> {
       listen: false,
     );
 
-    final finalContent = _processContentForSave(_bodyCtrl.text);
+    final finalContent = _normalizeScriptBody(_bodyCtrl.text);
 
-    // Execute task immediately
+    if (widget.saveReturnsToTeleprompterOnly) {
+      try {
+        final saved = await scriptsProvider.addScriptAndReturn(
+          _titleCtrl.text.trim(),
+          finalContent,
+          _selectedCategory,
+        );
+        if (!context.mounted) return;
+        ToastService.show(AppLocalizations.of(context).created);
+        Navigator.pop(
+          context,
+          TeleprompterScriptEditResult(
+            title: saved.title,
+            content: saved.content,
+            persistedScript: saved,
+          ),
+        );
+      } catch (_) {
+        if (!context.mounted) return;
+        ToastService.show(
+          AppLocalizations.of(context).unexpectedErrorDesc,
+          isError: true,
+        );
+      }
+      return;
+    }
+
     if (widget.scriptToEdit != null) {
       scriptsProvider.updateScript(
         widget.scriptToEdit!,
         _titleCtrl.text.trim(),
         finalContent,
-        _selectedPlatform,
+        _selectedCategory,
+      );
+      AnalyticsService().logScriptEdited(
+        scriptId: widget.scriptToEdit!.key?.toString() ?? 'unknown',
+        title: _titleCtrl.text.trim(),
+        category: _selectedCategory,
+        wordCount: _wordCount,
       );
       ToastService.show(AppLocalizations.of(context).saved);
     } else {
       scriptsProvider.addScript(
         _titleCtrl.text.trim(),
         finalContent,
-        _selectedPlatform,
+        _selectedCategory,
+      );
+      AnalyticsService().logScriptCreated(
+        scriptId: DateTime.now().millisecondsSinceEpoch.toString(),
+        title: _titleCtrl.text.trim(),
+        category: _selectedCategory,
+        wordCount: _wordCount,
       );
       ToastService.show(AppLocalizations.of(context).created);
       if (widget.onSaveSuccess != null) widget.onSaveSuccess!();
@@ -169,19 +364,82 @@ class _EditorScreenState extends State<EditorScreen> {
     Navigator.pop(context);
   }
 
+  Future<void> _recordFromEditor() async {
+    final cameraStatus = await Permission.camera.status;
+    final micStatus = await Permission.microphone.status;
+    if (!mounted) return;
+
+    if (!cameraStatus.isGranted || !micStatus.isGranted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+      );
+      return;
+    }
+
+    final title = _titleCtrl.text.trim();
+    final content = _bodyCtrl.text.trim();
+    final script = Script(
+      title: title.isEmpty ? 'Untitled Script' : title,
+      content: content.isEmpty ? ' ' : _normalizeScriptBody(content),
+      createdAt: DateTime.now(),
+      category: _selectedCategory,
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => TeleprompterScreen(script: script)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isEditing = widget.scriptToEdit != null;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final l10n = AppLocalizations.of(context);
+    final appBarTitle = isEditing || widget.saveReturnsToTeleprompterOnly
+        ? l10n.editScript
+        : l10n.newScript;
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBg : Colors.white,
 
       appBar: AdaptiveAppBar(
-        title: isEditing ? l10n.editScript : l10n.newScript,
+        title: appBarTitle,
         showBackButton: true,
         actions: [
+          if (!widget.saveReturnsToTeleprompterOnly)
+            IconButton(
+              icon: Icon(
+                Icons.videocam_rounded,
+                color: AppColors.primary,
+                size: 22.sp,
+              ),
+              onPressed: _recordFromEditor,
+              tooltip: l10n.startRecording,
+            ),
+          if (isEditing)
+            IconButton(
+              icon: Icon(
+                Icons.file_download_outlined,
+                color: AppColors.primary,
+                size: 22.sp,
+              ),
+              onPressed: () async {
+                final l10n = AppLocalizations.of(context);
+                await FileService.exportScript(
+                  _titleCtrl.text,
+                  _bodyCtrl.text,
+                  shareSubject: l10n.exportedScriptSubject(_titleCtrl.text),
+                );
+                AnalyticsService().logScriptExported(
+                  scriptId: widget.scriptToEdit?.key?.toString() ?? 'unknown',
+                );
+                if (mounted) {
+                  ToastService.show(l10n.exportSuccess);
+                }
+              },
+            ),
           TextButton(
             onPressed: () => _save(context),
             child: Text(
@@ -236,37 +494,63 @@ class _EditorScreenState extends State<EditorScreen> {
                     ),
                   ),
 
-                  Padding(
-                    padding: EdgeInsets.only(
-                      left: 24.w,
-                      top: 15.h,
-                      bottom: 5.h,
-                    ),
-                    child: Text(
-                      l10n.platform,
-                      style: TextStyle(
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textGrey,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                  ),
-                  PlatformSelector(
-                    platforms: _platforms,
-                    selectedPlatform: _selectedPlatform,
-                    onPlatformSelected: (platform) =>
-                        setState(() => _selectedPlatform = platform),
-                    isDark: isDark,
-                  ),
-
-                  SizedBox(height: 10.h),
+                  SizedBox(height: 16.h),
 
                   EditorStatsBar(
                     wordCount: _wordCount,
-                    estDuration: _estDuration,
+                    durationSeconds: _estDurationSeconds,
                     onPaste: _pasteFromClipboard,
+                    onImport: _handleImport,
+                    onTemplates: widget.scriptToEdit == null
+                        ? _showTemplates
+                        : null,
                   ),
+
+                  SizedBox(height: 12.h),
+                  SizedBox(
+                    height: 36.h,
+                    child: ListView.builder(
+                      padding: EdgeInsets.symmetric(horizontal: 24.w),
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: kScriptCategories.length,
+                      itemBuilder: (context, i) {
+                        final cat = kScriptCategories[i];
+                        final selected = cat == _selectedCategory;
+                        final isDark = Theme.of(context).brightness == Brightness.dark;
+                        return GestureDetector(
+                          onTap: () => setState(() => _selectedCategory = cat),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            margin: EdgeInsets.only(right: 8.w),
+                            padding: EdgeInsets.symmetric(horizontal: 14.w),
+                            decoration: BoxDecoration(
+                              color: selected
+                                  ? AppColors.primary
+                                  : (isDark ? AppColors.darkSurface : AppColors.lightBg),
+                              borderRadius: BorderRadius.circular(20.r),
+                              border: Border.all(
+                                color: selected
+                                    ? AppColors.primary
+                                    : (isDark ? AppColors.borderDark : AppColors.borderLight),
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                cat,
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: selected ? Colors.white : AppColors.textGrey,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
 
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 24.w),

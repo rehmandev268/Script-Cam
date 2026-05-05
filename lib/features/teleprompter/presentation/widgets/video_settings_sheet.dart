@@ -9,16 +9,20 @@ class VideoSettingsSheet extends StatelessWidget {
   final CameraState state;
   final VideoRecordingQuality videoQuality;
   final int targetFps;
+  final int countdownDuration;
   final Function(VideoRecordingQuality) onQualityChanged;
   final Function(int) onFpsChanged;
+  final Function(int) onCountdownChanged;
 
   const VideoSettingsSheet({
     super.key,
     required this.state,
     required this.videoQuality,
     required this.targetFps,
+    required this.countdownDuration,
     required this.onQualityChanged,
     required this.onFpsChanged,
+    required this.onCountdownChanged,
   });
 
   @override
@@ -118,7 +122,96 @@ class VideoSettingsSheet extends StatelessWidget {
             ],
           ),
           SizedBox(height: 24.h),
+          Text(
+            AppLocalizations.of(context).countdownTimer,
+            style: TextStyle(color: Colors.white70, fontSize: 14.sp),
+          ),
+          SizedBox(height: 12.h),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _CountdownOption(
+                  label: AppLocalizations.of(context).off,
+                  duration: 0,
+                  isSelected: countdownDuration == 0,
+                  onTap: () {
+                    onCountdownChanged(0);
+                    Navigator.pop(context);
+                  },
+                ),
+                _CountdownOption(
+                  label: "3s",
+                  duration: 3,
+                  isSelected: countdownDuration == 3,
+                  onTap: () {
+                    onCountdownChanged(3);
+                    Navigator.pop(context);
+                  },
+                ),
+                _CountdownOption(
+                  label: "5s",
+                  duration: 5,
+                  isSelected: countdownDuration == 5,
+                  onTap: () {
+                    onCountdownChanged(5);
+                    Navigator.pop(context);
+                  },
+                ),
+                _CountdownOption(
+                  label: "10s",
+                  duration: 10,
+                  isSelected: countdownDuration == 10,
+                  onTap: () {
+                    onCountdownChanged(10);
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 24.h),
         ],
+      ),
+    );
+  }
+}
+
+class _CountdownOption extends StatelessWidget {
+  final String label;
+  final int duration;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _CountdownOption({
+    required this.label,
+    required this.duration,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: EdgeInsets.only(right: 12.w),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : Colors.white10,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : Colors.white24,
+            width: 1.w,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.white70,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
     );
   }

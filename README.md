@@ -14,3 +14,7 @@
 ### Prerequisites
 - Flutter SDK (3.0.0+)
 - Android Studio / VS Code
+
+## 📝 Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for detailed release notes and updates.

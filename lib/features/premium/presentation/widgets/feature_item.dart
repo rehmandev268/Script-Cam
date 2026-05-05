@@ -24,19 +24,21 @@ class FeatureItem extends StatelessWidget {
             color: color.withValues(alpha: 0.2),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: color, size: 20.sp),
+          child: Icon(icon, color: color, size: 18.sp),
         ),
-        SizedBox(width: 16.w),
-        Text(
-          text,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
+        SizedBox(width: 12.w),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-        const Spacer(),
-        Icon(Icons.check_circle_rounded, color: color, size: 20.sp),
+        SizedBox(width: 8.w),
+        Icon(Icons.check_circle_rounded, color: color, size: 18.sp),
       ],
     );
   }

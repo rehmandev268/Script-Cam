@@ -6,6 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/responsive_config.dart';
 import '../../../../core/providers/locale_provider.dart';
+import '../../../../core/services/analytics_service.dart';
+import '../../../../widgets/common/adaptive_app_bar.dart';
 
 class LanguageSettingsScreen extends StatelessWidget {
   const LanguageSettingsScreen({super.key});
@@ -19,21 +21,7 @@ class LanguageSettingsScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBg : AppColors.lightBg,
-      appBar: AppBar(
-        backgroundColor: isDark ? AppColors.darkBg : AppColors.lightBg,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          l10n.language,
-          style: GoogleFonts.manrope(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ),
+      appBar: AdaptiveAppBar(title: l10n.language),
       body: ListView.builder(
         physics: const BouncingScrollPhysics(),
         padding: EdgeInsets.all(20.r),
@@ -64,6 +52,7 @@ class LanguageSettingsScreen extends StatelessWidget {
               child: InkWell(
                 onTap: () {
                   localeProvider.changeLocale(Locale(code));
+                  AnalyticsService().logLanguageChanged(languageCode: code);
                 },
                 borderRadius: BorderRadius.circular(16.r),
                 child: Padding(

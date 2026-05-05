@@ -1,65 +1,818 @@
 {
   "@@locale": "en",
-  
+  "about": "About",
+  "@about": {
+    "description": "About section header"
+  },
+  "addOrSelectScriptPrompt": "Add or select a script to begin recording with teleprompter overlay.",
+  "@addOrSelectScriptPrompt": {
+    "description": "Fallback script content prompt"
+  },
+  "adjust": "Adjust",
+  "@adjust": {
+    "description": "Adjust tab label"
+  },
+  "adNotAvailable": "Ad unavailable",
+  "@adNotAvailable": {
+    "description": "Ad error title"
+  },
+  "adNotAvailableDesc": "We couldn't load an ad. Try again in a moment.",
+  "@adNotAvailableDesc": {
+    "description": "Ad error description on sheet"
+  },
+  "adNotCompleted": "Ad not finished",
+  "@adNotCompleted": {
+    "description": "When user closed ad early"
+  },
+  "adNotCompletedDesc": "Watch the full ad to earn recording credits.",
+  "@adNotCompletedDesc": {
+    "description": "Description when ad incomplete"
+  },
+  "all": "All",
+  "@all": {
+    "description": "All category label"
+  },
+  "allScriptsTitle": "All Scripts",
+  "@allScriptsTitle": {
+    "description": "Bottom sheet title for scripts picker"
+  },
+  "appearance": "Appearance",
+  "@appearance": {
+    "description": "Appearance settings label"
+  },
+  "appInfoDescription": "The ultimate teleprompter and video recording tool for content creators. Create, read, and record seamlessly.",
+  "@appInfoDescription": {
+    "description": "App description in info dialog"
+  },
+  "appInfoTitle": "ScriptCam",
+  "@appInfoTitle": {
+    "description": "App info dialog title"
+  },
   "appTitle": "ScriptCam",
   "@appTitle": {
     "description": "The application title"
   },
-
-  "onboardingWelcomeTitle": "Welcome to ScriptCam",
-  "@onboardingWelcomeTitle": {
-    "description": "Title for the welcome onboarding screen"
+  "autoBackup": "Automatic backup",
+  "@autoBackup": {
+    "description": "Auto backup toggle title"
   },
-  "onboardingWelcomeDesc": "Your all-in-one Teleprompter studio. Write scripts, record videos, and edit seamlessly.",
-  "@onboardingWelcomeDesc": {
-    "description": "Description for the welcome onboarding screen"
+  "autoSync": "Auto Sync",
+  "@autoSync": {
+    "description": "Auto sync switch label"
   },
-
-  "onboardingScriptEditorTitle": "Script Editor",
-  "@onboardingScriptEditorTitle": {
-    "description": "Title for the script editor onboarding screen"
+  "backCamera": "Back",
+  "@backCamera": {
+    "description": "Back camera option label"
   },
-  "onboardingScriptEditorDesc": "Write and manage your video scripts with ease. Organize your ideas instantly.",
-  "@onboardingScriptEditorDesc": {
-    "description": "Description for the script editor onboarding screen"
+  "background": "Background",
+  "@background": {
+    "description": "Background color row label"
   },
-
-  "onboardingTeleprompterTitle": "Teleprompter",
-  "@onboardingTeleprompterTitle": {
-    "description": "Title for the teleprompter onboarding screen"
+  "backupFailedDetail": "Backup error: {error}",
+  "@backupFailedDetail": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
-  "onboardingTeleprompterDesc": "Read your script while looking directly at the camera. Professional recording made easy.",
-  "@onboardingTeleprompterDesc": {
-    "description": "Description for the teleprompter onboarding screen"
+  "backupNow": "Backup now",
+  "@backupNow": {
+    "description": "Trigger backup action"
   },
-
-  "onboardingPermissionsTitle": "Enable Permissions",
-  "@onboardingPermissionsTitle": {
-    "description": "Title for the permissions onboarding screen"
+  "backupVideos": "Backup videos",
+  "@backupVideos": {
+    "description": "Include videos in backup toggle"
   },
-  "onboardingPermissionsDesc": "To record videos and sync your voice with the script, we need access to your camera and microphone.",
-  "@onboardingPermissionsDesc": {
-    "description": "Description for the permissions onboarding screen"
+  "bulkDeleteRecordingsTitle": "{count, plural, =1{Delete this recording?} other{Delete {count} recordings?}}",
+  "@bulkDeleteRecordingsTitle": {
+    "description": "Confirm bulk delete from gallery",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
+  "cameraPreviewWithOverlay": "Camera preview with live teleprompter overlay.",
+  "@cameraPreviewWithOverlay": {
+    "description": "Camera mode helper description text"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button"
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Close button"
+  },
+  "cloudBackup": "Cloud Backup",
+  "@cloudBackup": {
+    "description": "Google Drive backup section title and premium feature"
+  },
+  "connected": "Connected",
+  "@connected": {
+    "description": "Drive connected status"
+  },
+  "connectGoogleDrive": "Connect Google Drive",
+  "@connectGoogleDrive": {
+    "description": "Backup connect drive tile"
+  },
+  "connectionError": "Connection error. Check your internet and try again.",
+  "@connectionError": {
+    "description": "IAP connection error toast"
+  },
+  "contactUs": "Contact Us",
+  "@contactUs": {
+    "description": "Contact us menu item"
+  },
+  "continueButton": "Continue",
+  "@continueButton": {
+    "description": "Button to continue to next screen"
+  },
+  "couldNotLoadVideo": "Could not load video",
+  "@couldNotLoadVideo": {
+    "description": "Editor error title"
+  },
+  "countdownTimer": "Countdown timer",
+  "@countdownTimer": {
+    "description": "Video settings countdown section"
+  },
+  "created": "Created!",
+  "@created": {
+    "description": "Toast when script is created"
+  },
+  "createNewScript": "Create New Script",
+  "@createNewScript": {
+    "description": "Create new script button"
+  },
+  "creditsRemaining": "Credits {count}",
+  "@creditsRemaining": {
+    "description": "Badge text for remaining credits",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cueCards": "Cue Cards",
+  "@cueCards": {
+    "description": "Cue cards mode label"
+  },
+  "currentCreditsDescription": "{count, plural, =1{You have 1 free recording left for this script.} other{You have {count} free recordings left for this script.}}",
+  "@currentCreditsDescription": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dark": "Dark",
+  "@dark": {
+    "description": "Dark theme short label"
+  },
+  "darkMode": "Dark Mode",
+  "@darkMode": {
+    "description": "Dark theme option"
+  },
+  "defaultCamera": "Default camera",
+  "@defaultCamera": {
+    "description": "Settings label for default camera"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete button"
+  },
+  "deleteScriptMessage": "This action cannot be undone.",
+  "@deleteScriptMessage": {
+    "description": "Delete confirmation dialog message"
+  },
+  "deleteScriptTitle": "Delete Script?",
+  "@deleteScriptTitle": {
+    "description": "Delete confirmation dialog title"
+  },
+  "deleteVideoTitle": "Delete Video?",
+  "@deleteVideoTitle": {
+    "description": "Delete video confirmation title"
+  },
+  "discard": "Discard",
+  "@discard": {
+    "description": "Discard edits"
+  },
+  "discardChanges": "Discard changes?",
+  "@discardChanges": {
+    "description": "Exit editor dialog title"
+  },
+  "discardChangesDesc": "Your edits will be lost.",
+  "@discardChangesDesc": {
+    "description": "Exit editor dialog body"
+  },
+  "disconnect": "Disconnect",
+  "@disconnect": {
+    "description": "Disconnect Google Drive"
+  },
+  "discountBadge": "20% OFF",
+  "@discountBadge": {
+    "description": "Discount badge text"
+  },
+  "duplicate": "Duplicate",
+  "@duplicate": {
+    "description": "Duplicate action label"
+  },
+  "durationMinutesSecondsShort": "{minutes}:{seconds}",
+  "@durationMinutesSecondsShort": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "durationSecondsShort": "{seconds}s",
+  "@durationSecondsShort": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "earnRecordingCredits": "Earn Recording Credits",
+  "@earnRecordingCredits": {
+    "description": "Ad gate title when user has credits"
+  },
+  "edit": "Edit",
+  "@edit": {
+    "description": "Edit menu item"
+  },
+  "editScript": "Edit Script",
+  "@editScript": {
+    "description": "Edit script screen title"
+  },
+  "editScriptBlockedDuringCountdown": "Wait for countdown to finish before editing.",
+  "@editScriptBlockedDuringCountdown": {
+    "description": "Toast when edit blocked during countdown"
+  },
+  "editScriptBlockedWhileRecording": "Stop recording to edit your script.",
+  "@editScriptBlockedWhileRecording": {
+    "description": "Toast when edit blocked during recording"
+  },
+  "emptyCreativeSpaceMessage": "Your creative space is empty. Create your first script or try recording something on the fly!",
+  "@emptyCreativeSpaceMessage": {
+    "description": "Empty state description when no scripts exist"
+  },
+  "emptyGallery": "No videos yet",
+  "@emptyGallery": {
+    "description": "Empty gallery state"
+  },
+  "emptyGalleryDesc": "Record your first video to see it here",
+  "@emptyGalleryDesc": {
+    "description": "Empty gallery state description"
+  },
+  "errorSharingVideo": "Could not share video: {error}",
+  "@errorSharingVideo": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "exportedScriptSubject": "Exported Script: {title}",
+  "@exportedScriptSubject": {
+    "description": "Share subject when exporting a script",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "exportQuality": "Export quality",
+  "@exportQuality": {
+    "description": "Settings label for export quality"
+  },
+  "exportSuccess": "Script exported successfully",
+  "@exportSuccess": {
+    "description": "Toast after export"
+  },
+  "focusLine": "Focus line",
+  "@focusLine": {
+    "description": "Teleprompter focus line toggle"
+  },
+  "font": "Font",
+  "@font": {
+    "description": "Font setting label"
+  },
+  "fontSize": "Font Size",
+  "@fontSize": {
+    "description": "Font size control label"
+  },
+  "freeRecordingsLeft": "{count, plural, =1{1 free recording left} other{{count} free recordings left}}",
+  "@freeRecordingsLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "freeTrialCancelAnytime": "Free trial starts immediately. Cancel anytime before renewal.",
+  "@freeTrialCancelAnytime": {
+    "description": "Legal note for weekly trial plan"
+  },
+  "frontCamera": "Front",
+  "@frontCamera": {
+    "description": "Front camera option label"
+  },
+  "fullDuration": "Full",
+  "@fullDuration": {
+    "description": "Full duration preset label in editor timeline"
+  },
+  "general": "General",
+  "@general": {
+    "description": "General category label"
+  },
+  "getPremium": "Get Premium",
+  "@getPremium": {
+    "description": "Get premium button"
+  },
+  "googleUser": "Google User",
+  "@googleUser": {
+    "description": "Fallback display name for Google account"
+  },
+  "goPremium": "Go Premium",
+  "@goPremium": {
+    "description": "Button on teleprompter error sheet"
+  },
+  "gotIt": "Got It",
+  "@gotIt": {
+    "description": "Got it button"
+  },
   "grantAccess": "Grant Access",
   "@grantAccess": {
     "description": "Button to grant permissions"
   },
-  "start": "Start",
-  "@start": {
-    "description": "Button to start using the app"
+  "help": "Help",
+  "@help": {
+    "description": "Help section header"
+  },
+  "highQualityVideo": "High Quality Video",
+  "@highQualityVideo": {
+    "description": "Premium feature bullet"
+  },
+  "howToUse": "How to Use",
+  "@howToUse": {
+    "description": "How to use menu item"
+  },
+  "howToUseTitle": "How to Use ScriptCam",
+  "@howToUseTitle": {
+    "description": "How to use screen title"
+  },
+  "importScript": "Import",
+  "@importScript": {
+    "description": "Import script button in editor"
+  },
+  "importSuccess": "Script imported successfully",
+  "@importSuccess": {
+    "description": "Toast after import"
+  },
+  "itemsSelected": "{count} selected",
+  "@itemsSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "keepEditing": "Keep editing",
+  "@keepEditing": {
+    "description": "Stay in editor"
+  },
+  "language": "Language",
+  "@language": {
+    "description": "Language settings label"
+  },
+  "lifetimeNoRecurringBilling": "Lifetime unlock. No recurring billing.",
+  "@lifetimeNoRecurringBilling": {
+    "description": "Legal note for lifetime plan"
+  },
+  "lifetimeOneTimeUnlock": "One-time purchase. Pay once, unlock forever.",
+  "@lifetimeOneTimeUnlock": {
+    "description": "Lifetime plan subtitle"
+  },
+  "lifetimePlan": "Lifetime Plan",
+  "@lifetimePlan": {
+    "description": "Lifetime purchase label"
+  },
+  "lifetimePriceNotLoaded": "Lifetime price not loaded from store yet.",
+  "@lifetimePriceNotLoaded": {
+    "description": "Price-not-loaded warning for lifetime plan"
+  },
+  "light": "Light",
+  "@light": {
+    "description": "Light theme short label"
+  },
+  "lightMode": "Light Mode",
+  "@lightMode": {
+    "description": "Light theme option"
+  },
+  "lineSpacing": "Line spacing",
+  "@lineSpacing": {
+    "description": "Teleprompter line spacing control"
+  },
+  "loop": "Loop",
+  "@loop": {
+    "description": "Loop toggle label"
+  },
+  "managePremiumStatus": "Manage your premium status",
+  "@managePremiumStatus": {
+    "description": "Settings link to premium details"
+  },
+  "minRead": "min read",
+  "@minRead": {
+    "description": "Minutes to read label"
+  },
+  "mirror": "Mirror",
+  "@mirror": {
+    "description": "Mirror text toggle label"
+  },
+  "mute": "Mute",
+  "@mute": {
+    "description": "Mute audio toggle"
+  },
+  "never": "Never",
+  "@never": {
+    "description": "Never backed up / restored label"
+  },
+  "newScript": "New Script",
+  "@newScript": {
+    "description": "New script action card title"
+  },
+  "newScriptMultiline": "New\nScript",
+  "@newScriptMultiline": {
+    "description": "Two-line label on script strip add card"
   },
   "next": "Next",
   "@next": {
     "description": "Button to go to next screen"
   },
-
+  "noAds": "No Ads Forever",
+  "@noAds": {
+    "description": "Premium feature bullet"
+  },
+  "noInternetDesc": "It seems you are offline. Please check your connection and try again.",
+  "@noInternetDesc": {
+    "description": "Description for the no internet screen"
+  },
+  "noInternetError": "No internet",
+  "@noInternetError": {
+    "description": "Short error title"
+  },
+  "noInternetErrorDesc": "Connect to the internet and try again.",
+  "@noInternetErrorDesc": {
+    "description": "No internet error description"
+  },
+  "noInternetTitle": "No Internet Connection",
+  "@noInternetTitle": {
+    "description": "Title for the no internet screen"
+  },
+  "noRecordingsLeft": "No recordings left · Watch an ad to continue",
+  "@noRecordingsLeft": {
+    "description": "When user has zero recording credits"
+  },
+  "noResultsFound": "No results found",
+  "@noResultsFound": {
+    "description": "Empty state title when search yields no results"
+  },
+  "noResultsMessage": "We couldn't find any scripts matching your search. Try different keywords!",
+  "@noResultsMessage": {
+    "description": "Empty state description when search yields no results"
+  },
+  "noSavedScriptSelected": "No saved script selected",
+  "@noSavedScriptSelected": {
+    "description": "No selected script status text"
+  },
+  "notAuthenticated": "Not signed in to Google.",
+  "@notAuthenticated": {
+    "description": "Backup when user not authenticated"
+  },
+  "off": "Off",
+  "@off": {
+    "description": "Countdown disabled option"
+  },
+  "onboardingAccessCamera": "Camera",
+  "@onboardingAccessCamera": {
+    "description": "Permission row label for camera"
+  },
+  "onboardingAccessMic": "Microphone",
+  "@onboardingAccessMic": {
+    "description": "Permission row label for microphone"
+  },
+  "onboardingInteractiveRecLabel": "REC",
+  "@onboardingInteractiveRecLabel": {
+    "description": "Small recording badge on onboarding mock overlay"
+  },
+  "onboardingInteractiveStep1Eyebrow": "Main view",
+  "@onboardingInteractiveStep1Eyebrow": {
+    "description": "Small label above onboarding mock preview"
+  },
+  "onboardingInteractiveStep1Preview": "Overlay script and framing stay visible together. Scroll to rehearse; start recording when pacing feels right.",
+  "@onboardingInteractiveStep1Preview": {
+    "description": "Muted text inside onboarding preview card"
+  },
+  "onboardingInteractiveStep1Subtitle": "ScriptCam centers on capture. Scripts, credits, and settings stay reachable without crowding what you film.",
+  "@onboardingInteractiveStep1Subtitle": {
+    "description": "Onboarding page 1 subtitle"
+  },
+  "onboardingInteractiveStep1Title": "Recording-first workspace",
+  "@onboardingInteractiveStep1Title": {
+    "description": "Onboarding page 1 title"
+  },
+  "onboardingInteractiveStep2Sample": "Good morning—thanks for being here.\nWe will keep this brief and practical.\nIf you drift from the lens, settle back deliberately and carry on.",
+  "@onboardingInteractiveStep2Sample": {
+    "description": "Sample teleprompter lines in onboarding"
+  },
+  "onboardingInteractiveStep2Subtitle": "Pause rehearsal with one tap. Adjust scroll pacing and text size from the recording screen when you rehearse or shoot.",
+  "@onboardingInteractiveStep2Subtitle": {
+    "description": "Onboarding page 2 subtitle"
+  },
+  "onboardingInteractiveStep2Title": "Teleprompter overlay",
+  "@onboardingInteractiveStep2Title": {
+    "description": "Onboarding page 2 title"
+  },
+  "onboardingInteractiveStep4CardHint": "You can change these anytime in Android or iOS settings.",
+  "@onboardingInteractiveStep4CardHint": {
+    "description": "Hint under permission rows on onboarding"
+  },
+  "onboardingInteractiveStep4Subtitle": "ScriptCam needs camera and microphone so you can see yourself while the script stays in sync with your pace.",
+  "@onboardingInteractiveStep4Subtitle": {
+    "description": "Onboarding page 3 subtitle before permissions"
+  },
+  "onboardingInteractiveStep4Title": "Recording access",
+  "@onboardingInteractiveStep4Title": {
+    "description": "Onboarding page 3 title before permissions"
+  },
+  "opacity": "Opacity",
+  "@opacity": {
+    "description": "Opacity control label"
+  },
+  "original": "Original",
+  "@original": {
+    "description": "Original filter/preset label"
+  },
+  "overlaySettings": "Overlay Settings",
+  "@overlaySettings": {
+    "description": "Title of camera preview overlay settings sheet"
+  },
+  "paste": "Paste",
+  "@paste": {
+    "description": "Paste button"
+  },
   "permissionsRequired": "Camera and Microphone permissions are required.",
   "@permissionsRequired": {
     "description": "Toast message when permissions are denied"
   },
-
+  "preferences": "Preferences",
+  "@preferences": {
+    "description": "Preferences section header"
+  },
+  "premium": "Premium",
+  "@premium": {
+    "description": "Premium screen title"
+  },
+  "premiumActive": "Premium Active",
+  "@premiumActive": {
+    "description": "Title when subscription is active"
+  },
+  "premiumBenefitInstantRecord": "Premium users get instant recording and Voice Sync!",
+  "@premiumBenefitInstantRecord": {
+    "description": "Premium benefit highlight in ad dialog"
+  },
+  "premiumDescription": "Unlock all premium features and enjoy an ad-free experience",
+  "@premiumDescription": {
+    "description": "Premium screen description"
+  },
+  "premiumUnlocked": "Premium unlocked!",
+  "@premiumUnlocked": {
+    "description": "Toast after successful purchase"
+  },
+  "privacyPolicy": "Privacy Policy",
+  "@privacyPolicy": {
+    "description": "Privacy policy menu item"
+  },
+  "pro": "PRO",
+  "@pro": {
+    "description": "Pro badge label"
+  },
+  "processing": "Processing...",
+  "@processing": {
+    "description": "Processing message"
+  },
+  "purchaseErrorDetail": "Purchase failed: {p0}",
+  "@purchaseErrorDetail": {
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "purchaseFailedInitiate": "Could not start purchase. Try again.",
+  "@purchaseFailedInitiate": {
+    "description": "IAP failed to start purchase"
+  },
+  "qualityHigh": "High",
+  "@qualityHigh": {
+    "description": "High export quality"
+  },
+  "qualityLabel": "Quality",
+  "@qualityLabel": {
+    "description": "Export quality section"
+  },
+  "qualityLow": "Low",
+  "@qualityLow": {
+    "description": "Low export quality"
+  },
+  "qualityStandard": "Standard",
+  "@qualityStandard": {
+    "description": "Standard export quality"
+  },
+  "range": "Range",
+  "@range": {
+    "description": "Range control label"
+  },
+  "rateUs": "Rate Us",
+  "@rateUs": {
+    "description": "Rate us menu item"
+  },
+  "ratio": "Ratio",
+  "@ratio": {
+    "description": "Aspect ratio label"
+  },
+  "recent": "Recent",
+  "@recent": {
+    "description": "Recent scripts section title"
+  },
+  "recordingFailed": "Recording failed",
+  "@recordingFailed": {
+    "description": "Recording failed error message"
+  },
+  "recordingsDeletedToast": "{count, plural, =1{1 recording deleted} other{{count} recordings deleted}}",
+  "@recordingsDeletedToast": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recordingsRemainingHint": "{count} recording{count, plural, =1{} other{s}} remaining · Watch an ad for more",
+  "@recordingsRemainingHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recordNow": "Record now",
+  "@recordNow": {
+    "description": "Primary CTA on recording intent zone"
+  },
+  "remoteControl": "Bluetooth Remote & Keyboard",
+  "@remoteControl": {
+    "description": "Premium feature line for Bluetooth remote and keyboard"
+  },
+  "remoteControlLocked": "Bluetooth Remote & Keyboard is a Premium Feature",
+  "@remoteControlLocked": {
+    "description": "Toast when remote or keyboard controls require Premium"
+  },
+  "removeAds": "Remove Ads",
+  "@removeAds": {
+    "description": "Remove ads feature"
+  },
+  "rename": "Rename",
+  "@rename": {
+    "description": "Rename action label"
+  },
+  "resolution": "Resolution",
+  "@resolution": {
+    "description": "Resolution setting label"
+  },
+  "restore": "Restore",
+  "@restore": {
+    "description": "Restore from backup"
+  },
+  "restoredSuccessfully": "Purchases restored successfully.",
+  "@restoredSuccessfully": {
+    "description": "Toast after restore"
+  },
+  "restoreFailed": "Restore failed: {error}",
+  "@restoreFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "restorePurchaseLink": "Restore Purchase",
+  "@restorePurchaseLink": {
+    "description": "Restore purchase link text"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry button label"
+  },
+  "rewardGranted": "Reward granted: +3 recordings",
+  "@rewardGranted": {
+    "description": "Toast when ad reward granted"
+  },
+  "rotate": "Rotate",
+  "@rotate": {
+    "description": "Rotate control label"
+  },
+  "save": "SAVE",
+  "@save": {
+    "description": "Save button"
+  },
+  "saveButton": "Save",
+  "@saveButton": {
+    "description": "Confirm save in export dialog"
+  },
+  "saved": "Saved",
+  "@saved": {
+    "description": "Toast when script is saved"
+  },
+  "savedAs": "Saved as {p0}",
+  "@savedAs": {
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      }
+    }
+  },
+  "saveEditorLabel": "Save",
+  "@saveEditorLabel": {
+    "description": "Editor save action label"
+  },
+  "saveFailed": "Save failed",
+  "@saveFailed": {
+    "description": "Generic save error"
+  },
+  "saveFailedEmpty": "Nothing to save",
+  "@saveFailedEmpty": {
+    "description": "Save error empty output"
+  },
+  "saveFailedGallery": "Could not save to gallery",
+  "@saveFailedGallery": {
+    "description": "Save error when gallery fails"
+  },
+  "saveFailedNotFound": "Save location not found",
+  "@saveFailedNotFound": {
+    "description": "Save error path missing"
+  },
+  "saveVideo": "Save video",
+  "@saveVideo": {
+    "description": "Export dialog title"
+  },
+  "savingEllipsis": "Saving…",
+  "@savingEllipsis": {
+    "description": "Save in progress label"
+  },
+  "scriptContentPlaceholder": "Start writing your script here...",
+  "@scriptContentPlaceholder": {
+    "description": "Script content input placeholder"
+  },
+  "scriptDeleted": "Script deleted",
+  "@scriptDeleted": {
+    "description": "Toast when script is deleted"
+  },
+  "scriptSummary": "{p0} · {p1}",
+  "@scriptSummary": {
+    "placeholders": {
+      "p0": {
+        "type": "String"
+      },
+      "p1": {
+        "type": "String"
+      }
+    }
+  },
+  "scriptTitleHint": "e.g. YouTube Intro",
+  "@scriptTitleHint": {
+    "description": "Script title field hint"
+  },
+  "scriptTitlePlaceholder": "Script Title...",
+  "@scriptTitlePlaceholder": {
+    "description": "Script title input placeholder"
+  },
+  "scrollSpeed": "Scroll Speed",
+  "@scrollSpeed": {
+    "description": "Scroll speed slider label"
+  },
+  "searchScripts": "Search scripts...",
+  "@searchScripts": {
+    "description": "Search scripts placeholder"
+  },
+  "selectedScriptReady": "Selected script ready",
+  "@selectedScriptReady": {
+    "description": "Selected script status text"
+  },
   "selectLanguage": "Select Language",
   "@selectLanguage": {
     "description": "Title for language selection screen"
@@ -68,99 +821,18 @@
   "@selectLanguageDesc": {
     "description": "Description for language selection screen"
   },
-  "continueButton": "Continue",
-  "@continueButton": {
-    "description": "Button to continue to next screen"
+  "selectPlatformDesc": "Select a platform for your script",
+  "@selectPlatformDesc": {
+    "description": "Platform selection description"
   },
-
   "settings": "Settings",
   "@settings": {
     "description": "Settings screen title"
-  },
-  "preferences": "Preferences",
-  "@preferences": {
-    "description": "Preferences section header"
-  },
-  "help": "Help",
-  "@help": {
-    "description": "Help section header"
-  },
-  "support": "Support",
-  "@support": {
-    "description": "Support section header"
-  },
-  "about": "About",
-  "@about": {
-    "description": "About section header"
-  },
-
-  "appearance": "Appearance",
-  "@appearance": {
-    "description": "Appearance settings label"
-  },
-  "language": "Language",
-  "@language": {
-    "description": "Language settings label"
-  },
-  "systemDefault": "System Default",
-  "@systemDefault": {
-    "description": "System default theme option"
-  },
-  "lightMode": "Light Mode",
-  "@lightMode": {
-    "description": "Light theme option"
-  },
-  "darkMode": "Dark Mode",
-  "@darkMode": {
-    "description": "Dark theme option"
-  },
-  "system": "System",
-  "@system": {
-    "description": "System theme short label"
-  },
-  "light": "Light",
-  "@light": {
-    "description": "Light theme short label"
-  },
-  "dark": "Dark",
-  "@dark": {
-    "description": "Dark theme short label"
-  },
-
-  "howToUse": "How to Use",
-  "@howToUse": {
-    "description": "How to use menu item"
   },
   "shareApp": "Share App",
   "@shareApp": {
     "description": "Share app menu item"
   },
-  "contactUs": "Contact Us",
-  "@contactUs": {
-    "description": "Contact us menu item"
-  },
-  "rateUs": "Rate Us",
-  "@rateUs": {
-    "description": "Rate us menu item"
-  },
-  "privacyPolicy": "Privacy Policy",
-  "@privacyPolicy": {
-    "description": "Privacy policy menu item"
-  },
-  "version": "Version",
-  "@version": {
-    "description": "Version menu item"
-  },
-
-  "upgradeToPro": "Upgrade to Pro",
-  "@upgradeToPro": {
-    "description": "Premium upgrade banner title"
-  },
-  "unlockAllFeatures": "Unlock all features & remove ads",
-  "@unlockAllFeatures": {
-    "description": "Premium upgrade banner description"
-  },
-
   "shareAppMessage": "Record professional videos with confidence using ScriptCam! 🎥✨\n\nIt features a built-in Teleprompter, 4K recording, and Video Editor. Try it out here:\n{url}",
   "@shareAppMessage": {
     "description": "Message when sharing the app",
@@ -175,488 +847,249 @@
   "@shareAppSubject": {
     "description": "Subject when sharing the app"
   },
-
-  "goodMorning": "Good Morning",
-  "@goodMorning": {
-    "description": "Morning greeting"
+  "shareVideoSubject": "Check out my video",
+  "@shareVideoSubject": {
+    "description": "Share sheet subject"
   },
-  "goodAfternoon": "Good Afternoon",
-  "@goodAfternoon": {
-    "description": "Afternoon greeting"
+  "shareVideoText": "Video recorded with ScriptCam",
+  "@shareVideoText": {
+    "description": "Share sheet message body"
   },
-  "goodEvening": "Good Evening",
-  "@goodEvening": {
-    "description": "Evening greeting"
+  "signInCancelled": "Sign-in was cancelled.",
+  "@signInCancelled": {
+    "description": "Google sign-in cancelled for backup"
   },
-  "readyToCreate": "Ready to create something\namazing?",
-  "@readyToCreate": {
-    "description": "Home screen tagline"
+  "softStart": "Soft Start",
+  "@softStart": {
+    "description": "Soft start toggle label"
   },
-
-  "newScript": "New Script",
-  "@newScript": {
-    "description": "New script action card title"
+  "speed": "Speed",
+  "@speed": {
+    "description": "Speed control label"
   },
-  "writeFromScratch": "Write from scratch",
-  "@writeFromScratch": {
-    "description": "New script action card subtitle"
+  "speedFast": "Fast",
+  "@speedFast": {
+    "description": "Speed preset fast"
   },
-  "quickRecord": "Quick Record",
-  "@quickRecord": {
-    "description": "Quick record action card title"
+  "speedNormal": "Normal",
+  "@speedNormal": {
+    "description": "Speed preset normal"
   },
-  "recordOnTheFly": "Record on the fly",
-  "@recordOnTheFly": {
-    "description": "Quick record action card subtitle"
+  "speedSlow": "Slow",
+  "@speedSlow": {
+    "description": "Speed preset slow"
   },
-
-  "myScripts": "My Scripts",
-  "@myScripts": {
-    "description": "My scripts section header"
+  "speedTurbo": "Turbo",
+  "@speedTurbo": {
+    "description": "Speed preset turbo"
   },
-  "recentFirst": "Recent First",
-  "@recentFirst": {
-    "description": "Sort order label"
-  },
-
-  "quickRecordDialogTitle": "Quick Record",
-  "@quickRecordDialogTitle": {
-    "description": "Quick record dialog title"
-  },
-  "quickRecordDialogDesc": "Enter script details below, or skip to open the camera without any text.",
-  "@quickRecordDialogDesc": {
-    "description": "Quick record dialog description"
-  },
-  "scriptTitle": "Script Title",
-  "@scriptTitle": {
-    "description": "Script title field label"
-  },
-  "scriptContent": "Script Content",
-  "@scriptContent": {
-    "description": "Script content field label"
-  },
-  "scriptTitleHint": "e.g. YouTube Intro",
-  "@scriptTitleHint": {
-    "description": "Script title field hint"
-  },
-  "scriptContentHint": "Paste your script content here...",
-  "@scriptContentHint": {
-    "description": "Script content field hint"
+  "startFreeTrial": "Start Free Trial",
+  "@startFreeTrial": {
+    "description": "CTA for weekly trial plan"
   },
   "startRecording": "Start Recording",
   "@startRecording": {
     "description": "Start recording button"
   },
-
-  "editScript": "Edit Script",
-  "@editScript": {
-    "description": "Edit script screen title"
-  },
-  "save": "SAVE",
-  "@save": {
-    "description": "Save button"
-  },
-  "scriptTitlePlaceholder": "Script Title...",
-  "@scriptTitlePlaceholder": {
-    "description": "Script title input placeholder"
-  },
-  "scriptContentPlaceholder": "Start writing your script here...",
-  "@scriptContentPlaceholder": {
-    "description": "Script content input placeholder"
-  },
-  "platform": "PLATFORM",
-  "@platform": {
-    "description": "Platform section label"
-  },
-
-  "titleRequired": "Title required",
-  "@titleRequired": {
-    "description": "Toast when title is missing"
-  },
-  "saved": "Saved",
-  "@saved": {
-    "description": "Toast when script is saved"
-  },
-  "created": "Created!",
-  "@created": {
-    "description": "Toast when script is created"
-  },
-  "textPasted": "Text pasted",
-  "@textPasted": {
-    "description": "Toast when text is pasted"
-  },
-  "scriptDeleted": "Script deleted",
-  "@scriptDeleted": {
-    "description": "Toast when script is deleted"
-  },
-
-  "deleteScriptTitle": "Delete Script?",
-  "@deleteScriptTitle": {
-    "description": "Delete confirmation dialog title"
-  },
-  "deleteScriptMessage": "This action cannot be undone.",
-  "@deleteScriptMessage": {
-    "description": "Delete confirmation dialog message"
-  },
-  "cancel": "Cancel",
-  "@cancel": {
-    "description": "Cancel button"
-  },
-  "delete": "Delete",
-  "@delete": {
-    "description": "Delete button"
-  },
-
-  "appInfoTitle": "ScriptCam",
-  "@appInfoTitle": {
-    "description": "App info dialog title"
-  },
-  "appInfoVersion": "Version 1.0.3",
-  "@appInfoVersion": {
-    "description": "App version in info dialog"
-  },
-  "appInfoDescription": "The ultimate teleprompter and video recording tool for content creators. Create, read, and record seamlessly.",
-  "@appInfoDescription": {
-    "description": "App description in info dialog"
-  },
-  "close": "Close",
-  "@close": {
-    "description": "Close button"
-  },
-
-  "emptyScriptsAll": "No scripts yet",
-  "@emptyScriptsAll": {
-    "description": "Empty state for all scripts"
-  },
-  "emptyScriptsAllDesc": "Create your first script to get started",
-  "@emptyScriptsAllDesc": {
-    "description": "Empty state description for all scripts"
-  },
-  "emptyScriptsCategory": "No {category} scripts",
-  "@emptyScriptsCategory": {
-    "description": "Empty state for specific category",
-    "placeholders": {
-      "category": {
-        "type": "String",
-        "example": "YouTube"
-      }
-    }
-  },
-  "emptyScriptsCategoryDesc": "Create a script for this platform",
-  "@emptyScriptsCategoryDesc": {
-    "description": "Empty state description for category"
-  },
-
-  "gallery": "Gallery",
-  "@gallery": {
-    "description": "Gallery screen title"
-  },
-  "emptyGallery": "No videos yet",
-  "@emptyGallery": {
-    "description": "Empty gallery state"
-  },
-  "emptyGalleryDesc": "Record your first video to see it here",
-  "@emptyGalleryDesc": {
-    "description": "Empty gallery state description"
-  },
-
-  "teleprompter": "Teleprompter",
-  "@teleprompter": {
-    "description": "Teleprompter screen title"
-  },
-  "record": "Record",
-  "@record": {
-    "description": "Record button"
-  },
-  "stop": "Stop",
-  "@stop": {
-    "description": "Stop button"
-  },
-  "pause": "Pause",
-  "@pause": {
-    "description": "Pause button"
-  },
-  "resume": "Resume",
-  "@resume": {
-    "description": "Resume button"
-  },
-
-  "speed": "Speed",
-  "@speed": {
-    "description": "Speed control label"
-  },
-  "fontSize": "Font Size",
-  "@fontSize": {
-    "description": "Font size control label"
-  },
-  "mirror": "Mirror",
-  "@mirror": {
-    "description": "Mirror text toggle label"
-  },
-  "voiceSync": "Voice Sync",
-  "@voiceSync": {
-    "description": "Voice sync toggle label"
-  },
-  "autoScroll": "Auto Scroll",
-  "@autoScroll": {
-    "description": "Auto scroll toggle label"
-  },
-
-  "videoSettings": "Video Settings",
-  "@videoSettings": {
-    "description": "Video settings title"
-  },
-  "resolution": "Resolution",
-  "@resolution": {
-    "description": "Resolution setting label"
-  },
-  "quality": "Quality",
-  "@quality": {
-    "description": "Quality setting label"
-  },
-
-  "premium": "Premium",
-  "@premium": {
-    "description": "Premium screen title"
-  },
-  "getPremium": "Get Premium",
-  "@getPremium": {
-    "description": "Get premium button"
-  },
-  "restorePurchases": "Restore Purchases",
-  "@restorePurchases": {
-    "description": "Restore purchases button"
-  },
-
-  "videoEditor": "Video Editor",
-  "@videoEditor": {
-    "description": "Video editor screen title"
-  },
-  "trim": "Trim",
-  "@trim": {
-    "description": "Trim tab label"
-  },
-  "adjust": "Adjust",
-  "@adjust": {
-    "description": "Adjust tab label"
-  },
-  "filters": "Filters",
-  "@filters": {
-    "description": "Filters tab label"
-  },
-  "export": "Export",
-  "@export": {
-    "description": "Export button"
-  },
-  "exporting": "Exporting...",
-  "@exporting": {
-    "description": "Exporting progress message"
-  },
-  "exportComplete": "Export complete!",
-  "@exportComplete": {
-    "description": "Export complete message"
-  },
-
-  "brightness": "Brightness",
-  "@brightness": {
-    "description": "Brightness adjustment label"
-  },
-  "contrast": "Contrast",
-  "@contrast": {
-    "description": "Contrast adjustment label"
-  },
-  "saturation": "Saturation",
-  "@saturation": {
-    "description": "Saturation adjustment label"
-  },
-
-  "share": "Share",
-  "@share": {
-    "description": "Share button"
-  },
-  "play": "Play",
-  "@play": {
-    "description": "Play button"
-  },
-
-  "all": "All",
-  "@all": {
-    "description": "All category label"
-  },
-  "general": "General",
-  "@general": {
-    "description": "General category label"
-  },
-
-  "search": "Search",
-  "@search": {
-    "description": "Search placeholder"
-  },
-  "searchScripts": "Search scripts...",
-  "@searchScripts": {
-    "description": "Search scripts placeholder"
-  },
-
-  "studio": "Studio",
-  "@studio": {
-    "description": "Dashboard tab label"
-  },
   "startYourJourney": "Start Your Journey",
   "@startYourJourney": {
     "description": "Empty state title when no scripts exist"
-  },
-  "noResultsFound": "No results found",
-  "@noResultsFound": {
-    "description": "Empty state title when search yields no results"
-  },
-  "noResultsMessage": "We couldn't find any scripts matching your search. Try different keywords!",
-  "@noResultsMessage": {
-    "description": "Empty state description when search yields no results"
-  },
-  "emptyCreativeSpaceMessage": "Your creative space is empty. Create your first script or try recording something on the fly!",
-  "@emptyCreativeSpaceMessage": {
-    "description": "Empty state description when no scripts exist"
-  },
-
-  "paste": "Paste",
-  "@paste": {
-    "description": "Paste button"
-  },
-  "createNewScript": "Create New Script",
-  "@createNewScript": {
-    "description": "Create new script button"
-  },
-  "selectPlatformDesc": "Select a platform for your script",
-  "@selectPlatformDesc": {
-    "description": "Platform selection description"
-  },
-  "pro": "PRO",
-  "@pro": {
-    "description": "Pro badge label"
-  },
-  "minRead": "min read",
-  "@minRead": {
-    "description": "Minutes to read label"
-  },
-  "words": "words",
-  "@words": {
-    "description": "Word count label"
-  },
-  "edit": "Edit",
-  "@edit": {
-    "description": "Edit menu item"
-  },
-  "howToUseTitle": "How to Use ScriptCam",
-  "@howToUseTitle": {
-    "description": "How to use screen title"
-  },
-  "step1Title": "Create a Script",
-  "@step1Title": {
-    "description": "Step 1 title"
   },
   "step1Desc": "Start by creating a new script or quick record without text",
   "@step1Desc": {
     "description": "Step 1 description"
   },
-  "step2Title": "Setup Teleprompter",
-  "@step2Title": {
-    "description": "Step 2 title"
+  "step1Title": "Create a Script",
+  "@step1Title": {
+    "description": "Step 1 title"
   },
   "step2Desc": "Adjust speed, font size, and enable voice sync for hands-free scrolling",
   "@step2Desc": {
     "description": "Step 2 description"
   },
-  "step3Title": "Record Your Video",
-  "@step3Title": {
-    "description": "Step 3 title"
+  "step2Title": "Setup Teleprompter",
+  "@step2Title": {
+    "description": "Step 2 title"
   },
   "step3Desc": "Press record and read your script while looking at the camera",
   "@step3Desc": {
     "description": "Step 3 description"
   },
-  "step4Title": "Edit & Share",
-  "@step4Title": {
-    "description": "Step 4 title"
+  "step3Title": "Record Your Video",
+  "@step3Title": {
+    "description": "Step 3 title"
   },
   "step4Desc": "Use the video editor to trim, adjust, and apply filters before sharing",
   "@step4Desc": {
     "description": "Step 4 description"
   },
-  "gotIt": "Got It",
-  "@gotIt": {
-    "description": "Got it button"
+  "step4Title": "Edit & Share",
+  "@step4Title": {
+    "description": "Step 4 title"
   },
-  "deleteVideoTitle": "Delete Video?",
-  "@deleteVideoTitle": {
-    "description": "Delete video confirmation title"
+  "step5Desc": "Use a Bluetooth remote or keyboard to play, pause, and adjust scroll speed.",
+  "@step5Desc": {
+    "description": "How-to step 5 description"
   },
-  "videoDeleted": "Video deleted",
-  "@videoDeleted": {
-    "description": "Video deleted toast message"
+  "step5Title": "Remote control",
+  "@step5Title": {
+    "description": "How-to step 5 title"
   },
-  "mute": "Mute",
-  "@mute": {
-    "description": "Mute audio toggle"
+  "storePricingUnavailable": "Store pricing unavailable right now.",
+  "@storePricingUnavailable": {
+    "description": "Message when product pricing cannot load"
   },
-  "opacity": "Opacity",
-  "@opacity": {
-    "description": "Opacity control label"
+  "storeUnavailable": "Store is unavailable. Try again later.",
+  "@storeUnavailable": {
+    "description": "IAP store unavailable toast"
   },
-  "original": "Original",
-  "@original": {
-    "description": "Original filter/preset label"
+  "stripView": "Strip view",
+  "@stripView": {
+    "description": "Toggle label for horizontal script strip"
   },
-  "processing": "Processing...",
-  "@processing": {
-    "description": "Processing message"
+  "studioEditor": "Studio Editor",
+  "@studioEditor": {
+    "description": "Video editor app bar title"
   },
-  "range": "Range",
-  "@range": {
-    "description": "Range control label"
+  "support": "Support",
+  "@support": {
+    "description": "Support section header"
   },
-  "ratio": "Ratio",
-  "@ratio": {
-    "description": "Aspect ratio label"
+  "supportBody": "Hi ScriptCam team,\n\n",
+  "@supportBody": {
+    "description": "Email body prefix for support"
   },
-  "recordingFailed": "Recording failed",
-  "@recordingFailed": {
-    "description": "Recording failed error message"
+  "supportSubject": "ScriptCam support",
+  "@supportSubject": {
+    "description": "Email subject for support"
   },
-  "rotate": "Rotate",
-  "@rotate": {
-    "description": "Rotate control label"
+  "switchAccount": "Switch account",
+  "@switchAccount": {
+    "description": "Switch Google account"
+  },
+  "system": "System",
+  "@system": {
+    "description": "System theme short label"
+  },
+  "systemDefault": "System Default",
+  "@systemDefault": {
+    "description": "System default theme option"
+  },
+  "tabCamera": "Camera",
+  "@tabCamera": {
+    "description": "Bottom navigation: camera / studio"
+  },
+  "tabRecordings": "Recordings",
+  "@tabRecordings": {
+    "description": "Bottom navigation: saved recordings"
+  },
+  "tabScripts": "Scripts",
+  "@tabScripts": {
+    "description": "Bottom navigation: scripts list"
   },
   "targetFps": "Target FPS",
   "@targetFps": {
     "description": "Target frames per second label"
   },
+  "text": "Text",
+  "@text": {
+    "description": "Text color row label"
+  },
+  "textPasted": "Text pasted",
+  "@textPasted": {
+    "description": "Toast when text is pasted"
+  },
+  "titleRequired": "Title required",
+  "@titleRequired": {
+    "description": "Toast when title is missing"
+  },
   "transform": "Transform",
   "@transform": {
     "description": "Transform tab label"
   },
-  "premiumDescription": "Unlock all premium features and enjoy an ad-free experience",
-  "@premiumDescription": {
-    "description": "Premium screen description"
+  "trim": "Trim",
+  "@trim": {
+    "description": "Trim tab label"
   },
-  "removeAds": "Remove Ads",
-  "@removeAds": {
-    "description": "Remove ads feature"
+  "unexpectedError": "Something went wrong",
+  "@unexpectedError": {
+    "description": "Generic error title"
+  },
+  "unexpectedErrorDesc": "Something went wrong. Please try again.",
+  "@unexpectedErrorDesc": {
+    "description": "Generic error description"
+  },
+  "unlimitedRecordings": "Unlimited Recordings",
+  "@unlimitedRecordings": {
+    "description": "Premium feature bullet"
   },
   "unlimitedScripts": "Unlimited Scripts",
   "@unlimitedScripts": {
     "description": "Unlimited scripts feature"
   },
+  "unlockAllFeatures": "Unlock all features & remove ads",
+  "@unlockAllFeatures": {
+    "description": "Premium upgrade banner description"
+  },
   "unlockCreatorPro": "Unlock Creator Pro",
   "@unlockCreatorPro": {
     "description": "Unlock creator pro title"
+  },
+  "untitledScript": "Untitled Script",
+  "@untitledScript": {
+    "description": "Fallback title for empty script"
   },
   "upgradeForLifetime": "Upgrade for Lifetime Access",
   "@upgradeForLifetime": {
     "description": "Upgrade for lifetime button"
   },
-  "restorePurchaseLink": "Restore Purchase",
-  "@restorePurchaseLink": {
-    "description": "Restore purchase link text"
+  "upgradeToPro": "Upgrade to Pro",
+  "@upgradeToPro": {
+    "description": "Premium upgrade banner title"
+  },
+  "useASavedScript": "Use a saved script",
+  "@useASavedScript": {
+    "description": "Toggle label for using saved script"
+  },
+  "version": "Version",
+  "@version": {
+    "description": "Version menu item"
+  },
+  "videoDeleted": "Video deleted",
+  "@videoDeleted": {
+    "description": "Video deleted toast message"
+  },
+  "videoFileNotFound": "Video file not found",
+  "@videoFileNotFound": {
+    "description": "Snackbar when file missing"
+  },
+  "videoName": "File name",
+  "@videoName": {
+    "description": "Export file name label"
+  },
+  "videoNameHint": "MyVideo",
+  "@videoNameHint": {
+    "description": "Export file name hint"
+  },
+  "videoSettings": "Video Settings",
+  "@videoSettings": {
+    "description": "Video settings title"
+  },
+  "voiceSync": "Voice Sync",
+  "@voiceSync": {
+    "description": "Voice sync toggle label"
+  },
+  "voiceSyncFeature": "Voice Sync",
+  "@voiceSyncFeature": {
+    "description": "Premium feature label on details screen"
+  },
+  "voiceSyncLocked": "Voice Sync is a Premium Feature",
+  "@voiceSyncLocked": {
+    "description": "Short message when voice sync is locked"
+  },
+  "watchAdGetRecordings": "Watch 1 Ad → Get +3 Recordings",
+  "@watchAdGetRecordings": {
+    "description": "Ad gate premium-style bullet"
   },
   "watchAdToRecord": "Watch Ad to Record",
   "@watchAdToRecord": {
@@ -666,28 +1099,65 @@
   "@watchAdToRecordDesc": {
     "description": "Description for the rewarded ad dialog"
   },
-  "premiumBenefitInstantRecord": "Premium users get instant recording and Voice Sync!",
-  "@premiumBenefitInstantRecord": {
-    "description": "Premium benefit highlight in ad dialog"
+  "weeklyPlan": "Weekly",
+  "@weeklyPlan": {
+    "description": "Weekly plan title"
   },
-  "noInternetTitle": "No Internet Connection",
-  "@noInternetTitle": {
-    "description": "Title for the no internet screen"
+  "weeklyPriceNotLoaded": "Weekly price not loaded from store yet.",
+  "@weeklyPriceNotLoaded": {
+    "description": "Price-not-loaded warning for weekly plan"
   },
-  "noInternetDesc": "It seems you are offline. Please check your connection and try again.",
-  "@noInternetDesc": {
-    "description": "Description for the no internet screen"
+  "weeklyTrialStorePrice": "3-day free trial, weekly price from store",
+  "@weeklyTrialStorePrice": {
+    "description": "Weekly plan subtitle when store price unavailable"
   },
-  "retry": "Retry",
-  "@retry": {
-    "description": "Retry button label"
+  "weeklyTrialThenPrice": "3-day free trial, then {price} / week",
+  "@weeklyTrialThenPrice": {
+    "description": "Weekly plan subtitle with price",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
   },
-  "voiceSyncLocked": "Voice Sync is a Premium Feature",
-  "@voiceSyncLocked": {
-    "description": "Short message when voice sync is locked"
+  "whatAreYouRecording": "What are you\nrecording today?",
+  "@whatAreYouRecording": {
+    "description": "Recording intent zone headline"
   },
-  "voiceSyncLockedDesc": "Upgrade to Pro to enable hands-free voice-synced scrolling.",
-  "@voiceSyncLockedDesc": {
-    "description": "Longer message when voice sync is locked"
+  "width": "Width",
+  "@width": {
+    "description": "Column width row label"
+  },
+  "widthFull": "Full",
+  "@widthFull": {
+    "description": "Full width option"
+  },
+  "widthMedium": "Medium",
+  "@widthMedium": {
+    "description": "Medium width option"
+  },
+  "widthNarrow": "Narrow",
+  "@widthNarrow": {
+    "description": "Narrow width option"
+  },
+  "wifiOnly": "Wi‑Fi only",
+  "@wifiOnly": {
+    "description": "Backup on Wi‑Fi only toggle"
+  },
+  "wordCountShort": "{count} words",
+  "@wordCountShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "words": "words",
+  "@words": {
+    "description": "Word count label"
+  },
+  "youAreNowPremium": "You're now Premium!",
+  "@youAreNowPremium": {
+    "description": "Purchase success headline"
   }
 }

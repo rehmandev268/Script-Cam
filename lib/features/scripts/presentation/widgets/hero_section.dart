@@ -1,4 +1,3 @@
-import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 
@@ -13,9 +12,7 @@ class HeroSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return FadeInDown(
-      duration: const Duration(milliseconds: 600),
-      child: Container(
+    return Container(
         margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
         height: 100.h,
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(24.r)),
@@ -95,7 +92,6 @@ class HeroSection extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 }

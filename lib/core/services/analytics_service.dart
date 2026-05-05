@@ -11,6 +11,10 @@ class AnalyticsService {
   FirebaseAnalyticsObserver get observer =>
       FirebaseAnalyticsObserver(analytics: _analytics);
 
+  void logEvent({required String name, Map<String, Object>? parameters}) {
+    _analytics.logEvent(name: name, parameters: parameters);
+  }
+
   void logAppOpen() {
     _analytics.logAppOpen();
   }
@@ -90,7 +94,7 @@ class AnalyticsService {
       parameters: {
         'script_id': scriptId,
         'script_title': scriptTitle,
-        'voice_sync_enabled': isVoiceSyncEnabled,
+        'voice_sync_enabled': isVoiceSyncEnabled ? 1 : 0,
       },
     );
   }
@@ -156,14 +160,21 @@ class AnalyticsService {
   void logVoiceSyncToggled({required bool enabled}) {
     _analytics.logEvent(
       name: 'voice_sync_toggled',
-      parameters: {'enabled': enabled},
+      parameters: {'enabled': enabled ? 1 : 0},
     );
   }
 
   void logMirrorTextToggled({required bool enabled}) {
     _analytics.logEvent(
       name: 'mirror_text_toggled',
-      parameters: {'enabled': enabled},
+      parameters: {'enabled': enabled ? 1 : 0},
+    );
+  }
+
+  void logCountdownDurationChanged({required int duration}) {
+    _analytics.logEvent(
+      name: 'countdown_duration_changed',
+      parameters: {'duration': duration},
     );
   }
 
@@ -220,6 +231,14 @@ class AnalyticsService {
       name: 'purchase_restored',
       parameters: {'restored_count': restoredCount},
     );
+  }
+
+  void logPremiumActivated() {
+    _analytics.logEvent(name: 'premium_activated', parameters: {});
+  }
+
+  void logSubscriptionExpired() {
+    _analytics.logEvent(name: 'subscription_expired', parameters: {});
   }
 
   void logAdDisplayed({required String adType, required String adPlacement}) {
@@ -376,7 +395,7 @@ class AnalyticsService {
   void logFlashToggled({required bool enabled}) {
     _analytics.logEvent(
       name: 'flash_toggled',
-      parameters: {'enabled': enabled},
+      parameters: {'enabled': enabled ? 1 : 0},
     );
   }
 
@@ -393,5 +412,336 @@ class AnalyticsService {
       name: 'navigation',
       parameters: {'from_screen': from, 'to_screen': to},
     );
+  }
+
+  void logGoogleSignIn({required String email}) {
+    _analytics.logEvent(name: 'google_sign_in', parameters: {'email': email});
+  }
+
+  void logGoogleSignOut() {
+    _analytics.logEvent(name: 'google_sign_out', parameters: {});
+  }
+
+  void logGoogleSignInFailed({required String reason}) {
+    _analytics.logEvent(
+      name: 'google_sign_in_failed',
+      parameters: {'reason': reason},
+    );
+  }
+
+  void logBackupStarted({required int scriptCount, required int videoCount}) {
+    _analytics.logEvent(
+      name: 'backup_started',
+      parameters: {'script_count': scriptCount, 'video_count': videoCount},
+    );
+  }
+
+  void logBackupCompleted({
+    required int scriptCount,
+    required int videoCount,
+    required int durationSeconds,
+  }) {
+    _analytics.logEvent(
+      name: 'backup_completed',
+      parameters: {
+        'script_count': scriptCount,
+        'video_count': videoCount,
+        'duration_seconds': durationSeconds,
+      },
+    );
+  }
+
+  void logBackupFailed({required String reason}) {
+    _analytics.logEvent(name: 'backup_failed', parameters: {'reason': reason});
+  }
+
+  void logRestoreStarted() {
+    _analytics.logEvent(name: 'restore_started', parameters: {});
+  }
+
+  void logRestoreCompleted({
+    required int scriptCount,
+    required int videoCount,
+  }) {
+    _analytics.logEvent(
+      name: 'restore_completed',
+      parameters: {'script_count': scriptCount, 'video_count': videoCount},
+    );
+  }
+
+  void logRestoreFailed({required String reason}) {
+    _analytics.logEvent(name: 'restore_failed', parameters: {'reason': reason});
+  }
+
+  void logAutoBackupToggled({required bool enabled}) {
+    _analytics.logEvent(
+      name: 'auto_backup_toggled',
+      parameters: {'enabled': enabled ? 1 : 0},
+    );
+  }
+
+  void logBackupVideosToggled({required bool enabled}) {
+    _analytics.logEvent(
+      name: 'backup_videos_toggled',
+      parameters: {'enabled': enabled ? 1 : 0},
+    );
+  }
+
+  void logWifiOnlyBackupToggled({required bool enabled}) {
+    _analytics.logEvent(
+      name: 'wifi_only_backup_toggled',
+      parameters: {'enabled': enabled ? 1 : 0},
+    );
+  }
+
+  void logLanguageChanged({required String languageCode}) {
+    _analytics.logEvent(
+      name: 'language_changed',
+      parameters: {'language_code': languageCode},
+    );
+  }
+
+  void logFocusLineToggled({required bool enabled}) {
+    _analytics.logEvent(
+      name: 'focus_line_toggled',
+      parameters: {'enabled': enabled ? 1 : 0},
+    );
+  }
+
+  void logLineSpacingChanged({required double spacing}) {
+    _analytics.logEvent(
+      name: 'line_spacing_changed',
+      parameters: {'spacing': spacing},
+    );
+  }
+
+  void logVideoEdited({required String videoId}) {
+    _analytics.logEvent(
+      name: 'video_edited',
+      parameters: {'video_id': videoId},
+    );
+  }
+
+  void logScriptSearchCleared() {
+    _analytics.logEvent(name: 'script_search_cleared', parameters: {});
+  }
+
+  void logScriptImported({required String source, required int wordCount}) {
+    _analytics.logEvent(
+      name: 'script_imported',
+      parameters: {'source': source, 'word_count': wordCount},
+    );
+  }
+
+  void logScriptExported({required String scriptId}) {
+    _analytics.logEvent(
+      name: 'script_exported',
+      parameters: {'script_id': scriptId},
+    );
+  }
+
+  void logScriptPasted({required int wordCount}) {
+    _analytics.logEvent(
+      name: 'script_pasted',
+      parameters: {'word_count': wordCount},
+    );
+  }
+
+  void logScriptPlatformChanged({
+    required String scriptId,
+    required String platform,
+  }) {
+    _analytics.logEvent(
+      name: 'script_platform_changed',
+      parameters: {'script_id': scriptId, 'platform': platform},
+    );
+  }
+
+  void logEditorOpened({required bool isEditing}) {
+    _analytics.logEvent(
+      name: 'editor_opened',
+      parameters: {'is_editing': isEditing ? 1 : 0},
+    );
+  }
+
+  void logScriptRecordTapped({
+    required String scriptId,
+    required String category,
+    required bool isPremium,
+  }) {
+    _analytics.logEvent(
+      name: 'script_record_tapped',
+      parameters: {
+        'script_id': scriptId,
+        'category': category,
+        'is_premium': isPremium ? 1 : 0,
+      },
+    );
+  }
+
+  void logQuickRecordSubmitted({required int wordCount}) {
+    _analytics.logEvent(
+      name: 'quick_record_submitted',
+      parameters: {'word_count': wordCount},
+    );
+  }
+
+  void logTeleprompterScreenOpened({
+    required String scriptId,
+    required String scriptTitle,
+  }) {
+    _analytics.logEvent(
+      name: 'teleprompter_screen_opened',
+      parameters: {'script_id': scriptId, 'script_title': scriptTitle},
+    );
+  }
+
+  void logTeleprompterPlayToggled({required bool isPlaying}) {
+    _analytics.logEvent(
+      name: 'teleprompter_play_toggled',
+      parameters: {'is_playing': isPlaying ? 1 : 0},
+    );
+  }
+
+  void logTeleprompterCompleted({
+    required String scriptId,
+    required int durationSeconds,
+  }) {
+    _analytics.logEvent(
+      name: 'teleprompter_completed',
+      parameters: {'script_id': scriptId, 'duration_seconds': durationSeconds},
+    );
+  }
+
+  void logTeleprompterPaused({required int durationSeconds}) {
+    _analytics.logEvent(
+      name: 'teleprompter_paused',
+      parameters: {'duration_seconds': durationSeconds},
+    );
+  }
+
+  void logTextOrientationChanged({required int orientation}) {
+    _analytics.logEvent(
+      name: 'text_orientation_changed',
+      parameters: {'orientation': orientation},
+    );
+  }
+
+  void logVideoEditorOpened({required String videoId}) {
+    _analytics.logEvent(
+      name: 'video_editor_opened',
+      parameters: {'video_id': videoId},
+    );
+  }
+
+  void logVideoEditorTabChanged({required String tab}) {
+    _analytics.logEvent(
+      name: 'video_editor_tab_changed',
+      parameters: {'tab': tab},
+    );
+  }
+
+  void logVideoEditorExportStarted({
+    required String quality,
+    required double trimStart,
+    required double trimEnd,
+    required double playbackSpeed,
+    required bool audioRemoved,
+  }) {
+    _analytics.logEvent(
+      name: 'video_export_started',
+      parameters: {
+        'quality': quality,
+        'trim_start': trimStart,
+        'trim_end': trimEnd,
+        'playback_speed': playbackSpeed,
+        'audio_removed': audioRemoved ? 1 : 0,
+      },
+    );
+  }
+
+  void logVideoEditorExportCompleted({
+    required int durationSeconds,
+    required int fileSizeBytes,
+  }) {
+    _analytics.logEvent(
+      name: 'video_export_completed',
+      parameters: {
+        'duration_seconds': durationSeconds,
+        'file_size_bytes': fileSizeBytes,
+      },
+    );
+  }
+
+  void logVideoEditorExportFailed({required String reason}) {
+    _analytics.logEvent(
+      name: 'video_export_failed',
+      parameters: {'reason': reason},
+    );
+  }
+
+  void logVideoEditorDiscarded() {
+    _analytics.logEvent(name: 'video_editor_discarded', parameters: {});
+  }
+
+  void logVideoRotated({required int degrees}) {
+    _analytics.logEvent(
+      name: 'video_rotated',
+      parameters: {'degrees': degrees},
+    );
+  }
+
+  void logVideoMirrored() {
+    _analytics.logEvent(name: 'video_mirrored', parameters: {});
+  }
+
+  void logVideoAspectRatioChanged({required String ratio}) {
+    _analytics.logEvent(
+      name: 'video_aspect_ratio_changed',
+      parameters: {'ratio': ratio},
+    );
+  }
+
+  void logVideoPlaybackSpeedChanged({required double speed}) {
+    _analytics.logEvent(
+      name: 'video_playback_speed_changed',
+      parameters: {'speed': speed},
+    );
+  }
+
+  void logVideoAudioToggled({required bool audioRemoved}) {
+    _analytics.logEvent(
+      name: 'video_audio_toggled',
+      parameters: {'audio_removed': audioRemoved ? 1 : 0},
+    );
+  }
+
+  void logGalleryVideoOpened({required String videoId}) {
+    _analytics.logEvent(
+      name: 'gallery_video_opened',
+      parameters: {'video_id': videoId},
+    );
+  }
+
+  void logScriptSearchTyped({required String term, required int results}) {
+    _analytics.logEvent(
+      name: 'script_search_typed',
+      parameters: {'term': term, 'results': results},
+    );
+  }
+
+  void logAdGateTriggered({required int videoCount}) {
+    _analytics.logEvent(
+      name: 'ad_gate_triggered',
+      parameters: {'video_count': videoCount},
+    );
+  }
+
+  void logAdGateAction({required String action}) {
+    _analytics.logEvent(name: 'ad_gate_action', parameters: {'action': action});
+  }
+
+  void logAdGateSuccess() {
+    _analytics.logEvent(name: 'ad_gate_success', parameters: {});
   }
 }

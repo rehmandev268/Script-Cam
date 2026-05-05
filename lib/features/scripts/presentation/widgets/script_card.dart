@@ -6,7 +6,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/responsive_config.dart';
 import '../../data/models/script_model.dart';
-import 'script_menu_button.dart';
 
 class ScriptCard extends StatelessWidget {
   final Script script;
@@ -15,6 +14,8 @@ class ScriptCard extends StatelessWidget {
   final VoidCallback onRecord;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback? onRename;
+  final VoidCallback? onDuplicate;
 
   const ScriptCard({
     super.key,
@@ -24,6 +25,8 @@ class ScriptCard extends StatelessWidget {
     required this.onRecord,
     required this.onEdit,
     required this.onDelete,
+    this.onRename,
+    this.onDuplicate,
   });
 
   @override
@@ -68,14 +71,7 @@ class ScriptCard extends StatelessWidget {
                         height: 44.h,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              brandColor.withValues(alpha: 0.15),
-                              brandColor.withValues(alpha: 0.05),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
+                          color: brandColor.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(14.r),
                         ),
                         child: FaIcon(
@@ -136,10 +132,33 @@ class ScriptCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                      ScriptMenuButton(
-                        script: script,
-                        onEdit: onEdit,
-                        onDelete: onDelete,
+                      PopupMenuButton<String>(
+                        icon: const Icon(Icons.more_horiz_rounded),
+                        onSelected: (value) {
+                          switch (value) {
+                            case 'edit':
+                              onEdit();
+                              break;
+                            case 'rename':
+                              onRename?.call();
+                              break;
+                            case 'duplicate':
+                              onDuplicate?.call();
+                              break;
+                            case 'delete':
+                              onDelete();
+                              break;
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
+                          PopupMenuItem(value: 'rename', child: Text(l10n.rename)),
+                          PopupMenuItem(
+                            value: 'duplicate',
+                            child: Text(l10n.duplicate),
+                          ),
+                          PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
+                        ],
                       ),
                     ],
                   ),

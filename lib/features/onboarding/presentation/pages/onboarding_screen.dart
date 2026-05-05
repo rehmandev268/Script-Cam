@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
-import 'package:provider/provider.dart';
-import 'package:animate_do/animate_do.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/utils/responsive_config.dart';
-import '../../../../widgets/ads/adaptive_banner_ad.dart';
-import '../../../settings/presentation/providers/ui_provider.dart';
-
+import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
-import '../../../../core/utils/toast_service.dart';
+import 'package:provider/provider.dart';
+
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/services/analytics_service.dart';
+import '../../../../core/utils/responsive_config.dart';
+import '../../../../core/utils/toast_service.dart';
+import '../../../settings/presentation/providers/ui_provider.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -19,51 +18,24 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  late PageController _controller;
-  int _currentPage = 0;
+  late final PageController _controller;
+  int _page = 0;
 
   @override
   void initState() {
     super.initState();
-    final uiProvider = Provider.of<UIProvider>(context, listen: false);
-    // If onboarding was already completed but we're here (permissions missing),
-    // jump straight to the permissions page.
-    _currentPage = (uiProvider.showOnboarding == false) ? 3 : 0;
-    _controller = PageController(initialPage: _currentPage);
-    if (uiProvider.showOnboarding) {
-      AnalyticsService().logOnboardingStarted();
-    }
+    _controller = PageController();
+    AnalyticsService().logOnboardingStarted();
   }
 
-  List<Map<String, dynamic>> _getPages(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return [
-      {
-        "title": l10n.onboardingWelcomeTitle,
-        "desc": l10n.onboardingWelcomeDesc,
-        "icon": Icons.movie_creation_outlined,
-      },
-      {
-        "title": l10n.onboardingScriptEditorTitle,
-        "desc": l10n.onboardingScriptEditorDesc,
-        "icon": Icons.edit_note_outlined,
-      },
-      {
-        "title": l10n.onboardingTeleprompterTitle,
-        "desc": l10n.onboardingTeleprompterDesc,
-        "icon": Icons.videocam_outlined,
-      },
-      {
-        "title": l10n.onboardingPermissionsTitle,
-        "desc": l10n.onboardingPermissionsDesc,
-        "icon": Icons.security_outlined,
-        "isPermission": true,
-      },
-    ];
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   Future<void> _requestPermissions() async {
-    Map<Permission, PermissionStatus> statuses = await [
+    final statuses = await [
       Permission.camera,
       Permission.microphone,
       Permission.speech,
@@ -71,23 +43,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       Permission.storage,
     ].request();
 
-    AnalyticsService().logPermissionRequested(
-      permissionType: 'onboarding_camera_mic',
-    );
+    if (!mounted) return;
 
     if (statuses[Permission.camera]!.isGranted &&
         statuses[Permission.microphone]!.isGranted) {
-      AnalyticsService().logPermissionGranted(
-        permissionType: 'onboarding_camera_mic',
-      );
-      if (mounted) _completeOnboarding(context);
+      context.read<UIProvider>().completeOnboarding();
     } else {
-      AnalyticsService().logPermissionDenied(
-        permissionType: 'onboarding_camera_mic',
-      );
-      if (!mounted) return;
-      final l10n = AppLocalizations.of(context);
-      ToastService.show(l10n.permissionsRequired);
+      ToastService.show(AppLocalizations.of(context).permissionsRequired);
       if (statuses[Permission.camera]!.isPermanentlyDenied ||
           statuses[Permission.microphone]!.isPermanentlyDenied) {
         openAppSettings();
@@ -95,12 +57,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  void _completeOnboarding(BuildContext context) {
-    final uiProvider = Provider.of<UIProvider>(context, listen: false);
-    
-    uiProvider.completeOnboarding();
-
-   
+  void _primaryAction() {
+    if (_page == 2) {
+      _requestPermissions();
+      return;
+    }
+    _controller.nextPage(
+      duration: const Duration(milliseconds: 240),
+      curve: Curves.easeOutCubic,
+    );
   }
 
   @override
@@ -110,153 +75,323 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBg : AppColors.lightBg,
-      body: Stack(
-        children: [
-          Padding(
-            padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top + 60.h,
-              bottom: 80.h,
-            ),
-            child: PageView.builder(
-              controller: _controller,
-              itemCount: _getPages(context).length,
-              onPageChanged: (idx) => setState(() => _currentPage = idx),
-              itemBuilder: (context, index) {
-                final isPermission =
-                    _getPages(context)[index]['isPermission'] ?? false;
-
-                return Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 32.w),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      FadeInDown(
-                        child: Container(
-                          padding: EdgeInsets.all(30.r),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            _getPages(context)[index]['icon'],
-                            size: 100.sp,
-                            color: AppColors.primary,
-                          ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: PageView(
+                controller: _controller,
+                onPageChanged: (value) => setState(() => _page = value),
+                children: [
+                  _StepShell(
+                    title: l10n.onboardingInteractiveStep1Title,
+                    subtitle: l10n.onboardingInteractiveStep1Subtitle,
+                    child: _CameraMockCard(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 20.h,
                         ),
-                      ),
-                      SizedBox(height: 40.h),
-                      FadeInUp(
-                        child: Text(
-                          _getPages(context)[index]['title'],
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 28.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 20.h),
-                      FadeInUp(
-                        delay: const Duration(milliseconds: 200),
-                        child: Text(
-                          _getPages(context)[index]['desc'],
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            color: AppColors.textGrey,
-                            height: 1.5,
-                          ),
-                        ),
-                      ),
-                      if (isPermission) ...[
-                        SizedBox(height: 40.h),
-                        FadeInUp(
-                          delay: const Duration(milliseconds: 400),
-                          child: ElevatedButton.icon(
-                            onPressed: _requestPermissions,
-                            icon: const Icon(Icons.check_circle_outline),
-                            label: Text(l10n.grantAccess),
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 32.w,
-                                vertical: 16.h,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _MutedEyebrow(text: l10n.onboardingInteractiveStep1Eyebrow),
+                            SizedBox(height: 14.h),
+                            Text(
+                              l10n.onboardingInteractiveStep1Preview,
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.88),
+                                fontSize: 14.sp,
+                                height: 1.5,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 10.h,
-            left: 20.w,
-            right: 20.w,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    if (_currentPage == _getPages(context).length - 1) {
-                      _requestPermissions();
-                    } else {
-                      _controller.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.r),
-                    ),
-                  ),
-                  child: Text(
-                    _currentPage == _getPages(context).length - 1
-                        ? l10n.start
-                        : l10n.next,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    _getPages(context).length,
-                    (index) => AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      margin: EdgeInsets.symmetric(horizontal: 4.w),
-                      height: 8.h,
-                      width: _currentPage == index ? 24.w : 8.w,
-                      decoration: BoxDecoration(
-                        color: _currentPage == index
-                            ? AppColors.primary
-                            : Colors.grey.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(4.r),
                       ),
                     ),
                   ),
-                ),
-                SizedBox(height: 20.h),
-                const AdaptiveBannerWidget(),
-                SizedBox(height: MediaQuery.of(context).padding.bottom + 10.h),
-              ],
+                  _StepShell(
+                    title: l10n.onboardingInteractiveStep2Title,
+                    subtitle: l10n.onboardingInteractiveStep2Subtitle,
+                    child: _CameraMockCard(
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(14.w, 16.h, 14.w, 12.h),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Icon(
+                                  Icons.fiber_manual_record,
+                                  color: AppColors.primary,
+                                  size: 16.sp,
+                                ),
+                                SizedBox(width: 6.w),
+                                Text(
+                                  l10n.onboardingInteractiveRecLabel,
+                                  style: TextStyle(
+                                    color: Colors.white54,
+                                    fontSize: 11.sp,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.35,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 14.h),
+                            Expanded(
+                              child: ShaderMask(
+                                shaderCallback: (rect) =>
+                                    const LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.white,
+                                    Colors.white,
+                                    Colors.transparent,
+                                  ],
+                                  stops: [0.0, 0.08, 0.92, 1.0],
+                                ).createShader(rect),
+                                blendMode: BlendMode.dstIn,
+                                child: SingleChildScrollView(
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 8.h),
+                                    child: Text(
+                                      l10n.onboardingInteractiveStep2Sample,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14.5.sp,
+                                        height: 1.52,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.pause_circle_outline_rounded,
+                                  color: Colors.white38,
+                                  size: 22.sp,
+                                ),
+                                SizedBox(width: 20.w),
+                                Icon(
+                                  Icons.swap_vert_rounded,
+                                  color: Colors.white38,
+                                  size: 22.sp,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  _StepShell(
+                    title: l10n.onboardingInteractiveStep4Title,
+                    subtitle: l10n.onboardingInteractiveStep4Subtitle,
+                    child: Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
+                      decoration: BoxDecoration(
+                        color: isDark ? AppColors.darkSurface : Colors.white,
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(
+                          color:
+                              isDark ? AppColors.borderDark : AppColors.borderLight,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _AccessRow(
+                            icon: Icons.videocam_outlined,
+                            label: l10n.onboardingAccessCamera,
+                          ),
+                          SizedBox(height: 12.h),
+                          _AccessRow(
+                            icon: Icons.mic_none_rounded,
+                            label: l10n.onboardingAccessMic,
+                          ),
+                          SizedBox(height: 16.h),
+                          Text(
+                            l10n.onboardingInteractiveStep4CardHint,
+                            style: TextStyle(
+                              fontSize: 12.5.sp,
+                              color: AppColors.textGrey,
+                              height: 1.42,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 20.h),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    children: List.generate(
+                      3,
+                      (index) => AnimatedContainer(
+                        duration: const Duration(milliseconds: 220),
+                        margin: EdgeInsets.only(right: 6.w),
+                        width: _page == index ? 18.w : 7.w,
+                        height: 7.h,
+                        decoration: BoxDecoration(
+                          color: _page == index
+                              ? AppColors.primary
+                              : AppColors.textGrey.withValues(alpha: 0.35),
+                          borderRadius: BorderRadius.circular(99.r),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  ElevatedButton(
+                    onPressed: _primaryAction,
+                    child:
+                        Text(_page == 2 ? l10n.grantAccess : l10n.next),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StepShell extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final Widget child;
+
+  const _StepShell({
+    required this.title,
+    required this.subtitle,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleColor = isDark ? AppColors.textWhite : AppColors.textBlack;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: GoogleFonts.manrope(
+              fontSize: 22.sp,
+              fontWeight: FontWeight.w800,
+              height: 1.2,
+              color: titleColor,
+              letterSpacing: -0.2,
             ),
           ),
+          SizedBox(height: 10.h),
+          Text(
+            subtitle,
+            style: TextStyle(
+              color: AppColors.textGrey,
+              fontSize: 14.sp,
+              height: 1.45,
+            ),
+          ),
+          SizedBox(height: 18.h),
+          Expanded(child: child),
         ],
       ),
+    );
+  }
+}
+
+class _CameraMockCard extends StatelessWidget {
+  final Widget child;
+
+  const _CameraMockCard({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A0A0B),
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: Colors.white12),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14.r),
+        child: child,
+      ),
+    );
+  }
+}
+
+class _MutedEyebrow extends StatelessWidget {
+  final String text;
+
+  const _MutedEyebrow({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 11.sp,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.35,
+        color: Colors.white38,
+      ),
+    );
+  }
+}
+
+class _AccessRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _AccessRow({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final iconColor =
+        isDark ? AppColors.textWhite70 : AppColors.textGrey;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 22.sp, color: iconColor),
+        SizedBox(width: 12.w),
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w600,
+              height: 1.35,
+              color: isDark ? AppColors.textWhite : AppColors.textBlack,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

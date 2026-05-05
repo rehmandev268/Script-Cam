@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:flutter_application_6/core/utils/responsive_config.dart';
 import 'glass_button.dart';
@@ -11,6 +12,8 @@ class CameraBottomControls extends StatelessWidget {
   final bool showProControls;
   final VoidCallback onTogglePro;
   final Function(VideoRecordingCameraState) onTogglePause;
+  final VoidCallback onStartRecording;
+  final bool isEnabled;
 
   const CameraBottomControls({
     super.key,
@@ -20,25 +23,31 @@ class CameraBottomControls extends StatelessWidget {
     required this.showProControls,
     required this.onTogglePro,
     required this.onTogglePause,
+    required this.onStartRecording,
+    this.isEnabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(bottom: 30.h, left: 24.w, right: 24.w),
-      child: state.when(
-        onVideoMode: (videoState) => _IdleControls(
-          state: videoState,
-          showProControls: showProControls,
-          onTogglePro: onTogglePro,
+      child: Opacity(
+        opacity: isEnabled ? 1.0 : 0.5,
+        child: state.when(
+          onVideoMode: (videoState) => _IdleControls(
+            state: videoState,
+            showProControls: showProControls,
+            onTogglePro: onTogglePro,
+            onStartRecording: isEnabled ? onStartRecording : () {},
+          ),
+          onVideoRecordingMode: (recordingState) => _RecordingControls(
+            recordingState: recordingState,
+            isPaused: isPaused,
+            onTogglePause: onTogglePause,
+          ),
+          onPreparingCamera: (_) => const SizedBox.shrink(),
+          onPhotoMode: (_) => const SizedBox.shrink(),
         ),
-        onVideoRecordingMode: (recordingState) => _RecordingControls(
-          recordingState: recordingState,
-          isPaused: isPaused,
-          onTogglePause: onTogglePause,
-        ),
-        onPreparingCamera: (_) => const SizedBox.shrink(),
-        onPhotoMode: (_) => const SizedBox.shrink(),
       ),
     );
   }
@@ -48,11 +57,13 @@ class _IdleControls extends StatelessWidget {
   final VideoCameraState state;
   final bool showProControls;
   final VoidCallback onTogglePro;
+  final VoidCallback onStartRecording;
 
   const _IdleControls({
     required this.state,
     required this.showProControls,
     required this.onTogglePro,
+    required this.onStartRecording,
   });
 
   @override
@@ -70,7 +81,10 @@ class _IdleControls extends StatelessWidget {
           },
         ),
         GestureDetector(
-          onTap: () => state.startRecording(),
+          onTap: () {
+            HapticFeedback.heavyImpact();
+            onStartRecording();
+          },
           child: Container(
             width: 80.w,
             height: 80.h,
@@ -120,7 +134,10 @@ class _RecordingControls extends StatelessWidget {
           onTap: () => onTogglePause(recordingState),
         ),
         GestureDetector(
-          onTap: () => recordingState.stopRecording(),
+          onTap: () {
+            HapticFeedback.heavyImpact();
+            recordingState.stopRecording();
+          },
           child: Container(
             width: 80.w,
             height: 80.h,

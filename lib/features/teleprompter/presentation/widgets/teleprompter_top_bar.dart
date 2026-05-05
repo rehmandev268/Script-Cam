@@ -7,7 +7,9 @@ import '../../../../core/services/analytics_service.dart';
 class TeleprompterTopBar extends StatelessWidget {
   final CameraState state;
   final bool isRecording;
+  final bool isReadingScript;
   final Duration recordingDuration;
+  final Duration readingDuration;
   final VoidCallback onBack;
   final VoidCallback onShowSettings;
   final String Function(Duration) formatDuration;
@@ -16,7 +18,9 @@ class TeleprompterTopBar extends StatelessWidget {
     super.key,
     required this.state,
     required this.isRecording,
+    this.isReadingScript = false,
     required this.recordingDuration,
+    this.readingDuration = Duration.zero,
     required this.onBack,
     required this.onShowSettings,
     required this.formatDuration,
@@ -33,6 +37,11 @@ class TeleprompterTopBar extends StatelessWidget {
           if (isRecording)
             _DurationDisplay(
               duration: recordingDuration,
+              formatDuration: formatDuration,
+            )
+          else if (isReadingScript)
+            _ReadTimerDisplay(
+              duration: readingDuration,
               formatDuration: formatDuration,
             ),
           Row(
@@ -79,6 +88,42 @@ class _DurationDisplay extends StatelessWidget {
               color: Colors.white,
               fontWeight: FontWeight.bold,
               fontSize: 16.sp,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReadTimerDisplay extends StatelessWidget {
+  final Duration duration;
+  final String Function(Duration) formatDuration;
+
+  const _ReadTimerDisplay({
+    required this.duration,
+    required this.formatDuration,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 7.h),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20.r),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.timer_outlined, color: Colors.white70, size: 13.sp),
+          SizedBox(width: 6.w),
+          Text(
+            formatDuration(duration),
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 14.sp,
             ),
           ),
         ],

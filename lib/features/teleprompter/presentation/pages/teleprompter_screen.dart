@@ -14,17 +14,25 @@ import '../../../../core/utils/toast_service.dart';
 import '../../../../core/services/voice_sync_service.dart';
 import '../../../../core/utils/responsive_config.dart';
 import '../../../scripts/data/models/script_model.dart';
+import '../../../scripts/presentation/pages/editor_screen.dart';
 import '../../../gallery/presentation/providers/gallery_provider.dart';
 import '../../../gallery/presentation/pages/video_player_screen.dart';
 import '../../../settings/presentation/providers/ui_provider.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../../../premium/presentation/providers/premium_provider.dart';
+import '../../../premium/presentation/screen/premium_screen.dart';
 
 import '../widgets/camera_side_controls.dart';
 import '../widgets/prompter_overlay.dart';
 import '../widgets/camera_bottom_controls.dart';
 import '../widgets/video_settings_sheet.dart';
 import '../widgets/teleprompter_top_bar.dart';
+import '../widgets/countdown_overlay.dart';
+import '../widgets/ad_gate_overlay.dart';
+import '../providers/recording_restriction_provider.dart';
+import '../../../../core/services/connectivity_service.dart';
+
+enum RecordingStatus { idle, recording, paused, finalized }
 
 class TeleprompterScreen extends StatefulWidget {
   final Script script;
@@ -36,9 +44,20 @@ class TeleprompterScreen extends StatefulWidget {
 
 class _TeleprompterScreenState extends State<TeleprompterScreen>
     with WidgetsBindingObserver, TickerProviderStateMixin {
-  bool _isRecording = false;
-  bool _isPaused = false;
+  RecordingStatus _recordingStatus = RecordingStatus.idle;
+  Duration _accumulatedDuration = Duration.zero;
+  DateTime? _startTimestamp;
+
   bool _showProControls = false;
+  bool _isCountingDown = false;
+
+  bool get _isRecording => _recordingStatus != RecordingStatus.idle;
+  bool get _isPaused => _recordingStatus == RecordingStatus.paused;
+
+  bool get _canOpenScriptEditor =>
+      !_isCountingDown &&
+      !_suspendCameraPipeline &&
+      _recordingStatus == RecordingStatus.idle;
 
   VideoRecordingQuality _videoQuality = VideoRecordingQuality.fhd;
   int _targetFps = 30;
@@ -46,22 +65,33 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
   double _currentZoom = 0.0;
 
   late final ValueNotifier<Duration> _recordingDuration;
+  late final ValueNotifier<Duration> _readingDuration;
+  DateTime? _readingStartTimestamp;
   late final ValueNotifier<Size> _prompterSize;
   late final ValueNotifier<double> _prompterOpacity;
   late final ValueNotifier<double> _fontSize;
   late final ValueNotifier<double> _scrollSpeed;
   late final ValueNotifier<int> _textOrientation;
+  late final ValueNotifier<double> _lineSpacing;
+  late final ValueNotifier<double> _scrollProgress;
 
   Ticker? _ticker;
   Duration _lastElapsed = Duration.zero;
+  double _softStartRamp = 0.0; // 0→1 over ~2s when soft-start enabled
   late final VoiceSyncService _voiceSync;
   late final UIProvider _uiProvider;
+  late final PremiumProvider _premiumProvider;
+  late final RecordingRestrictionProvider _restrictionProvider;
   final ScrollController _scriptScrollController = ScrollController();
+  late String _scriptContent;
 
   int _lastFoundIndex = 0;
   bool _isPlayingScript = false;
   bool _showScriptControls = true;
-  bool _showSettingsPanel = false;
+  bool _isOverlaySettingsSheetOpen = false;
+  bool _adGateDismissed = false;
+  /// Tears down [CameraAwesomeBuilder] so preview is released while editing on another route.
+  bool _suspendCameraPipeline = false;
   late final ValueNotifier<Offset> _prompterPosition;
   bool _isPositionInitialized = false;
   String? _lastVideoPath;
@@ -69,6 +99,10 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
   TextPainter? _cachedTextPainter;
   double? _cachedPainterWidth;
   double? _cachedPainterFontSize;
+  double? _cachedPainterLineSpacing;
+
+  /// Writable script binding (swaps after persisting from teleprompter-only editor flow).
+  late Script _activeScript;
 
   @override
   void initState() {
@@ -77,20 +111,84 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
 
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
 
-    _prompterOpacity = ValueNotifier(0.2);
-    _fontSize = ValueNotifier(24.0.sp);
-    _scrollSpeed = ValueNotifier(50.0);
-    _textOrientation = ValueNotifier(0);
-    _prompterSize = ValueNotifier(Size(double.infinity, 500.h));
-    _prompterPosition = ValueNotifier(Offset.zero);
+    _uiProvider = context.read<UIProvider>();
+    _videoQuality = _mapQuality(_uiProvider.defaultExportQuality);
+
+    _prompterOpacity = ValueNotifier(_uiProvider.prompterOpacity);
+    _fontSize = ValueNotifier(_uiProvider.prompterFontSize);
+    _scrollSpeed = ValueNotifier(_uiProvider.prompterScrollSpeed);
+    _textOrientation = ValueNotifier(_uiProvider.prompterTextOrientation);
+    _prompterSize = ValueNotifier(
+      _uiProvider.prompterWidth > 0 && _uiProvider.prompterHeight > 0
+          ? Size(_uiProvider.prompterWidth, _uiProvider.prompterHeight)
+          : Size(double.infinity, 500.h),
+    );
+    _prompterPosition = ValueNotifier(
+      Offset(_uiProvider.prompterX, _uiProvider.prompterY),
+    );
     _recordingDuration = ValueNotifier(Duration.zero);
+    _readingDuration = ValueNotifier(Duration.zero);
+    _lineSpacing = ValueNotifier(_uiProvider.lineSpacing);
+    _scrollProgress = ValueNotifier(0.0);
+
+    // Add listeners to sync changes to UIProvider
+    _prompterOpacity.addListener(
+      () => _uiProvider.setPrompterOpacity(_prompterOpacity.value),
+    );
+    _fontSize.addListener(
+      () => _uiProvider.setPrompterFontSize(_fontSize.value),
+    );
+    _scrollSpeed.addListener(
+      () => _uiProvider.setPrompterScrollSpeed(_scrollSpeed.value),
+    );
+    _textOrientation.addListener(
+      () => _uiProvider.setPrompterTextOrientation(_textOrientation.value),
+    );
+    _lineSpacing.addListener(
+      () => _uiProvider.setLineSpacing(_lineSpacing.value),
+    );
+    _prompterSize.addListener(
+      () => _uiProvider.setPrompterSize(
+        _prompterSize.value.width,
+        _prompterSize.value.height,
+      ),
+    );
+    _prompterPosition.addListener(
+      () => _uiProvider.setPrompterPosition(
+        _prompterPosition.value.dx,
+        _prompterPosition.value.dy,
+      ),
+    );
 
     _ticker = createTicker(_onTick);
     _voiceSync = context.read<VoiceSyncService>();
-    _uiProvider = context.read<UIProvider>();
+    _premiumProvider = context.read<PremiumProvider>();
+    _restrictionProvider = context.read<RecordingRestrictionProvider>();
+    _activeScript = widget.script;
+    _scriptContent = _activeScript.content;
     _voiceSync.initialize();
     _uiProvider.addListener(_handleUIChanges);
     _voiceSync.addListener(_handleVoiceChanges);
+    _premiumProvider.addListener(_handlePremiumChanges);
+    _handlePremiumChanges();
+  }
+
+  void _handlePremiumChanges() {
+    _restrictionProvider.updatePremiumStatus(_premiumProvider.isPremium);
+  }
+
+  @override
+  void didUpdateWidget(covariant TeleprompterScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.script != widget.script &&
+        !_suspendCameraPipeline &&
+        !_isRecording &&
+        !_isCountingDown) {
+      _activeScript = widget.script;
+      _scriptContent = _activeScript.content;
+      _cachedTextPainter = null;
+      _lastFoundIndex = 0;
+    }
   }
 
   void _handleVoiceChanges() {
@@ -98,8 +196,9 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
     if (!mounted ||
         !_isPlayingScript ||
         !_uiProvider.voiceSyncEnabled ||
-        !isPremium)
+        !isPremium) {
       return;
+    }
 
     if (!_voiceSync.isListening &&
         !_isPaused &&
@@ -132,25 +231,27 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
       _prompterSize.value.width - horizontalPadding,
     );
     final fs = _fontSize.value;
+    final ls = _lineSpacing.value;
 
     if (_cachedTextPainter == null ||
         _cachedPainterWidth != maxWidth ||
-        _cachedPainterFontSize != fs) {
+        _cachedPainterFontSize != fs ||
+        _cachedPainterLineSpacing != ls) {
       final textStyle = TextStyle(
         fontSize: fs,
         fontWeight: FontWeight.w700,
-        fontFamily: 'Manrope',
-        height: 1.4,
+        height: ls,
       );
 
       _cachedTextPainter = TextPainter(
-        text: TextSpan(text: widget.script.content, style: textStyle),
+        text: TextSpan(text: _scriptContent, style: textStyle),
         textAlign: TextAlign.center,
         textDirection: TextDirection.ltr,
       );
       _cachedTextPainter!.layout(maxWidth: maxWidth);
       _cachedPainterWidth = maxWidth;
       _cachedPainterFontSize = fs;
+      _cachedPainterLineSpacing = ls;
     }
 
     final offset = _cachedTextPainter!.getOffsetForCaret(
@@ -164,11 +265,12 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
   void _onVoiceResult(String words) {
     if (!mounted || !_isPlayingScript) return;
 
-    final scriptContent = widget.script.content.toLowerCase();
+    final scriptContent = _scriptContent.toLowerCase();
     final cleanedScript = scriptContent.replaceAll(RegExp(r'[^\w\s]'), ' ');
-    final spokenWords = words.toLowerCase().trim().split(RegExp(r'\s+'));
+    final trimmed = words.toLowerCase().trim();
+    if (trimmed.isEmpty) return;
 
-    if (spokenWords.isEmpty) return;
+    final spokenWords = trimmed.split(RegExp(r'\s+'));
 
     // Use a smaller transcript tail for more immediate matching
     final transcriptTail = spokenWords.length > 8
@@ -283,10 +385,28 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
 
   void _onTick(Duration elapsed) {
     if (!mounted) return;
+
+    // 1. Update recording duration display based on status
+    if (_recordingStatus == RecordingStatus.recording &&
+        _startTimestamp != null) {
+      final currentSegment = DateTime.now().difference(_startTimestamp!);
+      _recordingDuration.value = _accumulatedDuration + currentSegment;
+    } else if (_recordingStatus == RecordingStatus.paused) {
+      _recordingDuration.value = _accumulatedDuration;
+    } else if (_recordingStatus == RecordingStatus.idle) {
+      _recordingDuration.value = Duration.zero;
+    }
+
+    // 2. Update reading timer when script is playing (not recording)
+    if (_isPlayingScript && _readingStartTimestamp != null) {
+      _readingDuration.value = DateTime.now().difference(_readingStartTimestamp!);
+    }
+
     final isPremium = context.read<PremiumProvider>().isPremium;
-    final isManualScrolling =
-        _isPlayingScript && !(_uiProvider.voiceSyncEnabled && isPremium);
-    if (!isManualScrolling && !_isRecording) {
+    final voiceSyncActive = _uiProvider.voiceSyncEnabled && isPremium;
+    final isActive =
+        _isPlayingScript || (_recordingStatus == RecordingStatus.recording);
+    if (!isActive) {
       _lastElapsed = Duration.zero;
       return;
     }
@@ -296,19 +416,39 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
     }
     final delta = (elapsed - _lastElapsed).inMicroseconds / 1000000.0;
     _lastElapsed = elapsed;
-    if (_isRecording && !_isPaused) {
-      _recordingDuration.value += Duration(
-        microseconds: (delta * 1000000).toInt(),
-      );
-    }
+
     if (_scriptScrollController.hasClients && _isPlayingScript) {
-      if (_scriptScrollController.offset >=
-          _scriptScrollController.position.maxScrollExtent) {
-        setState(() => _isPlayingScript = false);
-        _stopScrolling();
-      } else if (!(_uiProvider.voiceSyncEnabled && isPremium)) {
+      final maxExt = _scriptScrollController.position.maxScrollExtent;
+      if (maxExt > 0) {
+        _scrollProgress.value = (_scriptScrollController.offset / maxExt).clamp(
+          0.0,
+          1.0,
+        );
+      }
+      if (_scriptScrollController.offset >= maxExt) {
+        if (_uiProvider.prompterLoopEnabled) {
+          // Loop: jump back to top and keep playing
+          HapticFeedback.lightImpact();
+          _scriptScrollController.jumpTo(0);
+          _lastFoundIndex = 0;
+          _softStartRamp = _uiProvider.prompterSoftStartEnabled ? 0.0 : 1.0;
+        } else {
+          // End: haptic + stop
+          HapticFeedback.heavyImpact();
+          setState(() {
+            _isPlayingScript = false;
+            _lastFoundIndex = 0;
+            _softStartRamp = 0.0;
+          });
+          _stopScrolling();
+        }
+      } else if (!voiceSyncActive) {
+        // Soft-start ramp: increase from 0→1 over ~2 seconds
+        if (_softStartRamp < 1.0) {
+          _softStartRamp = (_softStartRamp + delta * 0.5).clamp(0.0, 1.0);
+        }
         _scriptScrollController.jumpTo(
-          _scriptScrollController.offset + (_scrollSpeed.value * delta),
+          _scriptScrollController.offset + (_scrollSpeed.value * delta * _softStartRamp),
         );
       }
     }
@@ -318,13 +458,8 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
     final isPremium = context.read<PremiumProvider>().isPremium;
     if (_uiProvider.voiceSyncEnabled && isPremium) {
       _voiceSync.startListening(_onVoiceResult);
-    } else {
-      if (!(_ticker?.isActive ?? false)) _ticker?.start();
     }
-
-    if (_isRecording && !(_ticker?.isActive ?? false)) {
-      _ticker?.start();
-    }
+    if (!(_ticker?.isActive ?? false)) _ticker?.start();
   }
 
   void _stopScrolling() {
@@ -339,7 +474,15 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
   void _toggleScriptPlay() {
     setState(() {
       _isPlayingScript = !_isPlayingScript;
-      if (!_isPlayingScript) _lastFoundIndex = 0;
+      if (!_isPlayingScript) {
+        _lastFoundIndex = 0;
+        _readingStartTimestamp = null;
+        _readingDuration.value = Duration.zero;
+        _softStartRamp = 0.0;
+      } else {
+        _readingStartTimestamp = DateTime.now();
+        _softStartRamp = _uiProvider.prompterSoftStartEnabled ? 0.0 : 1.0;
+      }
     });
     if (_isPlayingScript) {
       _startScrolling();
@@ -348,21 +491,105 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
     }
   }
 
+  Future<void> _openScriptEditorFromTeleprompter() async {
+    // Blocks recording and paused paths (any non-idle capture state).
+    if (_recordingStatus != RecordingStatus.idle) {
+      ToastService.show(
+        AppLocalizations.of(context).editScriptBlockedWhileRecording,
+        isError: true,
+      );
+      return;
+    }
+
+    if (_suspendCameraPipeline) {
+      return;
+    }
+
+    if (_isCountingDown) {
+      ToastService.show(
+        AppLocalizations.of(context).editScriptBlockedDuringCountdown,
+        isError: true,
+      );
+      return;
+    }
+
+    FocusManager.instance.primaryFocus?.unfocus();
+    if (_isPlayingScript) {
+      _stopScrolling();
+    }
+
+    await SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
+    if (!mounted) return;
+
+    setState(() => _suspendCameraPipeline = true);
+
+    TeleprompterScriptEditResult? sessionResult;
+    try {
+      sessionResult =
+          await Navigator.of(context).push<TeleprompterScriptEditResult?>(
+        MaterialPageRoute(
+          builder: (_) {
+            if (_activeScript.isInBox) {
+              return EditorScreen(scriptToEdit: _activeScript);
+            }
+            return EditorScreen(
+              teleprompterInitialTitle: _activeScript.title,
+              teleprompterInitialContent: _activeScript.content,
+              saveReturnsToTeleprompterOnly: true,
+            );
+          },
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _suspendCameraPipeline = false;
+          if (sessionResult != null) {
+            if (sessionResult.persistedScript != null) {
+              _activeScript = sessionResult.persistedScript!;
+            } else if (sessionResult.title.isNotEmpty ||
+                sessionResult.content.isNotEmpty) {
+              _activeScript.title = sessionResult.title;
+              _activeScript.content = sessionResult.content;
+            }
+          }
+          _scriptContent = _activeScript.content;
+          _cachedTextPainter = null;
+          _lastFoundIndex = 0;
+        });
+      }
+      if (mounted) {
+        await SystemChrome.setEnabledSystemUIMode(
+          SystemUiMode.manual,
+          overlays: [],
+        );
+      }
+    }
+  }
+
   void _togglePause(VideoRecordingCameraState recordingState) async {
     if (recordingState.captureState == null) return;
-    if (_isPaused) {
+    if (_recordingStatus == RecordingStatus.paused) {
       await recordingState.resumeRecording(recordingState.captureState!);
       setState(() {
-        _isPaused = false;
+        _recordingStatus = RecordingStatus.recording;
+        _startTimestamp = DateTime.now();
         if (!_isPlayingScript) {
           _isPlayingScript = true;
           _startScrolling();
         }
       });
-    } else {
+    } else if (_recordingStatus == RecordingStatus.recording) {
       await recordingState.pauseRecording(recordingState.captureState!);
       setState(() {
-        _isPaused = true;
+        if (_startTimestamp != null) {
+          _accumulatedDuration += DateTime.now().difference(_startTimestamp!);
+        }
+        _recordingStatus = RecordingStatus.paused;
+        _startTimestamp = null;
         _stopScrolling();
       });
     }
@@ -383,15 +610,31 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
     return SingleCaptureRequest('${appDir.path}/$fileName', sensors.first);
   }
 
+  VideoRecordingQuality _mapQuality(String quality) {
+    switch (quality) {
+      case 'sd':
+        return VideoRecordingQuality.sd;
+      case 'hd':
+        return VideoRecordingQuality.hd;
+      case 'uhd':
+        return VideoRecordingQuality.uhd;
+      case 'fhd':
+      default:
+        return VideoRecordingQuality.fhd;
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_isPositionInitialized) {
-      final size = MediaQuery.of(context).size;
-      final prompterWidth = size.width;
-      final prompterHeight = size.height * 0.5;
-      _prompterSize.value = Size(prompterWidth, prompterHeight);
-      _prompterPosition.value = Offset(0, (size.height - prompterHeight) / 3);
+      if (_uiProvider.prompterWidth == 0 || _uiProvider.prompterHeight == 0) {
+        final size = MediaQuery.of(context).size;
+        final prompterWidth = size.width;
+        final prompterHeight = size.height * 0.5;
+        _prompterSize.value = Size(prompterWidth, prompterHeight);
+        _prompterPosition.value = Offset(0, (size.height - prompterHeight) / 3);
+      }
       _isPositionInitialized = true;
     }
   }
@@ -407,6 +650,7 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
 
     _uiProvider.removeListener(_handleUIChanges);
     _voiceSync.removeListener(_handleVoiceChanges);
+    _premiumProvider.removeListener(_handlePremiumChanges);
     _voiceSync.stopListening();
     _ticker?.dispose();
     _scriptScrollController.dispose();
@@ -414,18 +658,42 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
     _fontSize.dispose();
     _scrollSpeed.dispose();
     _textOrientation.dispose();
+    _lineSpacing.dispose();
+    _scrollProgress.dispose();
     _prompterSize.dispose();
     _prompterPosition.dispose();
     _recordingDuration.dispose();
+    _readingDuration.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Focus(
-      autofocus: true,
+      autofocus: false,
       onKeyEvent: (node, event) {
         if (event is KeyDownEvent) {
+          final isPremium = context.read<PremiumProvider>().isPremium;
+          if (!isPremium) {
+            // Check if it's one of the control keys before showing toast
+            final controlKeys = [
+              LogicalKeyboardKey.space,
+              LogicalKeyboardKey.arrowUp,
+              LogicalKeyboardKey.arrowDown,
+              LogicalKeyboardKey.keyR,
+              LogicalKeyboardKey.audioVolumeUp,
+              LogicalKeyboardKey.audioVolumeDown,
+              LogicalKeyboardKey.mediaPlayPause,
+              LogicalKeyboardKey.mediaPlay,
+              LogicalKeyboardKey.mediaPause,
+            ];
+            if (controlKeys.contains(event.logicalKey)) {
+              ToastService.show(AppLocalizations.of(context).remoteControlLocked);
+              return KeyEventResult.handled;
+            }
+            return KeyEventResult.ignored;
+          }
+
           if (event.logicalKey == LogicalKeyboardKey.space) {
             _toggleScriptPlay();
             return KeyEventResult.handled;
@@ -438,223 +706,456 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
           } else if (event.logicalKey == LogicalKeyboardKey.keyR) {
             _scriptScrollController.jumpTo(0);
             return KeyEventResult.handled;
+          } else if (event.logicalKey == LogicalKeyboardKey.audioVolumeUp ||
+              event.logicalKey == LogicalKeyboardKey.audioVolumeDown ||
+              event.logicalKey == LogicalKeyboardKey.mediaPlayPause ||
+              event.logicalKey == LogicalKeyboardKey.mediaPlay ||
+              event.logicalKey == LogicalKeyboardKey.mediaPause) {
+            _toggleScriptPlay();
+            return KeyEventResult.handled;
           }
         }
         return KeyEventResult.ignored;
       },
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: CameraAwesomeBuilder.awesome(
-          progressIndicator: const Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
-          ),
-          saveConfig: SaveConfig.video(
-            pathBuilder: _pathBuilder,
-            mirrorFrontCamera: true,
-            videoOptions: VideoOptions(
-              enableAudio: true,
-              quality: _videoQuality,
-            ),
-          ),
-          sensorConfig: SensorConfig.single(
-            sensor: Sensor.position(SensorPosition.front),
-            aspectRatio: CameraAspectRatios.ratio_16_9,
-          ),
-          theme: AwesomeTheme(
-            bottomActionsBackgroundColor: Colors.transparent,
-            buttonTheme: AwesomeButtonTheme(
-              backgroundColor: Colors.transparent,
-              iconSize: 32,
-              foregroundColor: Colors.white,
-            ),
-          ),
-          topActionsBuilder: (state) => const SizedBox.shrink(),
-          bottomActionsBuilder: (state) => const SizedBox.shrink(),
-          middleContentBuilder: (state) => Stack(
-            fit: StackFit.expand,
-            children: [
-              ValueListenableBuilder<Offset>(
-                valueListenable: _prompterPosition,
-                builder: (context, position, _) {
-                  return PrompterOverlay(
-                    script: widget.script,
-                    isPlayingScript: _isPlayingScript,
-                    showScriptControls: _showScriptControls,
-                    showSettingsPanel: _showSettingsPanel,
-                    dragX: position.dx,
-                    dragY: position.dy,
-                    prompterSize: _prompterSize,
-                    prompterOpacity: _prompterOpacity,
-                    fontSize: _fontSize,
-                    textOrientation: _textOrientation,
-                    scrollSpeed: _scrollSpeed,
-                    scrollController: _scriptScrollController,
-                    onTogglePlay: _toggleScriptPlay,
-                    onToggleSettings: () => setState(
-                      () => _showSettingsPanel = !_showSettingsPanel,
-                    ),
-                    onToggleControls: () => setState(
-                      () => _showScriptControls = !_showScriptControls,
-                    ),
-                    onDrag: (d) => _prompterPosition.value += d,
-                    onResize: (s) => _prompterSize.value = s,
-                  );
-                },
-              ),
-              if (_showProControls && !_isRecording)
-                CameraSideControls(
-                  state: state,
-                  currentBrightness: _currentBrightness,
-                  currentZoom: _currentZoom,
-                  onBrightnessChanged: (v) =>
-                      setState(() => _currentBrightness = v),
-                  onZoomChanged: (v) => setState(() => _currentZoom = v),
+        body: Consumer2<RecordingRestrictionProvider, PremiumProvider>(
+          builder: (context, restrictionProvider, premiumProvider, child) {
+            if (_suspendCameraPipeline) {
+              return const DecoratedBox(
+                decoration: BoxDecoration(color: Colors.black),
+                child: Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
                 ),
+              );
+            }
 
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: SafeArea(
-                  child: ValueListenableBuilder<Duration>(
-                    valueListenable: _recordingDuration,
-                    builder: (context, duration, _) => TeleprompterTopBar(
-                      state: state,
-                      isRecording: _isRecording,
-                      recordingDuration: duration,
-                      onBack: () => Navigator.pop(context),
-                      onShowSettings: () => _showVideoSettings(state),
-                      formatDuration: (d) =>
-                          "${d.inMinutes.remainder(60).toString().padLeft(2, "0")}:${d.inSeconds.remainder(60).toString().padLeft(2, "0")}",
-                    ),
-                  ),
+            return CameraAwesomeBuilder.awesome(
+              progressIndicator: const Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              ),
+              saveConfig: SaveConfig.video(
+                pathBuilder: _pathBuilder,
+                mirrorFrontCamera: true,
+                videoOptions: VideoOptions(
+                  enableAudio: true,
+                  quality: _videoQuality,
                 ),
               ),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: SafeArea(
-                  child: CameraBottomControls(
-                    state: state,
-                    isRecording: _isRecording,
-                    isPaused: _isPaused,
-                    showProControls: _showProControls,
-                    onTogglePro: () =>
-                        setState(() => _showProControls = !_showProControls),
-                    onTogglePause: (s) => _togglePause(s),
-                  ),
+              sensorConfig: SensorConfig.single(
+                sensor: Sensor.position(
+                  _uiProvider.defaultFrontCamera
+                      ? SensorPosition.front
+                      : SensorPosition.back,
+                ),
+                aspectRatio: CameraAspectRatios.ratio_16_9,
+              ),
+              theme: AwesomeTheme(
+                bottomActionsBackgroundColor: Colors.transparent,
+                buttonTheme: AwesomeButtonTheme(
+                  backgroundColor: Colors.transparent,
+                  iconSize: 32,
+                  foregroundColor: Colors.white,
                 ),
               ),
-              if (_lastVideoPath != null && !_isRecording)
-                Positioned(
-                  bottom: 120.h,
-                  left: 24.w,
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              FullScreenVideoPlayer(path: _lastVideoPath!),
+              topActionsBuilder: (state) => const SizedBox.shrink(),
+              bottomActionsBuilder: (state) => const SizedBox.shrink(),
+              middleContentBuilder: (state) => Stack(
+                fit: StackFit.expand,
+                children: [
+                  ValueListenableBuilder<Offset>(
+                    valueListenable: _prompterPosition,
+                    builder: (context, position, _) {
+                      return PrompterOverlay(
+                        scriptContent: _scriptContent,
+                        isPlayingScript: _isPlayingScript,
+                        showScriptControls: _showScriptControls,
+                        showSettingsPanel: _isOverlaySettingsSheetOpen,
+                        dragX: position.dx,
+                        dragY: position.dy,
+                        prompterSize: _prompterSize,
+                        prompterOpacity: _prompterOpacity,
+                        fontSize: _fontSize,
+                        textOrientation: _textOrientation,
+                        scrollSpeed: _scrollSpeed,
+                        lineSpacing: _lineSpacing,
+                        scrollProgress: _scrollProgress,
+                        scrollController: _scriptScrollController,
+                        onTogglePlay: _toggleScriptPlay,
+                        onEditScript: _canOpenScriptEditor
+                            ? _openScriptEditorFromTeleprompter
+                            : null,
+                        onToggleSettings: _openOverlaySettingsSheet,
+                        onToggleControls: () => setState(
+                          () => _showScriptControls = !_showScriptControls,
                         ),
+                        onDrag: (d) => _prompterPosition.value += d,
+                        onResize: (s) => _prompterSize.value = s,
+                        onTapPause: _isPlayingScript ? _stopScrolling : null,
                       );
                     },
-                    child: Container(
-                      width: 60.w,
-                      height: 80.h,
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(color: Colors.white24),
-                        image: const DecorationImage(
-                          image: AssetImage(
-                            'assets/images/video_placeholder.png',
-                          ),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.play_circle_fill,
-                          color: Colors.white,
-                          size: 30,
+                  ),
+                  if (_showProControls && !_isRecording)
+                    CameraSideControls(
+                      state: state,
+                      currentBrightness: _currentBrightness,
+                      currentZoom: _currentZoom,
+                      onBrightnessChanged: (v) =>
+                          setState(() => _currentBrightness = v),
+                      onZoomChanged: (v) => setState(() => _currentZoom = v),
+                    ),
+
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: SafeArea(
+                      child: ValueListenableBuilder<Duration>(
+                        valueListenable: _recordingDuration,
+                        builder: (context, duration, _) => Column(
+                          children: [
+                            ValueListenableBuilder<Duration>(
+                              valueListenable: _readingDuration,
+                              builder: (context, readDur, _) =>
+                                  TeleprompterTopBar(
+                                    state: state,
+                                    isRecording: _isRecording,
+                                    isReadingScript: _isPlayingScript && !_isRecording,
+                                    recordingDuration: duration,
+                                    readingDuration: readDur,
+                                    onBack: () => Navigator.pop(context),
+                                    onShowSettings: () => _showVideoSettings(state),
+                                    formatDuration: (d) =>
+                                        "${d.inMinutes.remainder(60).toString().padLeft(2, "0")}:${d.inSeconds.remainder(60).toString().padLeft(2, "0")}",
+                                  ),
+                            ),
+                            if (!premiumProvider.isPremium && !_isRecording)
+                              _buildRecordingCounter(restrictionProvider),
+                          ],
                         ),
                       ),
                     ),
                   ),
-                ),
-            ],
-          ),
-          onMediaCaptureEvent: (event) {
-            switch (event.status) {
-              case MediaCaptureStatus.capturing:
-                if (!_isRecording) {
-                  setState(() {
-                    _isRecording = true;
-                    _isPaused = false;
-                    _lastFoundIndex = 0;
-                    _recordingDuration.value = Duration.zero;
-                  });
-                  if (!(_ticker?.isActive ?? false)) _ticker?.start();
-                  if (!_isPlayingScript) _toggleScriptPlay();
-                  AnalyticsService().logRecordingStarted(
-                    scriptId: widget.script.key?.toString() ?? 'unknown',
-                    scriptTitle: widget.script.title,
-                    isVoiceSyncEnabled:
-                        _uiProvider.voiceSyncEnabled &&
-                        context.read<PremiumProvider>().isPremium,
-                  );
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: SafeArea(
+                      child: CameraBottomControls(
+                        state: state,
+                        isRecording: _isRecording,
+                        isPaused: _isPaused,
+                        showProControls: _showProControls,
+                        isEnabled: !restrictionProvider.isLimitReached,
+                        onTogglePro: () => setState(
+                          () => _showProControls = !_showProControls,
+                        ),
+                        onTogglePause: (s) => _togglePause(s),
+                        onStartRecording: () {
+                          if (restrictionProvider.isLimitReached) {
+                            return;
+                          }
+
+                          if (state is VideoCameraState) {
+                            if (_uiProvider.countdownDuration > 0) {
+                              setState(() => _isCountingDown = true);
+                            } else {
+                              state.when(
+                                onVideoMode: (videoState) =>
+                                    videoState.startRecording(),
+                              );
+                            }
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                  if (_isCountingDown)
+                    CountdownOverlay(
+                      duration: _uiProvider.countdownDuration,
+                      onFinished: () {
+                        setState(() => _isCountingDown = false);
+                        state.when(
+                          onVideoMode: (videoState) =>
+                              videoState.startRecording(),
+                        );
+                      },
+                    ),
+                  if (_lastVideoPath != null && !_isRecording)
+                    Positioned(
+                      bottom: 120.h,
+                      left: 24.w,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  FullScreenVideoPlayer(path: _lastVideoPath!),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 60.w,
+                          height: 80.h,
+                          decoration: BoxDecoration(
+                            color: Colors.black54,
+                            borderRadius: BorderRadius.circular(12.r),
+                            border: Border.all(color: Colors.white24),
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.play_circle_fill,
+                              color: Colors.white,
+                              size: 30,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (restrictionProvider.isLimitReached && !_adGateDismissed)
+                    AdGateOverlay(
+                      currentCredits: restrictionProvider.remainingRecordings,
+                      isLoading: restrictionProvider.isLoading,
+                      onWatchAd: () {
+                        setState(() => _adGateDismissed = false);
+                        _handleWatchAd(restrictionProvider);
+                      },
+                      onBuyPremium: _handleBuyPremium,
+                      onClose: () => setState(() => _adGateDismissed = true),
+                    ),
+                ],
+              ),
+              onMediaCaptureEvent: (event) {
+                switch (event.status) {
+                  case MediaCaptureStatus.capturing:
+                    if (_recordingStatus == RecordingStatus.idle) {
+                      setState(() {
+                        _recordingStatus = RecordingStatus.recording;
+                        _accumulatedDuration = Duration.zero;
+                        _startTimestamp = DateTime.now();
+                        _lastFoundIndex = 0;
+                        _recordingDuration.value = Duration.zero;
+                      });
+                      if (!(_ticker?.isActive ?? false)) _ticker?.start();
+                      if (!_isPlayingScript) _toggleScriptPlay();
+                      AnalyticsService().logRecordingStarted(
+                        scriptId: _activeScript.key?.toString() ?? 'unknown',
+                        scriptTitle: _activeScript.title,
+                        isVoiceSyncEnabled:
+                            _uiProvider.voiceSyncEnabled &&
+                            premiumProvider.isPremium,
+                      );
+                    }
+                    break;
+                  case MediaCaptureStatus.success:
+                    final path = event.captureRequest.path;
+                    Duration finalDuration = _recordingDuration.value;
+                    if (_recordingStatus == RecordingStatus.recording &&
+                        _startTimestamp != null) {
+                      finalDuration =
+                          _accumulatedDuration +
+                          DateTime.now().difference(_startTimestamp!);
+                    } else if (_recordingStatus == RecordingStatus.paused) {
+                      finalDuration = _accumulatedDuration;
+                    }
+
+                    setState(() {
+                      _recordingStatus = RecordingStatus.idle;
+                      _accumulatedDuration = Duration.zero;
+                      _startTimestamp = null;
+                      _lastVideoPath = path;
+                    });
+                    _stopScrolling();
+                    AnalyticsService().logRecordingStopped(
+                      scriptId: _activeScript.key?.toString() ?? 'unknown',
+                      durationSeconds: finalDuration.inSeconds,
+                    );
+                    if (path != null && mounted) {
+                      restrictionProvider.decrementRecordings();
+                      context.read<GalleryProvider>().addVideo(path);
+                      ToastService.show(AppLocalizations.of(context).saved);
+                    }
+                    break;
+                  case MediaCaptureStatus.failure:
+                    setState(() {
+                      _recordingStatus = RecordingStatus.idle;
+                      _accumulatedDuration = Duration.zero;
+                      _startTimestamp = null;
+                    });
+                    _stopScrolling();
+                    if (mounted) {
+                      ToastService.show(
+                        AppLocalizations.of(context).recordingFailed,
+                        isError: true,
+                      );
+                    }
+                    break;
                 }
-                break;
-              case MediaCaptureStatus.success:
-                final path = event.captureRequest.path;
-                setState(() {
-                  _isRecording = false;
-                  _isPaused = false;
-                  _lastVideoPath = path;
-                });
-                _stopScrolling();
-                AnalyticsService().logRecordingStopped(
-                  scriptId: widget.script.key?.toString() ?? 'unknown',
-                  durationSeconds: _recordingDuration.value.inSeconds,
-                );
-                if (path != null && mounted) {
-                  context.read<GalleryProvider>().addVideo(path);
-                  ToastService.show(AppLocalizations.of(context).saved);
-                }
-                break;
-              case MediaCaptureStatus.failure:
-                setState(() {
-                  _isRecording = false;
-                  _isPaused = false;
-                });
-                _stopScrolling();
-                if (mounted) {
-                  ToastService.show(
-                    AppLocalizations.of(context).recordingFailed,
-                    isError: true,
-                  );
-                }
-                break;
-            }
+              },
+            );
           },
         ),
       ),
     );
   }
 
+  Widget _buildRecordingCounter(RecordingRestrictionProvider provider) {
+    final count = provider.remainingRecordings;
+    final isWarning = count == 1;
+
+    return Container(
+      margin: EdgeInsets.only(top: 8.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: isWarning
+            ? AppColors.primary.withValues(alpha: 0.8)
+            : Colors.black.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(
+          color: isWarning ? AppColors.primary : Colors.white24,
+          width: 1,
+        ),
+      ),
+      child: Text(
+        AppLocalizations.of(context).freeRecordingsLeft(count),
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 12.sp,
+          fontWeight: isWarning ? FontWeight.w800 : FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  void _handleWatchAd(RecordingRestrictionProvider provider) {
+    final connectivity = context.read<ConnectivityService>();
+    provider.watchAd(
+      connectivity: connectivity,
+      onRewardGranted: () {
+        if (mounted) {
+          setState(() => _adGateDismissed = false);
+          ToastService.show(AppLocalizations.of(context).rewardGranted);
+        }
+      },
+      onFailure: (titleKey, messageKey) {
+        if (mounted) {
+          _showErrorDialog(titleKey, messageKey, provider);
+        }
+      },
+    );
+  }
+
+  void _showErrorDialog(
+    String titleKey,
+    String messageKey,
+    RecordingRestrictionProvider provider,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        final l10n = AppLocalizations.of(ctx);
+        final title = _resolveKey(l10n, titleKey);
+        final message = _resolveKey(l10n, messageKey);
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(l10n.cancel),
+            ),
+            if (titleKey != 'noInternetError')
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  _handleWatchAd(provider);
+                },
+                child: Text(l10n.retry),
+              ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _handleBuyPremium();
+              },
+              child: Text(l10n.goPremium),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _resolveKey(AppLocalizations l10n, String key) {
+    switch (key) {
+      case 'noInternetError':
+        return l10n.noInternetError;
+      case 'noInternetErrorDesc':
+        return l10n.noInternetErrorDesc;
+      case 'adNotAvailable':
+        return l10n.adNotAvailable;
+      case 'adNotAvailableDesc':
+        return l10n.adNotAvailableDesc;
+      case 'adNotCompleted':
+        return l10n.adNotCompleted;
+      case 'adNotCompletedDesc':
+        return l10n.adNotCompletedDesc;
+      case 'unexpectedError':
+        return l10n.unexpectedError;
+      case 'unexpectedErrorDesc':
+        return l10n.unexpectedErrorDesc;
+      default:
+        return key;
+    }
+  }
+
+  void _handleBuyPremium() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const PremiumScreen()),
+    );
+  }
+
   void _showVideoSettings(CameraState state) {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (_) => VideoSettingsSheet(
         state: state,
         videoQuality: _videoQuality,
         targetFps: _targetFps,
+        countdownDuration: _uiProvider.countdownDuration,
         onQualityChanged: (q) => setState(() => _videoQuality = q),
         onFpsChanged: (f) => setState(() => _targetFps = f),
+        onCountdownChanged: (d) => _uiProvider.setCountdownDuration(d),
       ),
     );
+  }
+
+  Future<void> _openOverlaySettingsSheet() async {
+    if (_isOverlaySettingsSheetOpen) {
+      Navigator.of(context, rootNavigator: true).maybePop();
+      return;
+    }
+
+    setState(() => _isOverlaySettingsSheetOpen = true);
+
+    await showModalBottomSheet<void>(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => PrompterSettingsSheet(
+        fontSize: _fontSize,
+        prompterOpacity: _prompterOpacity,
+        scrollSpeed: _scrollSpeed,
+        lineSpacing: _lineSpacing,
+      ),
+    );
+
+    if (mounted) {
+      setState(() => _isOverlaySettingsSheetOpen = false);
+    }
   }
 }

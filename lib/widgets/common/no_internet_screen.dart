@@ -63,15 +63,6 @@ class NoInternetScreen extends StatelessWidget {
                   onPressed: () {
                     context.read<ConnectivityService>().checkConnection();
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    minimumSize: Size(double.infinity, 56.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.r),
-                    ),
-                    elevation: 0,
-                  ),
                   child: Text(
                     l10n.retry,
                     style: GoogleFonts.manrope(

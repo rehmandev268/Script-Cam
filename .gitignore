@@ -21,6 +21,8 @@ migrate_working_dir/
 # VS Code (uncomment if you want to ignore VS Code settings)
 # .vscode/
 
+.venv/
+
 # Flutter / Dart / Pub
 **/doc/api/
 **/ios/Flutter/.last_build_id

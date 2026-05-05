@@ -9,14 +9,17 @@ class GDPRService {
 
   Future<bool> initializeConsent() async {
     try {
-      final debugSettings = ConsentDebugSettings(
-        debugGeography: DebugGeography.debugGeographyEea,
-        testIdentifiers: ["80C589E82E84A18078D863AD0C946288"],
-      );
-
-      final params = ConsentRequestParameters(
-        consentDebugSettings: debugSettings,
-      );
+      // Only apply debug geography overrides in debug builds — never in production.
+      // Shipping debugGeographyEea forces ALL users through EEA consent, blocking
+      // ads for anyone who dismisses the form (major impression killer).
+      final params = kDebugMode
+          ? ConsentRequestParameters(
+              consentDebugSettings: ConsentDebugSettings(
+                debugGeography: DebugGeography.debugGeographyEea,
+                testIdentifiers: ["80C589E82E84A18078D863AD0C946288"],
+              ),
+            )
+          : ConsentRequestParameters();
 
       final completer = Completer<bool>();
 

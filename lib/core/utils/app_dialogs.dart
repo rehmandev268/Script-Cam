@@ -1,5 +1,7 @@
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_application_6/generated/l10n/app_localizations.dart';
 import '../constants/app_constants.dart';
 import '../utils/responsive_config.dart';
 
@@ -8,6 +10,13 @@ class AppDialogs {
     required BuildContext context,
     required bool isDark,
   }) async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    final version = packageInfo.version;
+
+    if (!context.mounted) return;
+
+    final l10n = AppLocalizations.of(context);
+
     return showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -36,7 +45,7 @@ class AppDialogs {
             ),
             SizedBox(height: 16.h),
             Text(
-              "ScriptCam",
+              l10n.appInfoTitle,
               style: GoogleFonts.manrope(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
@@ -44,7 +53,7 @@ class AppDialogs {
             ),
             SizedBox(height: 4.h),
             Text(
-              "Version 1.0.3",
+              "${l10n.version} $version",
               style: TextStyle(
                 fontSize: 12.sp,
                 color: AppColors.textGrey,
@@ -53,7 +62,7 @@ class AppDialogs {
             ),
             SizedBox(height: 16.h),
             Text(
-              "The ultimate teleprompter and video recording tool for content creators. Create, read, and record seamlessly.",
+              l10n.appInfoDescription,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14.sp,
@@ -66,7 +75,7 @@ class AppDialogs {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text("Close"),
+                child: Text(l10n.close),
               ),
             ),
           ],
@@ -81,6 +90,7 @@ class AppDialogs {
     required String content,
     required bool isDark,
   }) async {
+    final l10n = AppLocalizations.of(context);
     return await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
@@ -105,7 +115,7 @@ class AppDialogs {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text("Cancel"),
+                child: Text(l10n.cancel),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(ctx, true),
@@ -114,7 +124,7 @@ class AppDialogs {
                   foregroundColor: Colors.white,
                   minimumSize: Size(100.w, 44.h),
                 ),
-                child: const Text("Delete"),
+                child: Text(l10n.delete),
               ),
             ],
           ),
