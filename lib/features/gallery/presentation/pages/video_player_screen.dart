@@ -99,11 +99,12 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
             )
           : null,
 
-      body: GestureDetector(
-        onTap: _toggleControls,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
+      body: SafeArea(
+        child: GestureDetector(
+          onTap: _toggleControls,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
             Center(
               child: _controller.value.isInitialized
                   ? AspectRatio(
@@ -191,7 +192,8 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
                 ),
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );

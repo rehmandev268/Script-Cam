@@ -918,4 +918,11 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get youAreNowPremium => 'अब आप प्रीमियम हैं!';
+
+  @override
+  String get stopRecordingTitle => 'रिकॉर्डिंग बंद करें?';
+
+  @override
+  String get stopRecordingMessage =>
+      'आपकी रिकॉर्डिंग रुकी हुई है। क्या आप वाकई बाहर जाना चाहते हैं? वर्तमान रिकॉर्डिंग हटा दी जाएगी।';
 }

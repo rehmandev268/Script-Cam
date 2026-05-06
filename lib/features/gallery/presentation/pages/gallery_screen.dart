@@ -131,25 +131,27 @@ class _GalleryScreenState extends State<GalleryScreen> {
               ]
             : null,
       ),
-      body: Consumer<GalleryProvider>(
-        builder: (context, provider, _) {
-          final videos = provider.videos;
-          if (videos.isEmpty) {
-            return EmptyGalleryState(
-              onGoToStudio: () => widget.onGoToStudio?.call(),
-            );
-          }
+      body: SafeArea(
+        top: false,
+        child: Consumer<GalleryProvider>(
+          builder: (context, provider, _) {
+            final videos = provider.videos;
+            if (videos.isEmpty) {
+              return EmptyGalleryState(
+                onGoToStudio: () => widget.onGoToStudio?.call(),
+              );
+            }
 
-          return ListView.builder(
-            padding: EdgeInsets.fromLTRB(
-              20.w,
-              12.h,
-              20.w,
-              widget.bottomPadding,
-            ),
-            physics: const BouncingScrollPhysics(),
-            itemCount: videos.length,
-            itemBuilder: (ctx, index) {
+            return ListView.builder(
+              padding: EdgeInsets.fromLTRB(
+                20.w,
+                12.h,
+                20.w,
+                widget.bottomPadding,
+              ),
+              physics: const BouncingScrollPhysics(),
+              itemCount: videos.length,
+              itemBuilder: (ctx, index) {
               final video = videos[index];
               final currentDate = DateUtils.dateOnly(video.date);
               final showHeader =
@@ -184,9 +186,10 @@ class _GalleryScreenState extends State<GalleryScreen> {
                         ),
                 ],
               );
-            },
-          );
-        },
+              },
+            );
+          },
+        ),
       ),
     );
   }

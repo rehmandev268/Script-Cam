@@ -28,67 +28,30 @@ class TeleprompterTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (isRecording) {
+      return const SizedBox.shrink();
+    }
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           TeleprompterGlassButton(icon: Icons.arrow_back, onTap: onBack),
-          if (isRecording)
-            _DurationDisplay(
-              duration: recordingDuration,
-              formatDuration: formatDuration,
-            )
-          else if (isReadingScript)
+          if (isReadingScript)
             _ReadTimerDisplay(
               duration: readingDuration,
               formatDuration: formatDuration,
             ),
           Row(
             children: [
-              if (!isRecording)
-                TeleprompterGlassButton(
-                  icon: Icons.settings,
-                  onTap: onShowSettings,
-                ),
+              TeleprompterGlassButton(
+                icon: Icons.settings,
+                onTap: onShowSettings,
+              ),
               SizedBox(width: 12.w),
               _FlashToggle(state: state),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DurationDisplay extends StatelessWidget {
-  final Duration duration;
-  final String Function(Duration) formatDuration;
-
-  const _DurationDisplay({
-    required this.duration,
-    required this.formatDuration,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-      decoration: BoxDecoration(
-        color: Colors.red.withValues(alpha: 0.8),
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.fiber_manual_record, color: Colors.white, size: 12.sp),
-          SizedBox(width: 8.w),
-          Text(
-            formatDuration(duration),
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 16.sp,
-            ),
           ),
         ],
       ),

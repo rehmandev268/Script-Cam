@@ -267,5 +267,13 @@
   "wifiOnly": "واي فاي فقط",
   "wordCountShort": "{count} كلمة",
   "words": "كلمات",
-  "youAreNowPremium": "أنت الآن بريميوم!"
+  "youAreNowPremium": "أنت الآن بريميوم!",
+  "stopRecordingTitle": "إيقاف التسجيل؟",
+  "@stopRecordingTitle": {
+    "description": "Dialog title when user tries to exit while recording is paused"
+  },
+  "stopRecordingMessage": "التسجيل متوقف مؤقتاً. هل أنت متأكد أنك تريد الخروج؟ سيتم حذف التسجيل الحالي.",
+  "@stopRecordingMessage": {
+    "description": "Dialog message when user tries to exit while recording is paused"
+  }
 }

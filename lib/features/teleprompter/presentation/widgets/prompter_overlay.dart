@@ -123,7 +123,9 @@ class PrompterOverlay extends StatelessWidget {
                                 showScriptControls: showScriptControls,
                                 onTapPause: onTapPause,
                               ),
-                              _ScrollProgressBar(scrollProgress: scrollProgress),
+                              _ScrollProgressBar(
+                                scrollProgress: scrollProgress,
+                              ),
                               if (showScriptControls)
                                 _PrompterControlBar(
                                   isPlaying: isPlayingScript,
@@ -180,9 +182,7 @@ class _ScrollProgressBar extends StatelessWidget {
                   value: progress,
                   minHeight: 3.h,
                   backgroundColor: Colors.white10,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    AppColors.primary,
-                  ),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
                 ),
               );
             },
@@ -192,7 +192,6 @@ class _ScrollProgressBar extends StatelessWidget {
     );
   }
 }
-
 
 class _PrompterTextList extends StatefulWidget {
   final String scriptContent;
@@ -282,9 +281,7 @@ class _PrompterTextListState extends State<_PrompterTextList> {
       return;
     }
 
-    final content = widget.scriptContent.isEmpty
-        ? ' '
-        : widget.scriptContent;
+    final content = widget.scriptContent.isEmpty ? ' ' : widget.scriptContent;
     final fs = widget.fontSize.value;
     final ls = widget.lineSpacing.value;
     final horizontalPadding = 32.0.w;
@@ -295,11 +292,7 @@ class _PrompterTextListState extends State<_PrompterTextList> {
     final painter = TextPainter(
       text: TextSpan(
         text: content,
-        style: TextStyle(
-          fontSize: fs,
-          fontWeight: FontWeight.w700,
-          height: ls,
-        ),
+        style: TextStyle(fontSize: fs, fontWeight: FontWeight.w700, height: ls),
       ),
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,
@@ -316,7 +309,10 @@ class _PrompterTextListState extends State<_PrompterTextList> {
     _cueCards = _buildCueCards(
       widget.scriptContent.isEmpty ? '...' : widget.scriptContent,
     );
-    final clamped = _cueIndex.clamp(0, _cueCards.isEmpty ? 0 : _cueCards.length - 1);
+    final clamped = _cueIndex.clamp(
+      0,
+      _cueCards.isEmpty ? 0 : _cueCards.length - 1,
+    );
     if (_cueIndex != clamped) _cueIndex = clamped;
     final card = _cueCards.isEmpty ? '' : _cueCards[_cueIndex];
     final total = _cueCards.length;
@@ -330,7 +326,13 @@ class _PrompterTextListState extends State<_PrompterTextList> {
             color: Colors.white,
             fontWeight: FontWeight.w700,
             height: 1.4,
-            shadows: [Shadow(color: Colors.black, offset: Offset(1.w, 1.h), blurRadius: 4.r)],
+            shadows: [
+              Shadow(
+                color: Colors.black,
+                offset: Offset(1.w, 1.h),
+                blurRadius: 4.r,
+              ),
+            ],
           ),
           ui.prompterFontFamily,
         );
@@ -350,7 +352,11 @@ class _PrompterTextListState extends State<_PrompterTextList> {
                 child: Center(
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 24.w),
-                    child: Text(card, textAlign: TextAlign.center, style: style),
+                    child: Text(
+                      card,
+                      textAlign: TextAlign.center,
+                      style: style,
+                    ),
                   ),
                 ),
               ),
@@ -361,7 +367,11 @@ class _PrompterTextListState extends State<_PrompterTextList> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton(
-                    icon: Icon(Icons.arrow_back_ios_rounded, color: _cueIndex > 0 ? Colors.white70 : Colors.white24, size: 18.sp),
+                    icon: Icon(
+                      Icons.arrow_back_ios_rounded,
+                      color: _cueIndex > 0 ? Colors.white70 : Colors.white24,
+                      size: 18.sp,
+                    ),
                     onPressed: _cueIndex > 0 ? _prevCue : null,
                   ),
                   Text(
@@ -369,7 +379,13 @@ class _PrompterTextListState extends State<_PrompterTextList> {
                     style: TextStyle(color: Colors.white54, fontSize: 12.sp),
                   ),
                   IconButton(
-                    icon: Icon(Icons.arrow_forward_ios_rounded, color: _cueIndex < total - 1 ? Colors.white70 : Colors.white24, size: 18.sp),
+                    icon: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: _cueIndex < total - 1
+                          ? Colors.white70
+                          : Colors.white24,
+                      size: 18.sp,
+                    ),
                     onPressed: _cueIndex < total - 1 ? _nextCue : null,
                   ),
                 ],
@@ -387,7 +403,9 @@ class _PrompterTextListState extends State<_PrompterTextList> {
       bottom: widget.showScriptControls ? 64.h : 0,
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
-        onTapDown: widget.onTapPause != null ? (_) => widget.onTapPause!() : null,
+        onTapDown: widget.onTapPause != null
+            ? (_) => widget.onTapPause!()
+            : null,
         onScaleStart: (d) {
           _pinchStartFontSize = widget.fontSize.value;
         },
@@ -401,8 +419,8 @@ class _PrompterTextListState extends State<_PrompterTextList> {
             final dy = d.focalPointDelta.dy;
             if (dy.abs() > 1.0) {
               final delta = -dy * 0.4;
-              widget.scrollSpeed.value =
-                  (widget.scrollSpeed.value + delta).clamp(10.0, 150.0);
+              widget.scrollSpeed.value = (widget.scrollSpeed.value + delta)
+                  .clamp(10.0, 150.0);
             }
           }
         },
@@ -411,129 +429,165 @@ class _PrompterTextListState extends State<_PrompterTextList> {
             final colWidth = uiCol.prompterColumnWidth; // 0.0–1.0
             // extra horizontal padding: full=0%, medium=15%, narrow=30% of container
             final extraPct = (1.0 - colWidth) * 0.30;
-            final hPad = 16.w + (widget.containerHeight > 0
-                ? widget.containerHeight * extraPct
-                : 0.0);
+            final hPad =
+                16.w +
+                (widget.containerHeight > 0
+                    ? widget.containerHeight * extraPct
+                    : 0.0);
             return Padding(
-          padding: EdgeInsets.fromLTRB(hPad, 24.h, hPad, 0),
-          child: ValueListenableBuilder<int>(
-          valueListenable: widget.textOrientation,
-          builder: (context, orientation, _) {
-            return Consumer<UIProvider>(
-              builder: (context, ui, _) {
-                if (ui.cueCardModeEnabled) {
-                  return _buildCueCardView(context, ui);
-                }
-                return Transform(
-                  alignment: Alignment.center,
-                  transform: Matrix4.diagonal3Values(
-                    ui.mirrorTextEnabled ? -1.0 : 1.0,
-                    1.0,
-                    1.0,
-                  ),
-                  child: RotatedBox(
-                    quarterTurns: orientation,
-                    child: ShaderMask(
-                      shaderCallback: (r) => const LinearGradient(
-                        colors: [
-                          Colors.transparent,
-                          Colors.white,
-                          Colors.white,
-                          Colors.transparent,
-                        ],
-                        stops: [0.0, 0.1, 0.9, 1.0],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      ).createShader(r),
-                      blendMode: BlendMode.dstIn,
-                      child: SingleChildScrollView(
-                        controller: widget.scrollController,
-                        padding: EdgeInsets.symmetric(
-                          vertical: widget.containerHeight / 2,
+              padding: EdgeInsets.fromLTRB(hPad, 24.h, hPad, 0),
+              child: ValueListenableBuilder<int>(
+                valueListenable: widget.textOrientation,
+                builder: (context, orientation, _) {
+                  return Consumer<UIProvider>(
+                    builder: (context, ui, _) {
+                      if (ui.cueCardModeEnabled) {
+                        return _buildCueCardView(context, ui);
+                      }
+                      return Transform(
+                        alignment: Alignment.center,
+                        transform: Matrix4.diagonal3Values(
+                          ui.mirrorTextEnabled ? -1.0 : 1.0,
+                          1.0,
+                          1.0,
                         ),
-                        child: ValueListenableBuilder<double>(
-                          valueListenable: widget.fontSize,
-                          builder: (context, fs, _) {
-                            return ValueListenableBuilder<double>(
-                              valueListenable: widget.lineSpacing,
-                              builder: (context, ls, _) {
-                                final rawText = widget.scriptContent.isEmpty
-                                    ? AppLocalizations.of(context).scriptContentPlaceholder
-                                    : widget.scriptContent;
+                        child: RotatedBox(
+                          quarterTurns: orientation,
+                          child: ShaderMask(
+                            shaderCallback: (r) => const LinearGradient(
+                              colors: [
+                                Colors.transparent,
+                                Colors.white,
+                                Colors.white,
+                                Colors.transparent,
+                              ],
+                              stops: [0.0, 0.1, 0.9, 1.0],
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                            ).createShader(r),
+                            blendMode: BlendMode.dstIn,
+                            child: SingleChildScrollView(
+                              controller: widget.scrollController,
+                              padding: EdgeInsets.symmetric(
+                                vertical: widget.containerHeight / 2,
+                              ),
+                              child: ValueListenableBuilder<double>(
+                                valueListenable: widget.fontSize,
+                                builder: (context, fs, _) {
+                                  return ValueListenableBuilder<double>(
+                                    valueListenable: widget.lineSpacing,
+                                    builder: (context, ls, _) {
+                                      final rawText =
+                                          widget.scriptContent.isEmpty
+                                          ? AppLocalizations.of(
+                                              context,
+                                            ).scriptContentPlaceholder
+                                          : widget.scriptContent;
 
-                                final textCol = Color(ui.prompterTextColor);
-                                final baseStyle = _applyFontFamily(
-                                  TextStyle(
-                                    fontSize: fs,
-                                    color: textCol,
-                                    fontWeight: FontWeight.w700,
-                                    height: ls,
-                                    shadows: [
-                                      Shadow(
-                                        color: Colors.black.withValues(alpha: 0.6),
-                                        offset: Offset(1.w, 1.h),
-                                        blurRadius: 4.r,
-                                      ),
-                                    ],
-                                  ),
-                                  ui.prompterFontFamily,
-                                );
+                                      final textCol = Color(
+                                        ui.prompterTextColor,
+                                      );
+                                      final baseStyle = _applyFontFamily(
+                                        TextStyle(
+                                          fontSize: fs,
+                                          color: textCol,
+                                          fontWeight: FontWeight.w700,
+                                          height: ls,
+                                          shadows: [
+                                            Shadow(
+                                              color: Colors.black.withValues(
+                                                alpha: 0.6,
+                                              ),
+                                              offset: Offset(1.w, 1.h),
+                                              blurRadius: 4.r,
+                                            ),
+                                          ],
+                                        ),
+                                        ui.prompterFontFamily,
+                                      );
 
-                                if (!ui.focusLineEnabled) {
-                                  return Text(
-                                    rawText,
-                                    textAlign: TextAlign.center,
-                                    style: baseStyle,
+                                      if (!ui.focusLineEnabled) {
+                                        return Text(
+                                          rawText,
+                                          textAlign: TextAlign.center,
+                                          style: baseStyle,
+                                        );
+                                      }
+
+                                      // Find the line boundaries around focusCharIndex.
+                                      // Walk back to nearest newline (or start) and forward
+                                      // to next newline (or end) to get the focused line range.
+                                      final clampedIdx = _focusCharIndex.clamp(
+                                        0,
+                                        rawText.length,
+                                      );
+                                      int lineStart = rawText.lastIndexOf(
+                                        '\n',
+                                        clampedIdx > 0 ? clampedIdx - 1 : 0,
+                                      );
+                                      lineStart = lineStart < 0
+                                          ? 0
+                                          : lineStart + 1;
+                                      int lineEnd = rawText.indexOf(
+                                        '\n',
+                                        clampedIdx,
+                                      );
+                                      if (lineEnd < 0) lineEnd = rawText.length;
+
+                                      final before = rawText.substring(
+                                        0,
+                                        lineStart,
+                                      );
+                                      final focused = rawText.substring(
+                                        lineStart,
+                                        lineEnd,
+                                      );
+                                      final after = rawText.substring(lineEnd);
+
+                                      final dimStyle = baseStyle.copyWith(
+                                        color: textCol.withValues(alpha: 0.35),
+                                        shadows: [],
+                                      );
+                                      final focusStyle = baseStyle.copyWith(
+                                        color: textCol,
+                                        backgroundColor: AppColors.primary
+                                            .withValues(alpha: 0.28),
+                                      );
+
+                                      return RichText(
+                                        textAlign: TextAlign.center,
+                                        text: TextSpan(
+                                          children: [
+                                            if (before.isNotEmpty)
+                                              TextSpan(
+                                                text: before,
+                                                style: dimStyle,
+                                              ),
+                                            TextSpan(
+                                              text: focused,
+                                              style: focusStyle,
+                                            ),
+                                            if (after.isNotEmpty)
+                                              TextSpan(
+                                                text: after,
+                                                style: dimStyle,
+                                              ),
+                                          ],
+                                        ),
+                                      );
+                                    },
                                   );
-                                }
-
-                                // Find the line boundaries around focusCharIndex.
-                                // Walk back to nearest newline (or start) and forward
-                                // to next newline (or end) to get the focused line range.
-                                final clampedIdx = _focusCharIndex.clamp(0, rawText.length);
-                                int lineStart = rawText.lastIndexOf('\n', clampedIdx > 0 ? clampedIdx - 1 : 0);
-                                lineStart = lineStart < 0 ? 0 : lineStart + 1;
-                                int lineEnd = rawText.indexOf('\n', clampedIdx);
-                                if (lineEnd < 0) lineEnd = rawText.length;
-
-                                final before = rawText.substring(0, lineStart);
-                                final focused = rawText.substring(lineStart, lineEnd);
-                                final after = rawText.substring(lineEnd);
-
-                                final dimStyle = baseStyle.copyWith(
-                                  color: textCol.withValues(alpha: 0.35),
-                                  shadows: [],
-                                );
-                                final focusStyle = baseStyle.copyWith(
-                                  color: textCol,
-                                  backgroundColor: AppColors.primary.withValues(alpha: 0.28),
-                                );
-
-                                return RichText(
-                                  textAlign: TextAlign.center,
-                                  text: TextSpan(
-                                    children: [
-                                      if (before.isNotEmpty)
-                                        TextSpan(text: before, style: dimStyle),
-                                      TextSpan(text: focused, style: focusStyle),
-                                      if (after.isNotEmpty)
-                                        TextSpan(text: after, style: dimStyle),
-                                    ],
-                                  ),
-                                );
-                              },
-                            );
-                          },
+                                },
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                );
-              },
+                      );
+                    },
+                  );
+                },
+              ),
             );
-          },
-        ),
-      );
           },
         ),
       ),
@@ -570,7 +624,9 @@ class PrompterSettingsSheet extends StatelessWidget {
       decoration: BoxDecoration(
         color: sheetBg,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-        border: Border(top: BorderSide(color: borderColor, width: 1.w)),
+        border: Border(
+          top: BorderSide(color: borderColor, width: 1.w),
+        ),
       ),
       child: SafeArea(
         top: false,
@@ -684,7 +740,9 @@ class PrompterSettingsSheet extends StatelessWidget {
                               }
                             },
                             activeThumbColor: AppColors.primary,
-                            activeTrackColor: AppColors.primary.withValues(alpha: 0.3),
+                            activeTrackColor: AppColors.primary.withValues(
+                              alpha: 0.3,
+                            ),
                           ),
                         ),
                       ),
@@ -696,7 +754,9 @@ class PrompterSettingsSheet extends StatelessWidget {
                           value: uiProvider.mirrorTextEnabled,
                           onChanged: (v) => uiProvider.toggleMirrorText(v),
                           activeThumbColor: AppColors.primary,
-                          activeTrackColor: AppColors.primary.withValues(alpha: 0.3),
+                          activeTrackColor: AppColors.primary.withValues(
+                            alpha: 0.3,
+                          ),
                         ),
                       ),
                       _toggleRow(
@@ -707,7 +767,9 @@ class PrompterSettingsSheet extends StatelessWidget {
                           value: uiProvider.focusLineEnabled,
                           onChanged: (v) => uiProvider.toggleFocusLine(v),
                           activeThumbColor: AppColors.primary,
-                          activeTrackColor: AppColors.primary.withValues(alpha: 0.3),
+                          activeTrackColor: AppColors.primary.withValues(
+                            alpha: 0.3,
+                          ),
                         ),
                       ),
                       _toggleRow(
@@ -716,7 +778,9 @@ class PrompterSettingsSheet extends StatelessWidget {
                         label: l10n.cueCards,
                         trailing: Consumer<PremiumProvider>(
                           builder: (context, premium, _) => Switch(
-                            value: uiProvider.cueCardModeEnabled && premium.isPremium,
+                            value:
+                                uiProvider.cueCardModeEnabled &&
+                                premium.isPremium,
                             onChanged: (v) {
                               if (premium.isPremium) {
                                 uiProvider.toggleCueCardMode(v);
@@ -731,15 +795,20 @@ class PrompterSettingsSheet extends StatelessWidget {
                               }
                             },
                             activeThumbColor: AppColors.primary,
-                            activeTrackColor: AppColors.primary.withValues(alpha: 0.3),
+                            activeTrackColor: AppColors.primary.withValues(
+                              alpha: 0.3,
+                            ),
                           ),
                         ),
                       ),
                       SizedBox(height: sectionSpacing.h),
                       Row(
                         children: [
-                          Icon(Icons.font_download_outlined,
-                              color: AppColors.primary, size: 18.sp),
+                          Icon(
+                            Icons.font_download_outlined,
+                            color: AppColors.primary,
+                            size: 18.sp,
+                          ),
                           SizedBox(width: 10.w),
                           Text(
                             l10n.font,
@@ -764,22 +833,27 @@ class PrompterSettingsSheet extends StatelessWidget {
                                   final selected =
                                       uiProvider.prompterFontFamily == family;
                                   return GestureDetector(
-                                    onTap: () =>
-                                        uiProvider.setPrompterFontFamily(family),
+                                    onTap: () => uiProvider
+                                        .setPrompterFontFamily(family),
                                     child: AnimatedContainer(
-                                      duration:
-                                          const Duration(milliseconds: 180),
+                                      duration: const Duration(
+                                        milliseconds: 180,
+                                      ),
                                       margin: EdgeInsets.only(right: 6.w),
                                       padding: EdgeInsets.symmetric(
-                                          horizontal: 10.w),
+                                        horizontal: 10.w,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: selected
                                             ? AppColors.primary
                                             : (isDark
-                                                ? Colors.white10
-                                                : Colors.black.withValues(alpha: 0.06)),
-                                        borderRadius:
-                                            BorderRadius.circular(8.r),
+                                                  ? Colors.white10
+                                                  : Colors.black.withValues(
+                                                      alpha: 0.06,
+                                                    )),
+                                        borderRadius: BorderRadius.circular(
+                                          8.r,
+                                        ),
                                       ),
                                       child: Center(
                                         child: Text(
@@ -790,8 +864,8 @@ class PrompterSettingsSheet extends StatelessWidget {
                                             color: selected
                                                 ? Colors.white
                                                 : (isDark
-                                                    ? Colors.white60
-                                                    : AppColors.textGrey),
+                                                      ? Colors.white60
+                                                      : AppColors.textGrey),
                                           ),
                                         ),
                                       ),
@@ -814,7 +888,9 @@ class PrompterSettingsSheet extends StatelessWidget {
                           value: uiProvider.prompterLoopEnabled,
                           onChanged: uiProvider.togglePrompterLoop,
                           activeThumbColor: AppColors.primary,
-                          activeTrackColor: AppColors.primary.withValues(alpha: 0.3),
+                          activeTrackColor: AppColors.primary.withValues(
+                            alpha: 0.3,
+                          ),
                         ),
                       ),
                       _toggleRow(
@@ -825,7 +901,9 @@ class PrompterSettingsSheet extends StatelessWidget {
                           value: uiProvider.prompterSoftStartEnabled,
                           onChanged: uiProvider.togglePrompterSoftStart,
                           activeThumbColor: AppColors.primary,
-                          activeTrackColor: AppColors.primary.withValues(alpha: 0.3),
+                          activeTrackColor: AppColors.primary.withValues(
+                            alpha: 0.3,
+                          ),
                         ),
                       ),
                       SizedBox(height: sectionSpacing.h),
@@ -1021,8 +1099,9 @@ class _PrompterControlBar extends StatelessWidget {
                 IconButton(
                   icon: Icon(
                     Icons.edit_note_rounded,
-                    color:
-                        onEditScript == null ? Colors.white24 : Colors.white70,
+                    color: onEditScript == null
+                        ? Colors.white24
+                        : Colors.white70,
                     size: 22.sp,
                   ),
                   onPressed: onEditScript,
@@ -1126,13 +1205,16 @@ class _SpeedPresetsRow extends StatelessWidget {
                   },
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 180),
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 4.h,
+                    ),
                     decoration: BoxDecoration(
                       color: selected
                           ? AppColors.primary
                           : (isDark
-                              ? Colors.white10
-                              : Colors.black.withValues(alpha: 0.06)),
+                                ? Colors.white10
+                                : Colors.black.withValues(alpha: 0.06)),
                       borderRadius: BorderRadius.circular(8.r),
                     ),
                     child: Text(
@@ -1184,58 +1266,66 @@ class _ColorAndWidthRow extends StatelessWidget {
     required int selectedColor,
     required void Function(int) onSelect,
   }) {
-    return Builder(builder: (context) {
-      final isDark = Theme.of(context).brightness == Brightness.dark;
-      return Row(
-      children: [
-        Icon(icon, color: AppColors.primary, size: 18.sp),
-        SizedBox(width: 8.w),
-        Text(
-          rowLabel,
-          style: TextStyle(
-            color: isDark ? Colors.white : AppColors.textBlack,
-            fontSize: 13.sp,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        SizedBox(width: 10.w),
-        Expanded(
-          child: Row(
-            children: presets.map((p) {
-              final selected = selectedColor == p.color;
-              return GestureDetector(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  onSelect(p.color);
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  width: 28.w,
-                  height: 28.w,
-                  margin: EdgeInsets.only(right: 8.w),
-                  decoration: BoxDecoration(
-                    color: Color(p.color),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: selected
-                          ? AppColors.primary
-                          : (isDark
-                              ? Colors.white24
-                              : AppColors.borderLight),
-                      width: selected ? 2.5 : 1,
+    return Builder(
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Row(
+          children: [
+            Icon(icon, color: AppColors.primary, size: 18.sp),
+            SizedBox(width: 8.w),
+            Text(
+              rowLabel,
+              style: TextStyle(
+                color: isDark ? Colors.white : AppColors.textBlack,
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Row(
+                children: presets.map((p) {
+                  final selected = selectedColor == p.color;
+                  return GestureDetector(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      onSelect(p.color);
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      width: 28.w,
+                      height: 28.w,
+                      margin: EdgeInsets.only(right: 8.w),
+                      decoration: BoxDecoration(
+                        color: Color(p.color),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: selected
+                              ? AppColors.primary
+                              : (isDark
+                                    ? Colors.white24
+                                    : AppColors.borderLight),
+                          width: selected ? 2.5 : 1,
+                        ),
+                      ),
+                      child: selected
+                          ? Icon(
+                              Icons.check,
+                              color: p.color == 0xFF000000
+                                  ? Colors.white
+                                  : Colors.black,
+                              size: 14.sp,
+                            )
+                          : null,
                     ),
-                  ),
-                  child: selected
-                      ? Icon(Icons.check, color: p.color == 0xFF000000 ? Colors.white : Colors.black, size: 14.sp)
-                      : null,
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-      ],
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        );
+      },
     );
-    });
   }
 
   @override
@@ -1261,7 +1351,11 @@ class _ColorAndWidthRow extends StatelessWidget {
         SizedBox(height: 8.h),
         Row(
           children: [
-            Icon(Icons.width_normal_rounded, color: AppColors.primary, size: 18.sp),
+            Icon(
+              Icons.width_normal_rounded,
+              color: AppColors.primary,
+              size: 18.sp,
+            ),
             SizedBox(width: 8.w),
             Text(
               AppLocalizations.of(context).width,
@@ -1275,41 +1369,58 @@ class _ColorAndWidthRow extends StatelessWidget {
             Expanded(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  (label: AppLocalizations.of(context).widthNarrow, value: 0.0),
-                  (label: AppLocalizations.of(context).widthMedium, value: 0.5),
-                  (label: AppLocalizations.of(context).widthFull, value: 1.0),
-                ].map((p) {
-                  final selected = (uiProvider.prompterColumnWidth - p.value).abs() < 0.1;
-                  return GestureDetector(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      uiProvider.setPrompterColumnWidth(p.value);
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                      decoration: BoxDecoration(
-                        color: selected
-                            ? AppColors.primary
-                            : (isDark
-                                ? Colors.white10
-                                : Colors.black.withValues(alpha: 0.06)),
-                        borderRadius: BorderRadius.circular(8.r),
+                children:
+                    [
+                      (
+                        label: AppLocalizations.of(context).widthNarrow,
+                        value: 0.0,
                       ),
-                      child: Text(
-                        p.label,
-                        style: TextStyle(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w700,
-                          color: selected
-                              ? Colors.white
-                              : (isDark ? Colors.white60 : AppColors.textGrey),
+                      (
+                        label: AppLocalizations.of(context).widthMedium,
+                        value: 0.5,
+                      ),
+                      (
+                        label: AppLocalizations.of(context).widthFull,
+                        value: 1.0,
+                      ),
+                    ].map((p) {
+                      final selected =
+                          (uiProvider.prompterColumnWidth - p.value).abs() <
+                          0.1;
+                      return GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          uiProvider.setPrompterColumnWidth(p.value);
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 10.w,
+                            vertical: 4.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: selected
+                                ? AppColors.primary
+                                : (isDark
+                                      ? Colors.white10
+                                      : Colors.black.withValues(alpha: 0.06)),
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                          child: Text(
+                            p.label,
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w700,
+                              color: selected
+                                  ? Colors.white
+                                  : (isDark
+                                        ? Colors.white60
+                                        : AppColors.textGrey),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  );
-                }).toList(),
+                      );
+                    }).toList(),
               ),
             ),
           ],

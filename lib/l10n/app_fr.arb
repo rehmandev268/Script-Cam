@@ -267,5 +267,13 @@
   "wifiOnly": "Wi-Fi uniquement",
   "wordCountShort": "{count} mots",
   "words": "mots",
-  "youAreNowPremium": "Vous êtes désormais Premium !"
+  "youAreNowPremium": "Vous êtes désormais Premium !",
+  "stopRecordingTitle": "Arrêter l’enregistrement ?",
+  "@stopRecordingTitle": {
+    "description": "Dialog title when user tries to exit while recording is paused"
+  },
+  "stopRecordingMessage": "Votre enregistrement est en pause. Voulez-vous vraiment quitter ? L’enregistrement actuel sera supprimé.",
+  "@stopRecordingMessage": {
+    "description": "Dialog message when user tries to exit while recording is paused"
+  }
 }

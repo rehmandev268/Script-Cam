@@ -1159,5 +1159,13 @@
   "youAreNowPremium": "You're now Premium!",
   "@youAreNowPremium": {
     "description": "Purchase success headline"
+  },
+  "stopRecordingTitle": "Stop Recording?",
+  "@stopRecordingTitle": {
+    "description": "Dialog title when user tries to exit while recording is paused"
+  },
+  "stopRecordingMessage": "Your recording is paused. Are you sure you want to exit? The current recording will be discarded.",
+  "@stopRecordingMessage": {
+    "description": "Dialog message when user tries to exit while recording is paused"
   }
 }

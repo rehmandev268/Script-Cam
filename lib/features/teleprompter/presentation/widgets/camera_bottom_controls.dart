@@ -14,6 +14,7 @@ class CameraBottomControls extends StatelessWidget {
   final Function(VideoRecordingCameraState) onTogglePause;
   final VoidCallback onStartRecording;
   final bool isEnabled;
+  final ValueNotifier<Duration>? recordingDuration;
 
   const CameraBottomControls({
     super.key,
@@ -25,6 +26,7 @@ class CameraBottomControls extends StatelessWidget {
     required this.onTogglePause,
     required this.onStartRecording,
     this.isEnabled = true,
+    this.recordingDuration,
   });
 
   @override
@@ -44,6 +46,7 @@ class CameraBottomControls extends StatelessWidget {
             recordingState: recordingState,
             isPaused: isPaused,
             onTogglePause: onTogglePause,
+            recordingDuration: recordingDuration,
           ),
           onPreparingCamera: (_) => const SizedBox.shrink(),
           onPhotoMode: (_) => const SizedBox.shrink(),
@@ -116,11 +119,13 @@ class _RecordingControls extends StatelessWidget {
   final VideoRecordingCameraState recordingState;
   final bool isPaused;
   final Function(VideoRecordingCameraState) onTogglePause;
+  final ValueNotifier<Duration>? recordingDuration;
 
   const _RecordingControls({
     required this.recordingState,
     required this.isPaused,
     required this.onTogglePause,
+    this.recordingDuration,
   });
 
   @override
@@ -156,7 +161,38 @@ class _RecordingControls extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(width: 50.w, height: 50.h),
+        if (recordingDuration != null)
+          ValueListenableBuilder<Duration>(
+            valueListenable: recordingDuration!,
+            builder: (context, duration, _) => Container(
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 7.h),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.82),
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.fiber_manual_record,
+                    color: Colors.white,
+                    size: 11.sp,
+                  ),
+                  SizedBox(width: 6.w),
+                  Text(
+                    "${duration.inMinutes.remainder(60).toString().padLeft(2, '0')}:${duration.inSeconds.remainder(60).toString().padLeft(2, '0')}",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14.sp,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          SizedBox(width: 50.w),
       ],
     );
   }

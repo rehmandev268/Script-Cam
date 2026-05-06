@@ -910,4 +910,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get youAreNowPremium => 'أنت الآن بريميوم!';
+
+  @override
+  String get stopRecordingTitle => 'إيقاف التسجيل؟';
+
+  @override
+  String get stopRecordingMessage =>
+      'التسجيل متوقف مؤقتاً. هل أنت متأكد أنك تريد الخروج؟ سيتم حذف التسجيل الحالي.';
 }

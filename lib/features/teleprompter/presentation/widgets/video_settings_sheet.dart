@@ -27,16 +27,18 @@ class VideoSettingsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(24.w),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1C1C1E),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return SafeArea(
+      top: false,
+      child: Container(
+        padding: EdgeInsets.all(24.w),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1C1C1E),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           Text(
             AppLocalizations.of(context).videoSettings,
             style: TextStyle(
@@ -170,8 +172,9 @@ class VideoSettingsSheet extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: 24.h),
-        ],
+            SizedBox(height: 24.h),
+          ],
+        ),
       ),
     );
   }

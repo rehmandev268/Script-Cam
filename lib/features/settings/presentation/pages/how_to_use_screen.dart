@@ -24,9 +24,11 @@ class _HowToUseScreenState extends State<HowToUseScreen> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AdaptiveAppBar(title: l10n.howToUseTitle),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(24.r),
-        child: Column(
+      body: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(24.r),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             StepCard(
@@ -78,6 +80,7 @@ class _HowToUseScreenState extends State<HowToUseScreen> {
             ),
             SizedBox(height: 40.h),
           ],
+          ),
         ),
       ),
     );

@@ -889,4 +889,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get youAreNowPremium => 'これであなたもプレミアムになりました!';
+
+  @override
+  String get stopRecordingTitle => '録画を停止しますか？';
+
+  @override
+  String get stopRecordingMessage => '録画が一時停止中です。本当に終了しますか？現在の録画は破棄されます。';
 }

@@ -18,11 +18,13 @@ class PremiumDetailsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBg : AppColors.lightBg,
       appBar: AdaptiveAppBar(title: l10n.premiumActive),
-      body: Consumer<PremiumProvider>(
-        builder: (context, provider, _) {
-          return Padding(
-            padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 20.h),
-            child: Column(
+      body: SafeArea(
+        top: false,
+        child: Consumer<PremiumProvider>(
+          builder: (context, provider, _) {
+            return Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 20.h),
+              child: Column(
               children: [
                 Container(
                   width: double.infinity,
@@ -92,9 +94,10 @@ class PremiumDetailsScreen extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-          );
-        },
+              ),
+            );
+          },
+        ),
       ),
     );
   }

@@ -267,5 +267,13 @@
   "wifiOnly": "Wi‑Fiのみ",
   "wordCountShort": "{count} 語",
   "words": "文字",
-  "youAreNowPremium": "これであなたもプレミアムになりました!"
+  "youAreNowPremium": "これであなたもプレミアムになりました!",
+  "stopRecordingTitle": "録画を停止しますか？",
+  "@stopRecordingTitle": {
+    "description": "Dialog title when user tries to exit while recording is paused"
+  },
+  "stopRecordingMessage": "録画が一時停止中です。本当に終了しますか？現在の録画は破棄されます。",
+  "@stopRecordingMessage": {
+    "description": "Dialog message when user tries to exit while recording is paused"
+  }
 }

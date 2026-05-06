@@ -21,9 +21,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
   bool _selectedLifetime = false;
 
   String _weeklySubtitle(PremiumProvider provider, AppLocalizations l10n) {
-    final weeklyPrice = provider.weeklyProduct?.price;
-    if (weeklyPrice != null && weeklyPrice.isNotEmpty) {
-      return l10n.weeklyTrialThenPrice(weeklyPrice);
+    final recurringPrice = provider.weeklyRecurringPrice;
+    if (recurringPrice != null && recurringPrice.isNotEmpty) {
+      return l10n.weeklyTrialThenPrice(recurringPrice);
     }
     return l10n.weeklyTrialStorePrice;
   }
@@ -85,9 +85,11 @@ class _PremiumScreenState extends State<PremiumScreen> {
               icon: const Icon(Icons.close_rounded),
             ),
           ),
-          body: Padding(
-            padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 20.h),
-            child: Column(
+          body: SafeArea(
+            top: false,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 20.h),
+              child: Column(
               children: [
                 Container(
                   width: double.infinity,
@@ -145,7 +147,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                         _planTile(
                           title: l10n.weeklyPlan,
                           subtitle: _weeklySubtitle(provider, l10n),
-                          price: provider.weeklyProduct?.price ?? '',
+                          price: provider.weeklyRecurringPrice ?? '',
                           isSelected: !_selectedLifetime,
                           onTap: () => setState(() => _selectedLifetime = false),
                         ),
@@ -232,6 +234,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                     ),
                   ),
               ],
+              ),
             ),
           ),
         );

@@ -885,4 +885,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get youAreNowPremium => '您现在是高级会员了！';
+
+  @override
+  String get stopRecordingTitle => '停止录制？';
+
+  @override
+  String get stopRecordingMessage => '您的录制已暂停。确定要退出吗？当前录制将被丢弃。';
 }

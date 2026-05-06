@@ -267,5 +267,13 @@
   "wifiOnly": "صرف WiFi",
   "wordCountShort": "{count} الفاظ",
   "words": "الفاظ",
-  "youAreNowPremium": "اب آپ پریمیم ہیں"
+  "youAreNowPremium": "اب آپ پریمیم ہیں",
+  "stopRecordingTitle": "ریکارڈنگ روکیں؟",
+  "@stopRecordingTitle": {
+    "description": "Dialog title when user tries to exit while recording is paused"
+  },
+  "stopRecordingMessage": "آپ کی ریکارڈنگ روکی گئی ہے۔ کیا آپ واقعی باہر جانا چاہتے ہیں؟ موجودہ ریکارڈنگ حذف کر دی جائے گی۔",
+  "@stopRecordingMessage": {
+    "description": "Dialog message when user tries to exit while recording is paused"
+  }
 }

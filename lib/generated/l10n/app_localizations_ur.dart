@@ -902,4 +902,11 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get youAreNowPremium => 'اب آپ پریمیم ہیں';
+
+  @override
+  String get stopRecordingTitle => 'ریکارڈنگ روکیں؟';
+
+  @override
+  String get stopRecordingMessage =>
+      'آپ کی ریکارڈنگ روکی گئی ہے۔ کیا آپ واقعی باہر جانا چاہتے ہیں؟ موجودہ ریکارڈنگ حذف کر دی جائے گی۔';
 }

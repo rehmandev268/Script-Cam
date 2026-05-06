@@ -544,56 +544,59 @@ class _ProfessionalVideoEditorState extends State<ProfessionalVideoEditor> {
             ),
           ],
         ),
-        body: !_isLoaded
-            ? const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
-              )
-            : Column(
-                children: [
-                  ValueListenableBuilder<bool>(
-                    valueListenable: _showOverlay,
-                    builder: (context, overlay, _) => EditorVideoPreview(
-                      controller: _controller,
-                      rotation: _rotation,
-                      isFlipped: _isFlipped,
-                      targetAspectRatio: _targetAspectRatio,
-                      showOverlay: overlay,
-                      onTogglePlay: _togglePlay,
+        body: SafeArea(
+          top: false,
+          child: !_isLoaded
+              ? const Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                )
+              : Column(
+                  children: [
+                    ValueListenableBuilder<bool>(
+                      valueListenable: _showOverlay,
+                      builder: (context, overlay, _) => EditorVideoPreview(
+                        controller: _controller,
+                        rotation: _rotation,
+                        isFlipped: _isFlipped,
+                        targetAspectRatio: _targetAspectRatio,
+                        showOverlay: overlay,
+                        onTogglePlay: _togglePlay,
+                      ),
                     ),
-                  ),
-                  Container(
-                    color: const Color(0xFF121212),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ValueListenableBuilder<EditorTab>(
-                          valueListenable: _activeTab,
-                          builder: (context, tab, _) => Container(
-                            height: 160.h,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 16.w,
-                              vertical: 10.h,
+                    Container(
+                      color: const Color(0xFF121212),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ValueListenableBuilder<EditorTab>(
+                            valueListenable: _activeTab,
+                            builder: (context, tab, _) => Container(
+                              height: 160.h,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 16.w,
+                                vertical: 10.h,
+                              ),
+                              child: _buildTabContent(tab),
                             ),
-                            child: _buildTabContent(tab),
                           ),
-                        ),
-                        ValueListenableBuilder<EditorTab>(
-                          valueListenable: _activeTab,
-                          builder: (context, tab, _) => EditorTabSelector(
-                            activeTab: tab,
-                            onTabChanged: (newTab) {
-                              setState(() => _activeTab.value = newTab);
-                              AnalyticsService().logVideoEditorTabChanged(
-                                tab: newTab.name,
-                              );
-                            },
+                          ValueListenableBuilder<EditorTab>(
+                            valueListenable: _activeTab,
+                            builder: (context, tab, _) => EditorTabSelector(
+                              activeTab: tab,
+                              onTabChanged: (newTab) {
+                                setState(() => _activeTab.value = newTab);
+                                AnalyticsService().logVideoEditorTabChanged(
+                                  tab: newTab.name,
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+        ),
       ),
     );
   }

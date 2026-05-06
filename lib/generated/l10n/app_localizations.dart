@@ -1723,6 +1723,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You\'re now Premium!'**
   String get youAreNowPremium;
+
+  /// Dialog title when user tries to exit while recording is paused
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Recording?'**
+  String get stopRecordingTitle;
+
+  /// Dialog message when user tries to exit while recording is paused
+  ///
+  /// In en, this message translates to:
+  /// **'Your recording is paused. Are you sure you want to exit? The current recording will be discarded.'**
+  String get stopRecordingMessage;
 }
 
 class _AppLocalizationsDelegate

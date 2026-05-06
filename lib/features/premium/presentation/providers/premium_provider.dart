@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/utils/toast_service.dart';
 import '../../../../core/services/analytics_service.dart';
@@ -80,6 +81,30 @@ class PremiumProvider extends ChangeNotifier {
       if (!_isLifetimeProductId(p.id)) return p;
     }
     return null;
+  }
+
+  /// Returns the actual recurring price for the weekly subscription.
+  /// For subscriptions with a free trial, Google Play's ProductDetails.price
+  /// returns the introductory (free trial) price. The recurring price is in
+  /// the last pricing phase of the subscription offer details.
+  String? get weeklyRecurringPrice {
+    final product = weeklyProduct;
+    if (product == null) return null;
+    if (product is GooglePlayProductDetails) {
+      final subscriptionIndex = product.subscriptionIndex;
+      if (subscriptionIndex != null) {
+        final offerDetails =
+            product.productDetails.subscriptionOfferDetails?[subscriptionIndex];
+        if (offerDetails != null && offerDetails.pricingPhases.isNotEmpty) {
+          return offerDetails.pricingPhases.last.formattedPrice;
+        }
+      }
+    }
+    // Fallback: if price looks like a zero/free value, return null so the UI
+    // can show a generic label instead.
+    final price = product.price;
+    if (price.isEmpty || price == 'Free' || product.rawPrice == 0) return null;
+    return price;
   }
 
   Future<void> _init() async {

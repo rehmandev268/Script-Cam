@@ -267,5 +267,13 @@
   "wifiOnly": "Wi-Fi 전용",
   "wordCountShort": "{count} 단어",
   "words": "단어",
-  "youAreNowPremium": "이제 프리미엄이 되셨습니다!"
+  "youAreNowPremium": "이제 프리미엄이 되셨습니다!",
+  "stopRecordingTitle": "녹화를 중단할까요?",
+  "@stopRecordingTitle": {
+    "description": "Dialog title when user tries to exit while recording is paused"
+  },
+  "stopRecordingMessage": "녹화가 일시 정지되어 있습니다. 정말 나가시겠습니까? 현재 녹화가 삭제됩니다.",
+  "@stopRecordingMessage": {
+    "description": "Dialog message when user tries to exit while recording is paused"
+  }
 }

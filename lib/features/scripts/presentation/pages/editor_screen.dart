@@ -181,6 +181,7 @@ class _EditorScreenState extends State<EditorScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
       context: context,
+      useSafeArea: false,
       backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
@@ -454,10 +455,12 @@ class _EditorScreenState extends State<EditorScreen> {
         ],
       ),
 
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
+      body: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -580,9 +583,10 @@ class _EditorScreenState extends State<EditorScreen> {
                   SizedBox(height: 300.h),
                 ],
               ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

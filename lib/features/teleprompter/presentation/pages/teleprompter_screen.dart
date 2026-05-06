@@ -31,6 +31,7 @@ import '../widgets/countdown_overlay.dart';
 import '../widgets/ad_gate_overlay.dart';
 import '../providers/recording_restriction_provider.dart';
 import '../../../../core/services/connectivity_service.dart';
+import '../../../../core/utils/app_dialogs.dart';
 
 enum RecordingStatus { idle, recording, paused, finalized }
 
@@ -630,10 +631,11 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
     if (!_isPositionInitialized) {
       if (_uiProvider.prompterWidth == 0 || _uiProvider.prompterHeight == 0) {
         final size = MediaQuery.of(context).size;
+        final topSafe = MediaQuery.of(context).padding.top;
         final prompterWidth = size.width;
         final prompterHeight = size.height * 0.5;
         _prompterSize.value = Size(prompterWidth, prompterHeight);
-        _prompterPosition.value = Offset(0, (size.height - prompterHeight) / 3);
+        _prompterPosition.value = Offset(0, topSafe + 16.h);
       }
       _isPositionInitialized = true;
     }
@@ -667,9 +669,68 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
     super.dispose();
   }
 
+  Offset _clampPrompterPosition(Offset proposed) {
+    final media = MediaQuery.of(context);
+    final screen = media.size;
+    final size = _prompterSize.value;
+
+    final minX = 0.0;
+    final maxX = math.max(0.0, screen.width - size.width);
+
+    // Allow reaching top corners while still keeping the overlay visible.
+    final minY = 0.0;
+    final maxY = math.max(
+      minY,
+      screen.height - size.height - media.padding.bottom - 8.h,
+    );
+
+    return Offset(
+      proposed.dx.clamp(minX, maxX),
+      proposed.dy.clamp(minY, maxY),
+    );
+  }
+
+  void _onPrompterDrag(Offset delta) {
+    _prompterPosition.value = _clampPrompterPosition(
+      _prompterPosition.value + delta,
+    );
+  }
+
+  void _onPrompterResize(Size nextSize) {
+    _prompterSize.value = nextSize;
+    _prompterPosition.value = _clampPrompterPosition(_prompterPosition.value);
+  }
+
+  Future<bool> _handleBack() async {
+    // Actively recording — block back entirely
+    if (_isRecording && !_isPaused) return false;
+
+    // Paused — ask for confirmation
+    if (_isPaused) {
+      final l10n = AppLocalizations.of(context);
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final confirmed = await AppDialogs.showConfirmDelete(
+        context: context,
+        isDark: isDark,
+        title: l10n.stopRecordingTitle,
+        content: l10n.stopRecordingMessage,
+      );
+      return confirmed;
+    }
+
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Focus(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final canPop = await _handleBack();
+        if (canPop && context.mounted) Navigator.pop(context);
+      },
+      child: Focus(
       autofocus: false,
       onKeyEvent: (node, event) {
         if (event is KeyDownEvent) {
@@ -731,6 +792,7 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
             }
 
             return CameraAwesomeBuilder.awesome(
+              previewFit: CameraPreviewFit.cover,
               progressIndicator: const Center(
                 child: CircularProgressIndicator(color: AppColors.primary),
               ),
@@ -760,7 +822,8 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
               ),
               topActionsBuilder: (state) => const SizedBox.shrink(),
               bottomActionsBuilder: (state) => const SizedBox.shrink(),
-              middleContentBuilder: (state) => Stack(
+              middleContentBuilder: (state) => const SizedBox.shrink(),
+              previewDecoratorBuilder: (state, preview) => Stack(
                 fit: StackFit.expand,
                 children: [
                   ValueListenableBuilder<Offset>(
@@ -789,11 +852,33 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
                         onToggleControls: () => setState(
                           () => _showScriptControls = !_showScriptControls,
                         ),
-                        onDrag: (d) => _prompterPosition.value += d,
-                        onResize: (s) => _prompterSize.value = s,
+                        onDrag: _onPrompterDrag,
+                        onResize: _onPrompterResize,
                         onTapPause: _isPlayingScript ? _stopScrolling : null,
                       );
                     },
+                  ),
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: IgnorePointer(
+                      child: Center(
+                        child: Container(
+                          padding: EdgeInsets.all(6.r),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.28),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white24),
+                          ),
+                          child: Icon(
+                            Icons.remove_red_eye_outlined,
+                            color: Colors.white70,
+                            size: 16.sp,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                   if (_showProControls && !_isRecording)
                     CameraSideControls(
@@ -847,6 +932,7 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
                         isPaused: _isPaused,
                         showProControls: _showProControls,
                         isEnabled: !restrictionProvider.isLimitReached,
+                        recordingDuration: _recordingDuration,
                         onTogglePro: () => setState(
                           () => _showProControls = !_showProControls,
                         ),
@@ -997,7 +1083,8 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
           },
         ),
       ),
-    );
+    ),   // Focus
+    );   // PopScope
   }
 
   Widget _buildRecordingCounter(RecordingRestrictionProvider provider) {
@@ -1120,6 +1207,7 @@ class _TeleprompterScreenState extends State<TeleprompterScreen>
     showModalBottomSheet(
       context: context,
       useRootNavigator: true,
+      useSafeArea: false,
       backgroundColor: Colors.transparent,
       builder: (_) => VideoSettingsSheet(
         state: state,

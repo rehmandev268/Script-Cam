@@ -88,8 +88,10 @@ class _RootNavigationScreenState extends State<RootNavigationScreen> {
     final l10n = AppLocalizations.of(context);
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final safeBottom = MediaQuery.of(context).padding.bottom;
 
-    double contentBottomPadding = 20.h;
+    final double contentBottomPadding =
+        20.h + (safeBottom > 0 ? 6.h : 0);
 
     final List<Widget> screens = [
       const CameraModeScreen(),
@@ -110,7 +112,11 @@ class _RootNavigationScreenState extends State<RootNavigationScreen> {
       extendBody: false,
       body: DecoratedBox(
         decoration: BoxDecoration(color: isDark ? AppColors.darkBg : AppColors.lightBg),
-        child: IndexedStack(index: _index, children: screens),
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: IndexedStack(index: _index, children: screens),
+        ),
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(

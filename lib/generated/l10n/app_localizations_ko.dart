@@ -891,4 +891,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get youAreNowPremium => '이제 프리미엄이 되셨습니다!';
+
+  @override
+  String get stopRecordingTitle => '녹화를 중단할까요?';
+
+  @override
+  String get stopRecordingMessage =>
+      '녹화가 일시 정지되어 있습니다. 정말 나가시겠습니까? 현재 녹화가 삭제됩니다.';
 }

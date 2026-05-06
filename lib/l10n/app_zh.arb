@@ -267,5 +267,13 @@
   "wifiOnly": "仅 Wi-Fi",
   "wordCountShort": "{count} 个字",
   "words": "字",
-  "youAreNowPremium": "您现在是高级会员了！"
+  "youAreNowPremium": "您现在是高级会员了！",
+  "stopRecordingTitle": "停止录制？",
+  "@stopRecordingTitle": {
+    "description": "Dialog title when user tries to exit while recording is paused"
+  },
+  "stopRecordingMessage": "您的录制已暂停。确定要退出吗？当前录制将被丢弃。",
+  "@stopRecordingMessage": {
+    "description": "Dialog message when user tries to exit while recording is paused"
+  }
 }

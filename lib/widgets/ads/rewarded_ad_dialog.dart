@@ -59,13 +59,29 @@ class _RewardedAdDialogState extends State<RewardedAdDialog> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 40.w,
-            height: 4.h,
-            decoration: BoxDecoration(
-              color: Colors.grey.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2.r),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Center(
+                  child: Container(
+                    width: 40.w,
+                    height: 4.h,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2.r),
+                    ),
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Icon(
+                  Icons.close_rounded,
+                  size: 22.sp,
+                  color: AppColors.textGrey,
+                ),
+              ),
+            ],
           ),
           SizedBox(height: 24.h),
           Icon(

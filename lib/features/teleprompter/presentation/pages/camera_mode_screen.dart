@@ -155,6 +155,7 @@ class _CameraModeScreenState extends State<CameraModeScreen>
   void _openScriptsPicker(BuildContext context, List<Script> scripts) {
     showModalBottomSheet(
       context: context,
+      useSafeArea: false,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;

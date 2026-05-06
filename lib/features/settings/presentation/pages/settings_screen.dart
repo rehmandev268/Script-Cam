@@ -92,6 +92,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     showModalBottomSheet(
       context: context,
+      useSafeArea: false,
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
@@ -163,10 +164,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBg : AppColors.lightBg,
       appBar: AdaptiveAppBar(title: l10n.settings, showBackButton: false),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
+      body: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               padding: EdgeInsets.fromLTRB(
                 20.w,
@@ -808,9 +811,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ],
               ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

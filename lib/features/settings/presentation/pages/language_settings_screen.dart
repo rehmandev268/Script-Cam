@@ -22,11 +22,13 @@ class LanguageSettingsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBg : AppColors.lightBg,
       appBar: AdaptiveAppBar(title: l10n.language),
-      body: ListView.builder(
-        physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.all(20.r),
-        itemCount: LocaleProvider.supportedLanguages.length,
-        itemBuilder: (context, index) {
+      body: SafeArea(
+        top: false,
+        child: ListView.builder(
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.all(20.r),
+          itemCount: LocaleProvider.supportedLanguages.length,
+          itemBuilder: (context, index) {
           final lang = LocaleProvider.supportedLanguages[index];
           final code = lang['code']!;
           final nativeName = lang['nativeName']!;
@@ -111,7 +113,8 @@ class LanguageSettingsScreen extends StatelessWidget {
               ),
             ),
           );
-        },
+          },
+        ),
       ),
     );
   }

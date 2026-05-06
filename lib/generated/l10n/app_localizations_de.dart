@@ -925,4 +925,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get youAreNowPremium => 'Du bist jetzt Premium!';
+
+  @override
+  String get stopRecordingTitle => 'Aufnahme beenden?';
+
+  @override
+  String get stopRecordingMessage =>
+      'Ihre Aufnahme ist pausiert. Möchten Sie wirklich beenden? Die aktuelle Aufnahme wird verworfen.';
 }

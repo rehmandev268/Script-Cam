@@ -928,4 +928,11 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get youAreNowPremium => 'Agora você é Premium!';
+
+  @override
+  String get stopRecordingTitle => 'Parar gravação?';
+
+  @override
+  String get stopRecordingMessage =>
+      'Sua gravação está pausada. Tem certeza que deseja sair? A gravação atual será descartada.';
 }

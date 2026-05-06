@@ -911,4 +911,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get youAreNowPremium => 'You\'re now Premium!';
+
+  @override
+  String get stopRecordingTitle => 'Stop Recording?';
+
+  @override
+  String get stopRecordingMessage =>
+      'Your recording is paused. Are you sure you want to exit? The current recording will be discarded.';
 }

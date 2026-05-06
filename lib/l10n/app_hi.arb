@@ -267,5 +267,13 @@
   "wifiOnly": "केवल वाईफाई",
   "wordCountShort": "{count} शब्द",
   "words": "शब्द",
-  "youAreNowPremium": "अब आप प्रीमियम हैं!"
+  "youAreNowPremium": "अब आप प्रीमियम हैं!",
+  "stopRecordingTitle": "रिकॉर्डिंग बंद करें?",
+  "@stopRecordingTitle": {
+    "description": "Dialog title when user tries to exit while recording is paused"
+  },
+  "stopRecordingMessage": "आपकी रिकॉर्डिंग रुकी हुई है। क्या आप वाकई बाहर जाना चाहते हैं? वर्तमान रिकॉर्डिंग हटा दी जाएगी।",
+  "@stopRecordingMessage": {
+    "description": "Dialog message when user tries to exit while recording is paused"
+  }
 }
